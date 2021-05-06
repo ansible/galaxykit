@@ -7,7 +7,7 @@ import json
 
 
 def get_or_create_user(
-    galaxy_root, username, password, group, fname="", lname="", email="", headers={}
+        galaxy_root, headers, username, password, group, fname="", lname="", email="", superuser=False
 ):
     """
     A simple utility to create a new user. All the arguments aside from
@@ -21,18 +21,19 @@ def get_or_create_user(
     }
     """
     # check if the user already exists
-    user_url = f"{galaxy_root}_ui/v1/users/?username={username}"
-    user_resp = requests.get(user_url, headers=headers)
+    user_url = f"{galaxy_root}_ui/v1/users?username={username}"
+    user_resp = requests.get(user_url, headers=headers).json()
     if user_resp["meta"]["count"] == 0:
-        return create_user(
-            galaxy_root, username, password, group, fname, lname, email, headers
+        create_user(
+                galaxy_root, headers, username, password, group, fname, lname, email
         )
+        user_resp = requests.get(user_url, headers=headers).json()
 
-    return user_resp.json()["data"][0]
+    return user_resp["data"][0]
 
 
 def create_user(
-    galaxy_root, username, password, group, fname="", lname="", email="", headers={}
+    galaxy_root, headers, username, password, group, fname="", lname="", email="", superuser=False
 ):
     """
     Create a new user. All the arguments aside from
@@ -45,13 +46,19 @@ def create_user(
         "pulp_href": f"/pulp/api/v3/groups/{group_id}",
     }
     """
+    if group is None:
+        group = []
+    else:
+        group = [group]
+
     create_body = {
         "username": username,
         "first_name": fname,
         "last_name": lname,
         "email": email,
         "password": password,
-        "groups": [group],
+        "groups": group,
+        "is_superuser": superuser,
     }
     create_body = json.dumps(create_body).encode("utf8")
     headers = {
@@ -61,25 +68,25 @@ def create_user(
     }
     # return the response so the caller has access to the id and other
     # metadata from the response.
-    return requests.post(
+    requests.post(
         f"{galaxy_root}_ui/v1/users/",
         create_body,
         headers=headers,
     )
 
 
-def delete_user(user, galaxy_root, headers):
-    user_id = get_user_id(user, galaxy_root, headers)
+def delete_user(galaxy_root, headers, user):
+    user_id = get_user_id(galaxy_root, headers, user)
     delete_url = f"{galaxy_root}_ui/v1/users/{user_id}/"
     headers = {
         **headers,
         "Content-Type": "application/json;charset=utf-8",
         "Content-length": "0",
     }
-    requests.delete(delete_url, headers=headers)
+    return requests.delete(delete_url, headers=headers)
 
 
-def get_user_id(username, galaxy_root, headers):
+def get_user_id(galaxy_root, headers, username):
     """
     Returns the id for a given username
     """

@@ -6,6 +6,7 @@ import requests
 
 import dockerutils
 import users
+import groups
 
 
 class GalaxyClient:
@@ -43,29 +44,61 @@ class GalaxyClient:
 
     def pull_image(self, image_name):
         """pulls an image with the given credentials"""
-        self.docker_client.pull_image(image_name)
+        return self.docker_client.pull_image(image_name)
 
     def tag_image(self, image_name, newtag, version="latest"):
         """tags a pulled image with the given newtag and version"""
-        self.docker_client.tag_image(image_name, newtag, version=version)
+        return self.docker_client.tag_image(image_name, newtag, version=version)
 
     def push_image(self, image_tag):
         """pushs a image"""
-        self.docker_client.push_image(image_tag)
+        return self.docker_client.push_image(image_tag)
 
     def get_or_create_user(
-        self, username, password, group, fname="", lname="", email=""
+        self, username, password, group, fname="", lname="", email="", superuser=False
     ):
-        users.get_or_create_user(
+        """
+        Returns user info if that already username exists,
+        creates a user if not.
+        """
+        return users.get_or_create_user(
             self.galaxy_root,
+            self.headers,
             username,
             password,
             group,
             fname,
             lname,
             email,
-            self.headers,
+            superuser,
         )
 
     def delete_user(self, username):
-        users.delete_user(username, self.galaxy_root, self.headers)
+        """deletes a user"""
+        return users.delete_user(self.galaxy_root, self.headers, username)
+
+    def create_group(self, group_name):
+        """
+        Creates a group
+        """
+        return groups.create_group(self.galaxy_root, self.headers, group_name)
+
+    def find_group(self, group_name):
+        """
+        Returns the data of the group with group_name
+        """
+        return groups.find_group(self.galaxy_root, self.headers, group_name)
+
+    def delete_group(self, group_name):
+        """
+        Deletes the given group
+        """
+        return groups.delete_group(self.galaxy_root, self.headers, group_name)
+
+    def set_permissions(self, group_name, permissions):
+        """
+        Assigns the given permissions to the group
+        """
+        return groups.set_permissions(
+            self.galaxy_root, self.headers, group_name, permissions
+        )
