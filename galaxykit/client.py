@@ -1,12 +1,15 @@
 """
 client.py contains the wrapping interface for all the other modules (aside from cli.py)
 """
+from simplejson.errors import JSONDecodeError
+import sys
 from urllib.parse import urlparse
+
 import requests
 
-import dockerutils
-import users
-import groups
+from . import dockerutils
+from . import users
+from . import groups
 
 
 class GalaxyClient:
@@ -23,11 +26,11 @@ class GalaxyClient:
     def __init__(self, galaxy_root, user="", password="", container_engine=""):
         self.galaxy_root = galaxy_root
         if user != "" and password != "":
-            self.token = (
-                requests.post(galaxy_root + "v3/auth/token/", auth=(user, password))
-                .json()
-                .get("token")
-            )
+            resp = requests.post(galaxy_root + "v3/auth/token/", auth=(user, password))
+            try:
+                self.token = resp.json().get("token")
+            except JSONDecodeError as e:
+                print(f"Failed to fetch token: {resp.text}", file=sys.stderr)
             self.headers = {
                 "accept": "application/json",
                 "Authorization": f"Token {self.token}",
