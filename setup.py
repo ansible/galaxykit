@@ -8,5 +8,5 @@ setup(
         author_email='hhummel@redhat.com',
         license='MIT',
         packages={'galaxy-kit'}
-        )
+)
 
