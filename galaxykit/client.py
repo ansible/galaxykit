@@ -42,7 +42,7 @@ class GalaxyClient:
                 )
 
                 self.docker_client = dockerutils.DockerClient(
-                    user, password, container_engine, container_registry
+                    (user, password), container_engine, container_registry
                 )
 
     def pull_image(self, image_name):
