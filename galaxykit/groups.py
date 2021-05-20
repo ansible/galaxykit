@@ -2,38 +2,38 @@ import requests
 import json
 
 
-def find_group(galaxy_root, headers, group_name):
+def find_group(client, group_name):
     """
     Returns the data of the group with group_name
     """
-    all_groups = requests.get(f"{galaxy_root}_ui/v1/groups/", headers=headers).json()
-    match_group = [x for x in all_groups["data"] if x["name"] == group_name]
-    return match_group
+    groups_url = f"_ui/v1/groups/?name={group_name}"
+    return client.get(groups_url)
+
+def get_group_id(client, group_name):
+    """
+    Returns the id for a given username
+    """
+    groups_url = f"_ui/v1/groups/?name={group_name}"
+    resp = client.get(groups_url)
+    return resp.json()["data"][0]["id"]
 
 
-def create_group(galaxy_root, headers, group_name):
+def create_group(client, group_name):
     """
     Creates a group
     """
-    group_url = f"{galaxy_root}_ui/v1/groups/"
-    payload = json.dumps({"name": group_name}).encode("utf8")
-    headers = {
-        **headers,
-        "Content-Type": "application/json;charset=utf-8",
-        "Content-length": str(len(payload)),
-    }
-    return requests.post(group_url, headers=headers, data=payload)
+    return client.post("_ui/v1/groups/", {"name": group_name})
 
 
-def delete_group(galaxy_root, headers, group_name):
+def delete_group(client, group_name):
     # need to get the group id,
     # then make the url and requests.delete it
-    group_id = find_group(galaxy_root, headers, group_name)[0]["id"]
-    delete_url = f"{galaxy_root}_ui/v1/groups/{group_id}"
-    return requests.delete(delete_url, headers=headers)
+    group_id = find_group(client, group_name)[0]["id"]
+    delete_url = f"_ui/v1/groups/{group_id}"
+    return client.delete(delete_url)
 
 
-def set_permissions(galaxy_root, headers, group_name, permissions):
+def set_permissions(client, group_name, permissions):
     """
     Assigns the given permissions to the group.
     `permissions` must be a list of strings, each one recognized as a permission by the backend. See
@@ -46,17 +46,15 @@ def set_permissions(galaxy_root, headers, group_name, permissions):
     The permissions are the ones that match the "namespace.permission-name" format.
 
     """
-    group_id = find_group(galaxy_root, headers, group_name)[0]["id"]
-    permissions_url = f"{galaxy_root}_ui/v1/groups/{group_id}/model-permissions/"
+    group_id = find_group(client, group_name)[0]["id"]
+    permissions_url = f"_ui/v1/groups/{group_id}/model-permissions/"
     for perm in permissions:
-        payload = json.dumps({"permission": perm}).encode("utf8")
-        headers = {
-            **headers,
-            "Content-Type": "application/json;charset=utf-8",
-            "Content-length": str(len(payload)),
-        }
-        requests.post(
-            permissions_url,
-            data=payload,
-            headers=headers,
-        )
+        payload = {"permission": perm}
+        client.post(permissions_url, payload)
+        # TODO: Check the results of each and aggregate for a return value
+
+def get_group_list(client):
+    """
+    Returns list of group names of groups in the system
+    """
+    return client.get("_ui/v1/groups/")
