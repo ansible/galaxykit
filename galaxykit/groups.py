@@ -11,11 +11,11 @@ def find_group(client, group_name):
 
 def get_group_id(client, group_name):
     """
-    Returns the id for a given username
+    Returns the id for a given group
     """
     groups_url = f"_ui/v1/groups/?name={group_name}"
     resp = client.get(groups_url)
-    return resp.json()["data"][0]["id"]
+    return resp["data"][0]["id"]
 
 
 def create_group(client, group_name):

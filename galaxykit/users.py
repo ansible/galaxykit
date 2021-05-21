@@ -21,7 +21,7 @@ def get_or_create_user(
     """
     # check if the user already exists
     user_url = f"_ui/v1/users?username={username}"
-    user_resp = client.get(user_url).json()
+    user_resp = client.get(user_url)
     if user_resp["meta"]["count"] == 0:
         return True, create_user(
                 client, username, password, group, fname, lname, email
@@ -80,7 +80,7 @@ def get_user_id(client, username):
     """
     user_url = f"_ui/v1/users/?username={username}"
     user_resp = client.get(user_url)
-    return user_resp.json()["data"][0]["id"]
+    return user_resp["data"][0]["id"]
 
 def get_user(client, username):
     """
@@ -88,7 +88,7 @@ def get_user(client, username):
     """
     user_url = f"_ui/v1/users/?username={username}"
     user_resp = client.get(user_url)
-    return user_resp.json()["data"][0]
+    return user_resp["data"][0]
 
 def get_user_list(client):
     """

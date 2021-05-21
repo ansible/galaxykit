@@ -30,7 +30,8 @@ class GalaxyClient:
 
         if auth:
             username, password = auth
-            resp = requests.post(galaxy_root + "v3/auth/token/", auth=(user, password))
+            auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
+            resp = requests.post(auth_url, auth=(username, password))
             try:
                 self.token = resp.json().get("token")
             except JSONDecodeError as e:
@@ -51,16 +52,21 @@ class GalaxyClient:
     def _http(self, method, path, *args, **kwargs):
         url = urljoin(self.galaxy_root, path)
         headers = kwargs.pop("headers", self.headers)
+        parse_json = kwargs.pop("parse_json", True)
+
         resp = requests.request(method, url, headers=headers, *args, **kwargs)
-        try:
-            json = resp.json()
-        except JSONDecodeError as e:
-            print(resp.text)
-            raise ValueError("Failed to parse JSON response from API")
-        if "errors" in resp:
-            # {'errors': [{'status': '403', 'code': 'not_authenticated', 'title': 'Authentication credentials were not provided.'}]}
-            raise Exception(resp["errors"][0]["title"])
-        return json
+        if parse_json:
+            try:
+                json = resp.json()
+            except JSONDecodeError as e:
+                print(resp.text)
+                raise ValueError("Failed to parse JSON response from API")
+            if "errors" in resp:
+                # {'errors': [{'status': '403', 'code': 'not_authenticated', 'title': 'Authentication credentials were not provided.'}]}
+                raise Exception(resp["errors"][0]["title"])
+            return json
+        else:
+            return resp
     
     def _payload(self, method, path, body, *args, **kwargs):
         if isinstance(body, dict):

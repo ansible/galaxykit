@@ -38,7 +38,7 @@ def main():
 
     args = parser.parse_args()
 
-    client = GalaxyClient(server, (args.username, args.password))
+    client = GalaxyClient(args.server, (args.username, args.password))
 
     if args.kind == "user":
         if args.operation == "list":
