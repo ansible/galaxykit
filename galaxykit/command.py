@@ -67,7 +67,7 @@ def main():
                     if not args.ignore:
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
-            if args.operation == "member":
+            if args.operation == "group":
                 subop, *subopargs = args.rest
                 if subop == "add":
                     username, groupname = subopargs
