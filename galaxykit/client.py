@@ -13,6 +13,10 @@ from . import users
 from . import groups
 
 
+class GalaxyClientError(Exception):
+    pass
+
+
 class GalaxyClient:
     """
     The primary class for the client - this is the authenticated context from
@@ -61,9 +65,9 @@ class GalaxyClient:
             except JSONDecodeError as e:
                 print(resp.text)
                 raise ValueError("Failed to parse JSON response from API")
-            if "errors" in resp:
+            if "errors" in json:
                 # {'errors': [{'status': '403', 'code': 'not_authenticated', 'title': 'Authentication credentials were not provided.'}]}
-                raise Exception(resp["errors"][0]["title"])
+                raise GalaxyClientError(*json["errors"])
             return json
         else:
             return resp
@@ -90,6 +94,9 @@ class GalaxyClient:
     
     def put(self, *args, **kwargs):
         return self._payload("put", *args, **kwargs)
+    
+    def delete(self, path, *args, **kwargs):
+        return self._http("delete", path, *args, **kwargs)
 
     def pull_image(self, image_name):
         """pulls an image with the given credentials"""
@@ -134,11 +141,11 @@ class GalaxyClient:
         """
         return groups.create_group(self, group_name)
 
-    def find_group(self, group_name):
+    def get_group(self, group_name):
         """
         Returns the data of the group with group_name
         """
-        return groups.find_group(self, group_name)
+        return groups.get_group(self, group_name)
 
     def delete_group(self, group_name):
         """

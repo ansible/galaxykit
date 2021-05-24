@@ -63,24 +63,24 @@ def create_user(
     resp = client.post(f"_ui/v1/users/", create_body)
     return resp
 
-
 def update_user(client, user):
     return client.put(f"_ui/v1/users/{user['id']}/", user)
-
 
 def delete_user(client, user):
     user_id = get_user_id(client, user)
     delete_url = f"_ui/v1/users/{user_id}/"
-    return client.delete(delete_url)
-
+    client.delete(delete_url, parse_json=False)
 
 def get_user_id(client, username):
     """
     Returns the id for a given username
     """
     user_url = f"_ui/v1/users/?username={username}"
-    user_resp = client.get(user_url)
-    return user_resp["data"][0]["id"]
+    resp = client.get(user_url)
+    if resp["data"]:
+        return resp["data"][0]["id"]
+    else:
+        raise ValueError(f"No user '{username}' found.")
 
 def get_user(client, username):
     """

@@ -2,12 +2,12 @@ import requests
 import json
 
 
-def find_group(client, group_name):
+def get_group(client, group_name):
     """
     Returns the data of the group with group_name
     """
     groups_url = f"_ui/v1/groups/?name={group_name}"
-    return client.get(groups_url)
+    return client.get(groups_url)["data"][0]
 
 def get_group_id(client, group_name):
     """
@@ -15,7 +15,10 @@ def get_group_id(client, group_name):
     """
     groups_url = f"_ui/v1/groups/?name={group_name}"
     resp = client.get(groups_url)
-    return resp["data"][0]["id"]
+    if resp["data"]:
+        return resp["data"][0]["id"]
+    else:
+        raise ValueError(f"No group '{group_name}' found.")
 
 
 def create_group(client, group_name):
@@ -28,9 +31,9 @@ def create_group(client, group_name):
 def delete_group(client, group_name):
     # need to get the group id,
     # then make the url and requests.delete it
-    group_id = find_group(client, group_name)[0]["id"]
+    group_id = get_group_id(client, group_name)
     delete_url = f"_ui/v1/groups/{group_id}"
-    return client.delete(delete_url)
+    return client.delete(delete_url, parse_json=False)
 
 
 def set_permissions(client, group_name, permissions):
@@ -46,7 +49,7 @@ def set_permissions(client, group_name, permissions):
     The permissions are the ones that match the "namespace.permission-name" format.
 
     """
-    group_id = find_group(client, group_name)[0]["id"]
+    group_id = get_group(client, group_name)["id"]
     permissions_url = f"_ui/v1/groups/{group_id}/model-permissions/"
     for perm in permissions:
         payload = {"permission": perm}
