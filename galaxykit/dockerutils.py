@@ -14,24 +14,24 @@ class DockerClient:
     engine = ""
     registry = ""
 
-    def __init__(self, auth_tuple=None, engine="podman", registry="docker.io/library/"):
+    def __init__(self, auth=None, engine="podman", registry="docker.io/library/"):
         """
-        auth_tuple should be `(username, password)` for logging into the docker registry.
+        auth should be `(username, password)` for logging into the docker registry.
 
         If not provided, then no login attempt is made.
         """
         self.engine = engine
         self.registry = registry
 
-        if auth_tuple:  # we only need to auth if creds are supplied
+        if auth:  # we only need to auth if creds are supplied
             run_args = [
                 engine,
                 "login",
                 registry,
                 "--username",
-                auth_tuple[0],
+                auth[0],
                 "--password",
-                auth_tuple[1],
+                auth[1],
             ]
             run(run_args)
 

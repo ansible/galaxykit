@@ -21,4 +21,9 @@ setup(
     version="0.0.2",
     install_requires=["requests", "simplejson"],
     extra_requires={"dev": ["black", "pylint", "flake8"]},
+        entry_points={
+        'console_scripts': [
+            'galaxykit = galaxykit.command:main',
+        ],
+    },
 )
