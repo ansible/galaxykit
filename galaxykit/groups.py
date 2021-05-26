@@ -60,17 +60,9 @@ def set_permissions(client, group_name, permissions):
         client.post(permissions_url, payload)
         # TODO: Check the results of each and aggregate for a return value
 
-def delete_permissions(client, group_name, permission):
+def delete_permission(client, group_name, permission):
     """
-    Assigns the given permissions to the group.
-    `permissions` must be a list of strings, each one recognized as a permission by the backend. See
-    them listed at the link below:
-    https://github.com/ansible/galaxy_ng/blob/ca503375077a225a5fb215e6fb2c6ae47e09cfd7/galaxy_ng/app/api/ui/serializers/user.py#L122
-
-    Container permissions are in another file:
-    https://github.com/ansible/galaxy_ng/blob/009385fb3a1a34d1df9ff369e2e15c3fa27869b3/galaxy_ng/app/access_control/statements/pulp_container.py#L139
-
-    The permissions are the ones that match the "namespace.permission-name" format.
+    Removes a permission from a group.
 
     """
     group_id = get_group(client, group_name)["id"]

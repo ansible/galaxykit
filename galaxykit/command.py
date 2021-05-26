@@ -112,7 +112,7 @@ def main():
                     resp = groups.set_permissions(client, groupname, perms)
                 elif subop == "remove":
                     groupname, perm = subopargs
-                    resp = groups.delete_permissions(client, groupname, perm)
+                    resp = groups.delete_permission(client, groupname, perm)
                 else:
                     print(f"Unknown group perm operation '{subop}'")
                     sys.exit(EXIT_UNKNOWN_ERROR)
