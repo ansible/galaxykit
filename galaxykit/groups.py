@@ -35,6 +35,10 @@ def delete_group(client, group_name):
     delete_url = f"_ui/v1/groups/{group_id}"
     return client.delete(delete_url, parse_json=False)
 
+def get_permissions(client, group_name):
+    group_id = get_group(client, group_name)["id"]
+    permissions_url = f"_ui/v1/groups/{group_id}/model-permissions/"
+    return client.get(permissions_url)
 
 def set_permissions(client, group_name, permissions):
     """
@@ -55,6 +59,20 @@ def set_permissions(client, group_name, permissions):
         payload = {"permission": perm}
         client.post(permissions_url, payload)
         # TODO: Check the results of each and aggregate for a return value
+
+def delete_permission(client, group_name, permission):
+    """
+    Removes a permission from a group.
+
+    """
+    group_id = get_group(client, group_name)["id"]
+    permissions_url = f"_ui/v1/groups/{group_id}/model-permissions/"
+    resp = client.get(permissions_url)
+    for perm in resp["data"]:
+        if perm["permission"] == permission:
+            perm_id = perm["id"]
+            perm_url = f"_ui/v1/groups/{group_id}/model-permissions/{perm_id}/"
+            client.delete(perm_url, parse_json=False)
 
 def get_group_list(client):
     """

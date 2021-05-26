@@ -2,9 +2,10 @@ import argparse
 import sys
 
 from .client import GalaxyClient, GalaxyClientError
-from . import users
+from . import containers
 from . import groups
 from . import namespaces
+from . import users
 
 EXIT_OK = 0
 EXIT_UNKNOWN_ERROR = 1
@@ -95,6 +96,26 @@ def main():
                     if not args.ignore:
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
+            if args.operation == "perm":
+                subop, *subopargs = args.rest
+                if subop == "list":
+                    groupname, = subopargs
+                    resp = groups.get_permissions(client, groupname)
+                    print(format_list(resp["data"], "permission"))
+                elif subop == "add":
+                    groupname, perm = subopargs
+                    perms = [
+                        p["permission"]
+                        for p in groups.get_permissions(client, groupname)["data"]
+                    ]
+                    perms = list(set(perms) | set([perm]))
+                    resp = groups.set_permissions(client, groupname, perms)
+                elif subop == "remove":
+                    groupname, perm = subopargs
+                    resp = groups.delete_permission(client, groupname, perm)
+                else:
+                    print(f"Unknown group perm operation '{subop}'")
+                    sys.exit(EXIT_UNKNOWN_ERROR)
 
         elif args.kind == "namespace":
             if args.operation == "list":
@@ -120,6 +141,19 @@ def main():
                 raise NotImplementedError
             if args.operation == "removegroupperm":
                 raise NotImplementedError
+        
+        elif args.kind == "container":
+            if args.operation == "readme":
+                if len(args.rest) == 1:
+                    container, = args.rest
+                    resp = containers.get_readme(client, container)
+                    print(resp["text"])
+                elif len(args.rest) == 2:
+                    container, readme = args.rest
+                    resp = containers.set_readme(client, container, readme)
+                else:
+                    print("container readme takes either 1 or 2 parameters.")
+                    sys.exit(EXIT_UNKNOWN_ERROR)
     
         if resp and not ignore:
             report_error(resp)
