@@ -8,6 +8,7 @@ from urllib.parse import urlparse, urljoin
 
 import requests
 
+from . import containers
 from . import dockerutils
 from . import users
 from . import groups
@@ -164,3 +165,9 @@ class GalaxyClient:
         Assigns the given permissions to the group
         """
         return groups.set_permissions(self, group_name, permissions)
+
+    def get_container_readme(self, container):
+        return containers.get_readme(self, container)
+
+    def set_container_readme(self, container, readme):
+        return containers.set_readme(self, container, readme)
