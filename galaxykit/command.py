@@ -28,20 +28,31 @@ def format_list(data, identifier):
 def report_error(resp):
     if "errors" in resp:
         for error in resp["errors"]:
-            print(f"API Failure: HTTP {error['status']} {error['code']}; {error['title']} ({error['detail']})")
+            print(
+                f"API Failure: HTTP {error['status']} {error['code']}; {error['title']} ({error['detail']})"
+            )
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("kind", type=str, action="store",
-        help="Kind of API content to operate against (user, group, namespace)")
+    parser.add_argument(
+        "kind",
+        type=str,
+        action="store",
+        help="Kind of API content to operate against (user, group, namespace)",
+    )
     parser.add_argument("operation", type=str, action="store")
     parser.add_argument("rest", type=str, action="store", nargs="*")
     parser.add_argument("-i", "--ignore", default=False, action="store_true")
     parser.add_argument("-u", "--username", type=str, action="store")
     parser.add_argument("-p", "--password", type=str, action="store")
-    parser.add_argument("-s", "--server", type=str, action="store",
-        default="http://localhost:8002/api/automation-hub/")
+    parser.add_argument(
+        "-s",
+        "--server",
+        type=str,
+        action="store",
+        default="http://localhost:8002/api/automation-hub/",
+    )
 
     args = parser.parse_args()
     ignore = args.ignore
@@ -55,13 +66,15 @@ def main():
                 print(format_list(resp["data"], "username"))
             if args.operation == "create":
                 username, password = args.rest
-                created, resp = users.get_or_create_user(client, username, password, None)
+                created, resp = users.get_or_create_user(
+                    client, username, password, None
+                )
                 if created:
                     print("Created user", username)
                 else:
                     print(f"User {username} already existed")
             if args.operation == "delete":
-                username, = args.rest
+                (username,) = args.rest
                 try:
                     resp = users.delete_user(client, username)
                 except ValueError as e:
@@ -74,11 +87,13 @@ def main():
                     username, groupname = subopargs
                     user_data = users.get_user(client, username)
                     group_id = groups.get_group_id(client, groupname)
-                    user_data["groups"].append({
-                        "id": group_id,
-                        "name": groupname,
-                        "pulp_href": f"/pulp/api/v3/groups/{group_id}",
-                    })
+                    user_data["groups"].append(
+                        {
+                            "id": group_id,
+                            "name": groupname,
+                            "pulp_href": f"/pulp/api/v3/groups/{group_id}",
+                        }
+                    )
                     resp = users.update_user(client, user_data)
 
         elif args.kind == "group":
@@ -86,10 +101,10 @@ def main():
                 resp = groups.get_group_list(client)
                 print(format_list(resp["data"], "name"))
             if args.operation == "create":
-                name, = args.rest
+                (name,) = args.rest
                 resp = groups.create_group(client, name)
             if args.operation == "delete":
-                name, = args.rest
+                (name,) = args.rest
                 try:
                     resp = groups.delete_group(client, name)
                 except ValueError as e:
@@ -99,7 +114,7 @@ def main():
             if args.operation == "perm":
                 subop, *subopargs = args.rest
                 if subop == "list":
-                    groupname, = subopargs
+                    (groupname,) = subopargs
                     resp = groups.get_permissions(client, groupname)
                     print(format_list(resp["data"], "permission"))
                 elif subop == "add":
@@ -124,7 +139,7 @@ def main():
                 if len(args.rest) == 2:
                     name, group = args.rest
                 else:
-                    name, = args.rest
+                    (name,) = args.rest
                     group = None
                 resp = namespaces.create_namespace(client, name, group)
             if args.operation == "delete":
@@ -141,11 +156,11 @@ def main():
                 raise NotImplementedError
             if args.operation == "removegroupperm":
                 raise NotImplementedError
-        
+
         elif args.kind == "container":
             if args.operation == "readme":
                 if len(args.rest) == 1:
-                    container, = args.rest
+                    (container,) = args.rest
                     resp = containers.get_readme(client, container)
                     print(resp["text"])
                 elif len(args.rest) == 2:
@@ -154,10 +169,10 @@ def main():
                 else:
                     print("container readme takes either 1 or 2 parameters.")
                     sys.exit(EXIT_UNKNOWN_ERROR)
-    
+
         if resp and not ignore:
             report_error(resp)
-    
+
     except GalaxyClientError as e:
         if not ignore:
             raise

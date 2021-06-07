@@ -28,7 +28,9 @@ class GalaxyClient:
     token = ""
     docker_client = None
 
-    def __init__(self, galaxy_root, auth=None, container_engine=None, container_registry=None):
+    def __init__(
+        self, galaxy_root, auth=None, container_engine=None, container_registry=None
+    ):
         self.galaxy_root = galaxy_root
         self.headers = {}
 
@@ -40,19 +42,23 @@ class GalaxyClient:
                 self.token = resp.json().get("token")
             except JSONDecodeError as e:
                 print(f"Failed to fetch token: {resp.text}", file=sys.stderr)
-            self.headers.update({
-                "Accept": "application/json",
-                "Authorization": f"Token {self.token}",
-            })
+            self.headers.update(
+                {
+                    "Accept": "application/json",
+                    "Authorization": f"Token {self.token}",
+                }
+            )
 
             if container_engine:
-                container_registry = container_registry or \
-                    urlparse(self.galaxy_root).netloc.split(":") + ":5001"
+                container_registry = (
+                    container_registry
+                    or urlparse(self.galaxy_root).netloc.split(":") + ":5001"
+                )
 
                 self.docker_client = dockerutils.DockerClient(
                     (user, password), container_engine, container_registry
                 )
-    
+
     def _http(self, method, path, *args, **kwargs):
         url = urljoin(self.galaxy_root, path)
         headers = kwargs.pop("headers", self.headers)
@@ -71,12 +77,12 @@ class GalaxyClient:
             return json
         else:
             return resp
-    
+
     def _payload(self, method, path, body, *args, **kwargs):
         if isinstance(body, dict):
             body = dumps(body)
         if isinstance(body, str):
-            body = body.encode('utf8')
+            body = body.encode("utf8")
         headers = {
             **kwargs.pop("headers", self.headers),
             "Content-Type": "application/json;charset=utf-8",
@@ -85,16 +91,16 @@ class GalaxyClient:
         kwargs["headers"] = headers
         kwargs["data"] = body
         return self._http(method, path, *args, **kwargs)
-    
+
     def get(self, path, *args, **kwargs):
         return self._http("get", path, *args, **kwargs)
 
     def post(self, *args, **kwargs):
         return self._payload("post", *args, **kwargs)
-    
+
     def put(self, *args, **kwargs):
         return self._payload("put", *args, **kwargs)
-    
+
     def delete(self, path, *args, **kwargs):
         return self._http("delete", path, *args, **kwargs)
 
@@ -127,7 +133,7 @@ class GalaxyClient:
             email,
             superuser,
         )
-    
+
     def get_user_list(self):
         return users.get_user_list(self)
 
@@ -157,6 +163,4 @@ class GalaxyClient:
         """
         Assigns the given permissions to the group
         """
-        return groups.set_permissions(
-            self, group_name, permissions
-        )
+        return groups.set_permissions(self, group_name, permissions)

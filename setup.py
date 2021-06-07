@@ -18,12 +18,12 @@ setup(
     name="galaxykit",
     packages={"galaxykit"},
     url="https://github.com/hendersonreed/galaxykit/",
-    version="0.1.0",
+    version="0.2.1",
     install_requires=["requests", "simplejson"],
-    extra_requires={"dev": ["black", "pylint", "flake8"]},
-        entry_points={
-        'console_scripts': [
-            'galaxykit = galaxykit.command:main',
+    extra_requires={"dev": ["pre-commit"]},
+    entry_points={
+        "console_scripts": [
+            "galaxykit = galaxykit.command:main",
         ],
     },
 )

@@ -1,5 +1,6 @@
 from . import groups
 
+
 def create_namespace(client, name, group):
     try:
         namespace = get_namespace(client, name)
@@ -7,11 +8,13 @@ def create_namespace(client, name, group):
         groups = []
         if group:
             group_id = groups.get_group_id(client, group)
-            groups.append({
-                "id": group_id,
-                "name": group,
-                "object_permissions": ["change_namespace", "upload_to_namespace"],
-            })
+            groups.append(
+                {
+                    "id": group_id,
+                    "name": group,
+                    "object_permissions": ["change_namespace", "upload_to_namespace"],
+                }
+            )
         create_body = {
             "name": name,
             "groups": groups,
@@ -20,6 +23,7 @@ def create_namespace(client, name, group):
     else:
         if group:
             add_group(client, name, group)
+
 
 def get_namespace(client, name):
     try:
@@ -31,27 +35,32 @@ def get_namespace(client, name):
         else:
             raise
 
+
 def update_namespace(client, namespace):
-    name = namespace['name']
+    name = namespace["name"]
     return client.put(f"v3/namespaces/{name}/", namespace)
+
 
 def add_group(client, ns_name, group_name):
     namespace = get_namespace(client, ns_name)
     group = groups.get_group(client, group_name)
-    namespace["groups"].append({
-        "id": group["id"],
-        "name": group["name"],
-        "object_permissions": ["change_namespace", "upload_to_namespace"],
-    })
+    namespace["groups"].append(
+        {
+            "id": group["id"],
+            "name": group["name"],
+            "object_permissions": ["change_namespace", "upload_to_namespace"],
+        }
+    )
     return update_namespace(client, namespace)
+
 
 def remove_group(client, ns_name, group_name):
     namespace = get_namespace(client, ns_name)
     namespace["groups"] = [
-        group for group in namespace["groups"]
-        if group["name"] != group_name
+        group for group in namespace["groups"] if group["name"] != group_name
     ]
     return update_namespace(client, namespace)
+
 
 def get_namespace_id(client, name):
     """

@@ -6,7 +6,7 @@ import json
 
 
 def get_or_create_user(
-        client, username, password, group, fname="", lname="", email="", superuser=False
+    client, username, password, group, fname="", lname="", email="", superuser=False
 ):
     """
     A simple utility to create a new user. All the arguments aside from
@@ -23,9 +23,7 @@ def get_or_create_user(
     user_url = f"_ui/v1/users?username={username}"
     user_resp = client.get(user_url)
     if user_resp["meta"]["count"] == 0:
-        return True, create_user(
-                client, username, password, group, fname, lname, email
-        )
+        return True, create_user(client, username, password, group, fname, lname, email)
 
     return False, user_resp["data"][0]
 
@@ -63,13 +61,16 @@ def create_user(
     resp = client.post(f"_ui/v1/users/", create_body)
     return resp
 
+
 def update_user(client, user):
     return client.put(f"_ui/v1/users/{user['id']}/", user)
+
 
 def delete_user(client, user):
     user_id = get_user_id(client, user)
     delete_url = f"_ui/v1/users/{user_id}/"
     client.delete(delete_url, parse_json=False)
+
 
 def get_user_id(client, username):
     """
@@ -82,6 +83,7 @@ def get_user_id(client, username):
     else:
         raise ValueError(f"No user '{username}' found.")
 
+
 def get_user(client, username):
     """
     Returns the id for a given username
@@ -90,9 +92,9 @@ def get_user(client, username):
     user_resp = client.get(user_url)
     return user_resp["data"][0]
 
+
 def get_user_list(client):
     """
     Returns list of usernames of users in the system
     """
     return client.get("_ui/v1/users/")
-
