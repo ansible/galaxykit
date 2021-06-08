@@ -1,17 +1,17 @@
 """
 client.py contains the wrapping interface for all the other modules (aside from cli.py)
 """
-from simplejson.errors import JSONDecodeError
-from simplejson import dumps
 import sys
 from urllib.parse import urlparse, urljoin
+from simplejson.errors import JSONDecodeError
+from simplejson import dumps
 
 import requests
 
 from . import containers
 from . import dockerutils
-from . import users
 from . import groups
+from . import users
 
 
 class GalaxyClientError(Exception):
@@ -41,7 +41,7 @@ class GalaxyClient:
             resp = requests.post(auth_url, auth=(username, password))
             try:
                 self.token = resp.json().get("token")
-            except JSONDecodeError as e:
+            except JSONDecodeError:
                 print(f"Failed to fetch token: {resp.text}", file=sys.stderr)
             self.headers.update(
                 {
@@ -69,9 +69,11 @@ class GalaxyClient:
         if parse_json:
             try:
                 json = resp.json()
-            except JSONDecodeError as e:
+            except JSONDecodeError:
                 print(resp.text)
-                raise ValueError("Failed to parse JSON response from API")
+                raise ValueError(
+                    "Failed to parse JSON response from API"
+                ) from JSONDecodeError
             if "errors" in json:
                 # {'errors': [{'status': '403', 'code': 'not_authenticated', 'title': 'Authentication credentials were not provided.'}]}
                 raise GalaxyClientError(*json["errors"])
@@ -136,6 +138,7 @@ class GalaxyClient:
         )
 
     def get_user_list(self):
+        """returns a list of all the users"""
         return users.get_user_list(self)
 
     def delete_user(self, username):
