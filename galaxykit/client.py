@@ -30,7 +30,12 @@ class GalaxyClient:
     docker_client = None
 
     def __init__(
-        self, galaxy_root, auth=None, container_engine=None, container_registry=None
+        self,
+        galaxy_root,
+        auth=None,
+        container_engine=None,
+        container_registry=None,
+        container_tls_verify=True,
     ):
         self.galaxy_root = galaxy_root
         self.headers = {}
@@ -53,11 +58,14 @@ class GalaxyClient:
             if container_engine:
                 container_registry = (
                     container_registry
-                    or urlparse(self.galaxy_root).netloc.split(":") + ":5001"
+                    or urlparse(self.galaxy_root).netloc.split(":")[0] + ":5001"
                 )
 
                 self.docker_client = dockerutils.DockerClient(
-                    (user, password), container_engine, container_registry
+                    (username, password),
+                    container_engine,
+                    container_registry,
+                    tls_verify=container_tls_verify,
                 )
 
     def _http(self, method, path, *args, **kwargs):
@@ -111,9 +119,9 @@ class GalaxyClient:
         """pulls an image with the given credentials"""
         return self.docker_client.pull_image(image_name)
 
-    def tag_image(self, image_name, newtag, version="latest"):
-        """tags a pulled image with the given newtag and version"""
-        return self.docker_client.tag_image(image_name, newtag, version=version)
+    def tag_image(self, image_name, newtag):
+        """tags a pulled image with the given newtag"""
+        return self.docker_client.tag_image(image_name, newtag)
 
     def push_image(self, image_tag):
         """pushs a image"""
