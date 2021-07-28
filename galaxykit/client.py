@@ -36,10 +36,12 @@ class GalaxyClient:
         container_engine=None,
         container_registry=None,
         container_tls_verify=True,
+        https_verify=True,
     ):
         self.galaxy_root = galaxy_root
         self.headers = {}
         self.token = None
+        self.https_verify = https_verify
 
         if auth:
             if isinstance(auth, dict):
@@ -84,7 +86,7 @@ class GalaxyClient:
         headers = kwargs.pop("headers", self.headers)
         parse_json = kwargs.pop("parse_json", True)
 
-        resp = requests.request(method, url, headers=headers, verify=False, *args, **kwargs)
+        resp = requests.request(method, url, headers=headers, verify=self.https_verify, *args, **kwargs)
         if parse_json:
             try:
                 json = resp.json()
