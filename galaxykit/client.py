@@ -36,18 +36,29 @@ class GalaxyClient:
         container_engine=None,
         container_registry=None,
         container_tls_verify=True,
+        https_verify=True,
     ):
         self.galaxy_root = galaxy_root
         self.headers = {}
+        self.token = None
+        self.https_verify = https_verify
 
         if auth:
-            username, password = auth
-            auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
-            resp = requests.post(auth_url, auth=(username, password))
-            try:
-                self.token = resp.json().get("token")
-            except JSONDecodeError:
-                print(f"Failed to fetch token: {resp.text}", file=sys.stderr)
+            if isinstance(auth, dict):
+                username = auth["username"]
+                password = auth["password"]
+                self.token = auth.get("token")
+            elif isinstance(auth, tuple):
+                username, password = auth
+            
+            if self.token is None:
+                auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
+                resp = requests.post(auth_url, auth=(username, password), verify=False)
+                try:
+                    self.token = resp.json().get("token")
+                except JSONDecodeError:
+                    print(f"Failed to fetch token: {resp.text}", file=sys.stderr)
+
             self.headers.update(
                 {
                     "Accept": "application/json",
@@ -56,6 +67,8 @@ class GalaxyClient:
             )
 
             if container_engine:
+                if not (username and password):
+                    raise ValueError("Cannot use container engine commands without username and password for authentication.")
                 container_registry = (
                     container_registry
                     or urlparse(self.galaxy_root).netloc.split(":")[0] + ":5001"
@@ -73,15 +86,15 @@ class GalaxyClient:
         headers = kwargs.pop("headers", self.headers)
         parse_json = kwargs.pop("parse_json", True)
 
-        resp = requests.request(method, url, headers=headers, *args, **kwargs)
+        resp = requests.request(method, url, headers=headers, verify=self.https_verify, *args, **kwargs)
         if parse_json:
             try:
                 json = resp.json()
-            except JSONDecodeError:
+            except JSONDecodeError as exc:
                 print(resp.text)
                 raise ValueError(
                     "Failed to parse JSON response from API"
-                ) from JSONDecodeError
+                ) from exc
             if "errors" in json:
                 # {'errors': [{'status': '403', 'code': 'not_authenticated', 'title': 'Authentication credentials were not provided.'}]}
                 raise GalaxyClientError(*json["errors"])

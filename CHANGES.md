@@ -1,3 +1,7 @@
+## Version 0.4.0
+Allow passing both a simple username/password tuple or a {username, password, token} dict.
+* Allows re-use of token from another client
+* Uses username/password for container registry login
 ## Version 0.1.0
 A command-line wrapper has been added to Galaxykit, enabling it to be used by non-Python
 code including Javascript UI tests.

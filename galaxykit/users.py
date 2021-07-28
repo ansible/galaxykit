@@ -45,6 +45,10 @@ def create_user(
     if group is None:
         group = []
     else:
+        assert isinstance(group, dict)
+        assert "id" in group
+        assert "name" in group
+        assert "pulp_href" in group
         group = [group]
 
     create_body = {

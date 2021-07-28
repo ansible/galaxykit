@@ -68,11 +68,9 @@ class DockerClient:
         """
         Pushes an image to the registry
         """
-        run_args = [
-            self.engine,
-            "push",
-            f"{self.registry}/{image_tag}",
-        ]
+        sep = '' if self.registry.endswith('/') else '/'
+        full_tag = f"{self.registry}{sep}{image_tag}"
+        run_args = [self.engine, "push", full_tag]
 
         if self.engine == "podman":
             run_args.append(f"--tls-verify={self.tls_verify}")
