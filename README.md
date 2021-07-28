@@ -1,5 +1,3 @@
-# NOTE: this repository is no longer maintained! Please use https://github.com/ansible/galaxykit instead.
-
 ## Galaxykit
 
 Galaxykit is a client library for [galaxy\_ng](https://github.com/ansible/galaxy_ng), designed for use in internal testing.
