@@ -3,7 +3,7 @@ from . import groups
 
 def create_namespace(client, name, group):
     try:
-        namespace = get_namespace(client, name)
+        get_namespace(client, name)
     except KeyError:
         groups = []
         if group:
@@ -56,9 +56,7 @@ def add_group(client, ns_name, group_name):
 
 def remove_group(client, ns_name, group_name):
     namespace = get_namespace(client, ns_name)
-    namespace["groups"] = [
-        group for group in namespace["groups"] if group["name"] != group_name
-    ]
+    namespace["groups"] = [group for group in namespace["groups"] if group["name"] != group_name]
     return update_namespace(client, namespace)
 
 
