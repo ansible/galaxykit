@@ -19,7 +19,7 @@ setup(
     packages={"galaxykit"},
     url="https://github.com/hendersonreed/galaxykit/",
     version="0.4.0",
-    install_requires=["requests", "simplejson"],
+    install_requires=["requests", "simplejson", "pyyaml", "ansible"],
     extra_requires={"dev": ["pre-commit"]},
     entry_points={
         "console_scripts": [

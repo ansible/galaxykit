@@ -36,6 +36,17 @@ def get_namespace(client, name):
             raise
 
 
+def get_namespace_collections(client, name):
+    try:
+        collection_list = client.get(f"_ui/v1/repo/published/?namespace={name}/")
+        return collection_list
+    except Exception as e:
+        if e.args[0]["status"] == "404":
+            raise KeyError(f"No namespace {name} found.")
+        else:
+            raise
+
+
 def update_namespace(client, namespace):
     name = namespace["name"]
     return client.put(f"v3/namespaces/{name}/", namespace)

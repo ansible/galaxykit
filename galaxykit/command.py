@@ -1,8 +1,10 @@
 import argparse
 import sys
+import json
 
 from .client import GalaxyClient, GalaxyClientError
 from . import containers
+from . import collections
 from . import groups
 from . import namespaces
 from . import users
@@ -64,24 +66,22 @@ def main():
             if args.operation == "list":
                 resp = users.get_user_list(client)
                 print(format_list(resp["data"], "username"))
-            if args.operation == "create":
+            elif args.operation == "create":
                 username, password = args.rest
-                created, resp = users.get_or_create_user(
-                    client, username, password, None
-                )
+                created, resp = users.get_or_create_user(client, username, password, None)
                 if created:
                     print("Created user", username)
                 else:
                     print(f"User {username} already existed")
-            if args.operation == "delete":
+            elif args.operation == "delete":
                 (username,) = args.rest
                 try:
-                    resp = users.delete_user(client, username)
+                    users.delete_user(client, username)
                 except ValueError as e:
                     if not args.ignore:
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
-            if args.operation == "group":
+            elif args.operation == "group":
                 subop, *subopargs = args.rest
                 if subop == "add":
                     username, groupname = subopargs
@@ -95,15 +95,18 @@ def main():
                         }
                     )
                     resp = users.update_user(client, user_data)
+            else:
+                print(f"Unknown {args.kind} operation '{args.operation}'")
+                sys.exit(EXIT_UNKNOWN_ERROR)
 
         elif args.kind == "group":
             if args.operation == "list":
                 resp = groups.get_group_list(client)
                 print(format_list(resp["data"], "name"))
-            if args.operation == "create":
+            elif args.operation == "create":
                 (name,) = args.rest
                 resp = groups.create_group(client, name)
-            if args.operation == "delete":
+            elif args.operation == "delete":
                 (name,) = args.rest
                 try:
                     resp = groups.delete_group(client, name)
@@ -111,7 +114,7 @@ def main():
                     if not args.ignore:
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
-            if args.operation == "perm":
+            elif args.operation == "perm":
                 subop, *subopargs = args.rest
                 if subop == "list":
                     (groupname,) = subopargs
@@ -120,42 +123,48 @@ def main():
                 elif subop == "add":
                     groupname, perm = subopargs
                     perms = [
-                        p["permission"]
-                        for p in groups.get_permissions(client, groupname)["data"]
+                        p["permission"] for p in groups.get_permissions(client, groupname)["data"]
                     ]
                     perms = list(set(perms) | set([perm]))
-                    resp = groups.set_permissions(client, groupname, perms)
+                    groups.set_permissions(client, groupname, perms)
                 elif subop == "remove":
                     groupname, perm = subopargs
-                    resp = groups.delete_permission(client, groupname, perm)
+                    groups.delete_permission(client, groupname, perm)
                 else:
                     print(f"Unknown group perm operation '{subop}'")
                     sys.exit(EXIT_UNKNOWN_ERROR)
 
         elif args.kind == "namespace":
-            if args.operation == "list":
-                raise NotImplementedError
-            if args.operation == "create":
+            if args.operation == "get":
+                (name,) = args.rest
+                print(json.dumps(namespaces.get_namespace(client, name)))
+            elif args.operation == "list":
+                (name,) = args.rest
+                print(json.dumps(namespaces.get_namespace_collections(client, name)))
+            elif args.operation == "create":
                 if len(args.rest) == 2:
                     name, group = args.rest
                 else:
                     (name,) = args.rest
                     group = None
                 resp = namespaces.create_namespace(client, name, group)
-            if args.operation == "delete":
+            elif args.operation == "delete":
                 raise NotImplementedError
-            if args.operation == "groups":
+            elif args.operation == "groups":
                 raise NotImplementedError
-            if args.operation == "addgroup":
+            elif args.operation == "addgroup":
                 name, group = args.rest
                 resp = namespaces.add_group(client, name, group)
-            if args.operation == "removegroup":
+            elif args.operation == "removegroup":
                 name, group = args.rest
                 resp = namespaces.remove_group(client, name, group)
-            if args.operation == "addgroupperm":
+            elif args.operation == "addgroupperm":
                 raise NotImplementedError
-            if args.operation == "removegroupperm":
+            elif args.operation == "removegroupperm":
                 raise NotImplementedError
+            else:
+                print(f"Unknown {args.kind} operation '{args.operation}'")
+                sys.exit(EXIT_UNKNOWN_ERROR)
 
         elif args.kind == "container":
             if args.operation == "readme":
@@ -170,9 +179,26 @@ def main():
                     print("container readme takes either 1 or 2 parameters.")
                     sys.exit(EXIT_UNKNOWN_ERROR)
 
+        elif args.kind == "collection":
+            if args.operation == "upload":
+                collections.upload_test_collection(client)
+            else:
+                print(f"Unknown {args.kind} operation '{args.operation}'")
+                sys.exit(EXIT_UNKNOWN_ERROR)
+
+        elif args.kind == "url":
+            if args.operation == "get":
+                (url,) = args.rest
+                print(json.dumps(client.get(url)))
+            elif args.operation == "post":
+                raise NotImplementedError
+            else:
+                print(f"Unknown {args.kind} operation '{args.operation}'")
+                sys.exit(EXIT_UNKNOWN_ERROR)
+
         if resp and not ignore:
             report_error(resp)
 
-    except GalaxyClientError as e:
+    except GalaxyClientError:
         if not ignore:
             raise

@@ -28,6 +28,8 @@ class GalaxyClient:
     galaxy_root = ""
     token = ""
     docker_client = None
+    username = ""
+    password = ""
 
     def __init__(
         self,
@@ -45,15 +47,15 @@ class GalaxyClient:
 
         if auth:
             if isinstance(auth, dict):
-                username = auth["username"]
-                password = auth["password"]
+                self.username = auth["username"]
+                self.password = auth["password"]
                 self.token = auth.get("token")
             elif isinstance(auth, tuple):
-                username, password = auth
-            
+                self.username, self.password = auth
+
             if self.token is None:
                 auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
-                resp = requests.post(auth_url, auth=(username, password), verify=False)
+                resp = requests.post(auth_url, auth=(self.username, self.password), verify=False)
                 try:
                     self.token = resp.json().get("token")
                 except JSONDecodeError:
@@ -67,15 +69,16 @@ class GalaxyClient:
             )
 
             if container_engine:
-                if not (username and password):
-                    raise ValueError("Cannot use container engine commands without username and password for authentication.")
+                if not (self.username and self.password):
+                    raise ValueError(
+                        "Cannot use container engine commands without username and password for authentication."
+                    )
                 container_registry = (
-                    container_registry
-                    or urlparse(self.galaxy_root).netloc.split(":")[0] + ":5001"
+                    container_registry or urlparse(self.galaxy_root).netloc.split(":")[0] + ":5001"
                 )
 
                 self.docker_client = dockerutils.DockerClient(
-                    (username, password),
+                    (self.username, self.password),
                     container_engine,
                     container_registry,
                     tls_verify=container_tls_verify,
@@ -86,15 +89,15 @@ class GalaxyClient:
         headers = kwargs.pop("headers", self.headers)
         parse_json = kwargs.pop("parse_json", True)
 
-        resp = requests.request(method, url, headers=headers, verify=self.https_verify, *args, **kwargs)
+        resp = requests.request(
+            method, url, headers=headers, verify=self.https_verify, *args, **kwargs
+        )
         if parse_json:
             try:
                 json = resp.json()
             except JSONDecodeError as exc:
                 print(resp.text)
-                raise ValueError(
-                    "Failed to parse JSON response from API"
-                ) from exc
+                raise ValueError("Failed to parse JSON response from API") from exc
             if "errors" in json:
                 # {'errors': [{'status': '403', 'code': 'not_authenticated', 'title': 'Authentication credentials were not provided.'}]}
                 raise GalaxyClientError(*json["errors"])
