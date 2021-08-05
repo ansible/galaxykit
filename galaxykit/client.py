@@ -9,7 +9,7 @@ from simplejson import dumps
 import requests
 
 from . import containers
-from . import dockerutils
+from . import containerutils
 from . import groups
 from . import users
 
@@ -27,7 +27,7 @@ class GalaxyClient:
     headers = None
     galaxy_root = ""
     token = ""
-    docker_client = None
+    container_client = None
     username = ""
     password = ""
 
@@ -77,7 +77,7 @@ class GalaxyClient:
                     container_registry or urlparse(self.galaxy_root).netloc.split(":")[0] + ":5001"
                 )
 
-                self.docker_client = dockerutils.DockerClient(
+                self.container_client = containerutils.ContainerClient(
                     (self.username, self.password),
                     container_engine,
                     container_registry,
@@ -133,15 +133,15 @@ class GalaxyClient:
 
     def pull_image(self, image_name):
         """pulls an image with the given credentials"""
-        return self.docker_client.pull_image(image_name)
+        return self.container_client.pull_image(image_name)
 
     def tag_image(self, image_name, newtag):
         """tags a pulled image with the given newtag"""
-        return self.docker_client.tag_image(image_name, newtag)
+        return self.container_client.tag_image(image_name, newtag)
 
     def push_image(self, image_tag):
         """pushs a image"""
-        return self.docker_client.push_image(image_tag)
+        return self.container_client.push_image(image_tag)
 
     def get_or_create_user(
         self, username, password, group, fname="", lname="", email="", superuser=False
