@@ -56,19 +56,20 @@ class ContainerClient:
         else:
             run([self.engine, "pull", self.registry + image_name])
 
-    def tag_image(self, image_name, newtag):
+    def tag_image(self, image_name, image_tag):
         """
         Tags an image with the given tag (prepends the registry to the tag.)
         """
-        run(
-            [
-                self.engine,
-                "image",
-                "tag",
-                image_name,
-                f"{self.registry}/{newtag}",
-            ]
-        )
+        sep = "" if self.registry.endswith("/") else "/"
+        full_tag = f"{self.registry}{sep}{image_tag}"
+        run_args = [
+            self.engine,
+            "image",
+            "tag",
+            image_name,
+            full_tag,
+        ]
+        run(run_args)
 
     def push_image(self, image_tag):
         """
