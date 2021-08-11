@@ -1,13 +1,15 @@
 """
-Holds all of the functions used by GalaxyClient to handle Docker operations
+Holds all of the functions used by GalaxyClient to handle container operations.
+
+i.e. cli commands with podman, e.g. podman pull, podman image tag, etc.
 """
 
 from subprocess import run
 
 
-class DockerClient:
+class ContainerClient:
     """
-    DockerClient authenticates with the passed registry, as well as
+    ContainerClient authenticates with the passed registry, as well as
     provides utility functions for pushing, tagging, and pulling images.
     """
 
@@ -16,10 +18,14 @@ class DockerClient:
     tls_verify = True
 
     def __init__(
-        self, auth=None, engine="podman", registry="docker.io/library/", tls_verify=True
+        self,
+        auth=None,
+        engine="podman",
+        registry="docker.io/library/",
+        tls_verify=True,
     ):
         """
-        auth should be `(username, password)` for logging into the docker registry.
+        auth should be `(username, password)` for logging into the container registry.
 
         If not provided, then no login attempt is made.
         """
@@ -50,25 +56,26 @@ class DockerClient:
         else:
             run([self.engine, "pull", self.registry + image_name])
 
-    def tag_image(self, image_name, newtag):
+    def tag_image(self, image_name, image_tag):
         """
         Tags an image with the given tag (prepends the registry to the tag.)
         """
-        run(
-            [
-                self.engine,
-                "image",
-                "tag",
-                image_name,
-                f"{self.registry}/{newtag}",
-            ]
-        )
+        sep = "" if self.registry.endswith("/") else "/"
+        full_tag = f"{self.registry}{sep}{image_tag}"
+        run_args = [
+            self.engine,
+            "image",
+            "tag",
+            image_name,
+            full_tag,
+        ]
+        run(run_args)
 
     def push_image(self, image_tag):
         """
         Pushes an image to the registry
         """
-        sep = '' if self.registry.endswith('/') else '/'
+        sep = "" if self.registry.endswith("/") else "/"
         full_tag = f"{self.registry}{sep}{image_tag}"
         run_args = [self.engine, "push", full_tag]
 
