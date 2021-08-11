@@ -75,7 +75,7 @@ class GalaxyClient:
                 )
 
                 self.container_client = containerutils.ContainerClient(
-                    (self.username, self.password),
+                    (username, password),
                     container_engine,
                     container_registry,
                     tls_verify=container_tls_verify,
