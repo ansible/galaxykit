@@ -21,13 +21,11 @@ def upload_test_collection(client, namespace=None, collection_name=None):
     artifact = build_collection(
         "skeleton",
         config=config,
-        extra_files={"meta/runtime.yml": {"requires_ansible": "==2.10"}},
     )
     upload_resp_url = upload_artifact(config, client, artifact)["task"]
 
     ready = False
     state = ""
-    breakpoint()
     while not ready:
         sleep(1)
         task_resp = client.get(upload_resp_url)
