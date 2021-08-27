@@ -73,9 +73,7 @@ def main():
                 print(format_list(resp["data"], "username"))
             elif args.operation == "create":
                 username, password = args.rest
-                created, resp = users.get_or_create_user(
-                    client, username, password, None
-                )
+                created, resp = users.get_or_create_user(client, username, password, None)
                 if created:
                     print("Created user", username)
                 else:
@@ -129,8 +127,7 @@ def main():
                 elif subop == "add":
                     groupname, perm = subopargs
                     perms = [
-                        p["permission"]
-                        for p in groups.get_permissions(client, groupname)["data"]
+                        p["permission"] for p in groups.get_permissions(client, groupname)["data"]
                     ]
                     perms = list(set(perms) | set([perm]))
                     resp = groups.set_permissions(client, groupname, perms)
@@ -144,9 +141,13 @@ def main():
                 print_unknown_error(args)
 
         elif args.kind == "namespace":
-            if args.operation == "list":
-                raise NotImplementedError
-            if args.operation == "create":
+            if args.operation == "get":
+                (name,) = args.rest
+                print(json.dumps(namespaces.get_namespace(client, name)))
+            elif args.operation == "list-collections":
+                (name,) = args.rest
+                print(json.dumps(namespaces.get_namespace_collections(client, name)))
+            elif args.operation == "create":
                 if len(args.rest) == 2:
                     name, group = args.rest
                 else:

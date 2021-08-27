@@ -3,7 +3,7 @@ from . import groups
 
 def create_namespace(client, name, group):
     try:
-        namespace = get_namespace(client, name)
+        get_namespace(client, name)
     except KeyError:
         groups = []
         if group:
@@ -36,6 +36,17 @@ def get_namespace(client, name):
             raise
 
 
+def get_namespace_collections(client, name):
+    try:
+        collection_list = client.get(f"_ui/v1/repo/published/?namespace={name}/")
+        return collection_list
+    except Exception as e:
+        if e.args[0]["status"] == "404":
+            raise KeyError(f"No namespace {name} found.")
+        else:
+            raise
+
+
 def update_namespace(client, namespace):
     name = namespace["name"]
     return client.put(f"v3/namespaces/{name}/", namespace)
@@ -56,9 +67,7 @@ def add_group(client, ns_name, group_name):
 
 def remove_group(client, ns_name, group_name):
     namespace = get_namespace(client, ns_name)
-    namespace["groups"] = [
-        group for group in namespace["groups"] if group["name"] != group_name
-    ]
+    namespace["groups"] = [group for group in namespace["groups"] if group["name"] != group_name]
     return update_namespace(client, namespace)
 
 
