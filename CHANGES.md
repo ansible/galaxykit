@@ -1,3 +1,5 @@
+## Version 0.5.1
+Bugfix: fix login to handle missing container utilities.
 ## Version 0.5.0
 Updates to namespaces and add collection functionality
 * List the metadata of a namespace
