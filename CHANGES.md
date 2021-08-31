@@ -1,3 +1,9 @@
+## Version 0.5.0
+Updates to namespaces and add collection functionality
+* List the metadata of a namespace
+* List all the collections in a namespace
+* Upload test collections with a given name to a given namespace
+* Rename dockerUtils to containerUtils to avoid using Docker trademark.
 ## Version 0.4.0
 Allow passing both a simple username/password tuple or a {username, password, token} dict.
 * Allows re-use of token from another client
