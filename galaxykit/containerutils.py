@@ -38,20 +38,20 @@ class ContainerClient:
         self.tls_verify = tls_verify
 
         if auth:  # we only need to auth if creds are supplied
-            self.login(registry, *auth, fail_ok=True)
+            self.login(*auth, fail_ok=True)
 
-    def login(self, registry, username, password, fail_ok=False):
+    def login(self, username, password, fail_ok=False):
         run_args = [
-            engine,
+            self.engine,
             "login",
-            registry,
+            self.registry,
             "--username",
             username,
             "--password",
             password,
         ]
-        if engine == "podman":
-            run_args.append(f"--tls-verify={tls_verify}")
+        if self.engine == "podman":
+            run_args.append(f"--tls-verify={self.tls_verify}")
         try:
             run(run_args)
         except FileNotFoundError:
