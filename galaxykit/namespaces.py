@@ -67,7 +67,9 @@ def add_group(client, ns_name, group_name):
 
 def remove_group(client, ns_name, group_name):
     namespace = get_namespace(client, ns_name)
-    namespace["groups"] = [group for group in namespace["groups"] if group["name"] != group_name]
+    namespace["groups"] = [
+        group for group in namespace["groups"] if group["name"] != group_name
+    ]
     return update_namespace(client, namespace)
 
 

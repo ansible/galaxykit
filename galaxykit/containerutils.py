@@ -4,7 +4,11 @@ Holds all of the functions used by GalaxyClient to handle container operations.
 i.e. cli commands with podman, e.g. podman pull, podman image tag, etc.
 """
 
+from logging import getLogger
 from subprocess import run
+
+
+logger = getLogger(__name__)
 
 
 class ContainerClient:
@@ -34,18 +38,27 @@ class ContainerClient:
         self.tls_verify = tls_verify
 
         if auth:  # we only need to auth if creds are supplied
-            run_args = [
-                engine,
-                "login",
-                registry,
-                "--username",
-                auth[0],
-                "--password",
-                auth[1],
-            ]
-            if engine == "podman":
-                run_args.append(f"--tls-verify={tls_verify}")
+            self.login(registry, *auth, fail_ok=True)
+
+    def login(self, registry, username, password, fail_ok=False):
+        run_args = [
+            engine,
+            "login",
+            registry,
+            "--username",
+            username,
+            "--password",
+            password,
+        ]
+        if engine == "podman":
+            run_args.append(f"--tls-verify={tls_verify}")
+        try:
             run(run_args)
+        except FileNotFoundError:
+            if fail_ok:
+                logger.warn(f"Container engine '{self.engine}' not found.")
+            else:
+                raise
 
     def pull_image(self, image_name):
         """

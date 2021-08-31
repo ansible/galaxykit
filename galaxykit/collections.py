@@ -84,7 +84,9 @@ def upload_artifact(
             b_hash = to_bytes(sha256(data).hexdigest(), errors="surrogate_or_strict")
 
         # add the hash to the request.
-        form.extend([part_boundary, b'Content-Disposition: form-data; name="sha256"', b_hash])
+        form.extend(
+            [part_boundary, b'Content-Disposition: form-data; name="sha256"', b_hash]
+        )
 
     # only add the file to the request if no_file == False
     if not no_file:
@@ -101,7 +103,8 @@ def upload_artifact(
             form.extend(
                 [
                     part_boundary,
-                    b'Content-Disposition: file; name="file"; filename="%s"' % to_bytes(file_name),
+                    b'Content-Disposition: file; name="file"; filename="%s"'
+                    % to_bytes(file_name),
                     b"Content-Type: application/octet-stream",
                 ]
             )
