@@ -19,7 +19,7 @@ setup(
     packages={"galaxykit"},
     url="https://github.com/hendersonreed/galaxykit/",
     version="0.4.0",
-    install_requires=["requests", "simplejson", "orionutils"],
+    install_requires=["requests", "simplejson", "orionutils", "pyyaml"],
     extra_requires={"dev": ["pre-commit"]},
     entry_points={
         "console_scripts": [
