@@ -56,6 +56,9 @@ def main():
     parser.add_argument("-u", "--username", type=str, action="store")
     parser.add_argument("-p", "--password", type=str, action="store")
     parser.add_argument(
+        "-c", "--ignore-certs", type=str, action="store", help="Ignore invalid SSL certificates"
+    )
+    parser.add_argument(
         "-s",
         "--server",
         type=str,
