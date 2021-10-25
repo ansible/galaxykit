@@ -54,7 +54,11 @@ def main():
     parser.add_argument("-u", "--username", type=str, action="store")
     parser.add_argument("-p", "--password", type=str, action="store")
     parser.add_argument(
-        "-c", "--ignore-certs", type=str, action="store", help="Ignore invalid SSL certificates"
+        "-c",
+        "--ignore_certs",
+        default=False,
+        action="store_true",
+        help="Ignore invalid SSL certificates",
     )
     parser.add_argument(
         "-s",
@@ -66,7 +70,8 @@ def main():
 
     args = parser.parse_args()
     ignore = args.ignore
-    client = GalaxyClient(args.server, (args.username, args.password))
+    https_verify = args.ignore_certs
+    client = GalaxyClient(args.server, (args.username, args.password), https_verify=https_verify)
     resp = None
 
     try:
