@@ -121,6 +121,6 @@ def upload_artifact(
         "Authorization": f"Token {client.token}",
     }
 
-    n_url = f"{client.galaxy_root}/content/inbound-{artifact.namespace}/v3/artifacts/collections/"
+    n_url = urljoin(client.galaxy_root, f"content/inbound-{artifact.namespace}/v3/artifacts/collections/")
     resp = client._http("post", n_url, data=data, headers=headers)
     return resp
