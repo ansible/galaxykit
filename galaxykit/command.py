@@ -50,7 +50,9 @@ def main():
     )
     parser.add_argument("operation", type=str, action="store")
     parser.add_argument("rest", type=str, action="store", nargs="*")
-    parser.add_argument("-i", "--ignore", default=False, action="store_true")
+    parser.add_argument(
+        "-i", "--ignore", default=False, action="store_true", help="Ignore API failures"
+    )
     parser.add_argument("-u", "--username", type=str, action="store")
     parser.add_argument("-p", "--password", type=str, action="store")
     parser.add_argument(
@@ -73,9 +75,7 @@ def main():
                 print(format_list(resp["data"], "username"))
             elif args.operation == "create":
                 username, password = args.rest
-                created, resp = users.get_or_create_user(
-                    client, username, password, None
-                )
+                created, resp = users.get_or_create_user(client, username, password, None)
                 if created:
                     print("Created user", username)
                 else:
@@ -129,8 +129,7 @@ def main():
                 elif subop == "add":
                     groupname, perm = subopargs
                     perms = [
-                        p["permission"]
-                        for p in groups.get_permissions(client, groupname)["data"]
+                        p["permission"] for p in groups.get_permissions(client, groupname)["data"]
                     ]
                     perms = list(set(perms) | set([perm]))
                     resp = groups.set_permissions(client, groupname, perms)

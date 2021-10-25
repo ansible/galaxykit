@@ -28,9 +28,7 @@ def get_or_create_user(
     return False, user_resp["data"][0]
 
 
-def create_user(
-    client, username, password, group, fname="", lname="", email="", superuser=False
-):
+def create_user(client, username, password, group, fname="", lname="", email="", superuser=False):
     """
     Create a new user. All the arguments aside from
     `group` should be strings. `group` needs to be a dict of the following

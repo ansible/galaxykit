@@ -55,9 +55,7 @@ class GalaxyClient:
 
             if self.token is None:
                 auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
-                resp = requests.post(
-                    auth_url, auth=(self.username, self.password), verify=False
-                )
+                resp = requests.post(auth_url, auth=(self.username, self.password), verify=False)
                 try:
                     self.token = resp.json().get("token")
                 except JSONDecodeError:
@@ -76,8 +74,7 @@ class GalaxyClient:
                         "Cannot use container engine commands without username and password for authentication."
                     )
                 container_registry = (
-                    container_registry
-                    or urlparse(self.galaxy_root).netloc.split(":")[0] + ":5001"
+                    container_registry or urlparse(self.galaxy_root).netloc.split(":")[0] + ":5001"
                 )
 
                 self.container_client = containerutils.ContainerClient(
