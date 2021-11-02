@@ -54,6 +54,13 @@ def main():
     parser.add_argument("-u", "--username", type=str, action="store")
     parser.add_argument("-p", "--password", type=str, action="store")
     parser.add_argument(
+        "-c",
+        "--ignore-certs",
+        default=False,
+        action="store_true",
+        help="Ignore invalid SSL certificates",
+    )
+    parser.add_argument(
         "-s",
         "--server",
         type=str,
@@ -63,7 +70,8 @@ def main():
 
     args = parser.parse_args()
     ignore = args.ignore
-    client = GalaxyClient(args.server, (args.username, args.password))
+    https_verify = not args.ignore_certs
+    client = GalaxyClient(args.server, (args.username, args.password), https_verify=https_verify)
     resp = None
 
     try:
@@ -73,9 +81,7 @@ def main():
                 print(format_list(resp["data"], "username"))
             elif args.operation == "create":
                 username, password = args.rest
-                created, resp = users.get_or_create_user(
-                    client, username, password, None
-                )
+                created, resp = users.get_or_create_user(client, username, password, None)
                 if created:
                     print("Created user", username)
                 else:
@@ -129,8 +135,7 @@ def main():
                 elif subop == "add":
                     groupname, perm = subopargs
                     perms = [
-                        p["permission"]
-                        for p in groups.get_permissions(client, groupname)["data"]
+                        p["permission"] for p in groups.get_permissions(client, groupname)["data"]
                     ]
                     perms = list(set(perms) | set([perm]))
                     resp = groups.set_permissions(client, groupname, perms)
