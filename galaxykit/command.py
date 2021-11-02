@@ -55,7 +55,7 @@ def main():
     parser.add_argument("-p", "--password", type=str, action="store")
     parser.add_argument(
         "-c",
-        "--ignore_certs",
+        "--ignore-certs",
         default=False,
         action="store_true",
         help="Ignore invalid SSL certificates",
