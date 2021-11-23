@@ -206,6 +206,14 @@ def main():
                     client, namespace=namespace, collection_name=collection_name
                 )
                 print(json.dumps(artifact))
+            if args.operation == "move":
+                if len(args.rest) == 2:
+                    (namespace, collection_name) = args.rest
+                else:
+                    (namespace, collection_name, version, source, destination) = args.rest
+                collections.move_collection(
+                    namespace, collection_name, version, source, destination
+                )
             else:
                 print_unknown_error(args)
 

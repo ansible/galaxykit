@@ -128,3 +128,33 @@ def upload_artifact(
     )
     resp = client._http("post", n_url, data=data, headers=headers)
     return resp
+
+
+def move_collection(
+    client, namespace, collection_name, version="1.0.0", source="staging", destination="published"
+):
+    """
+    Moves a collection between repositories. The default arguments are for the most common usecase, which
+    is moving a collection from the staging to published repositories.
+
+    POST /v3/collections/{namespace}/{collection_name}/versions/{version}/move/{source}/{destination}/
+    """
+    move_url = f"/v3/collections/{namespace}/{collection_name}/versions/{version}/move/{source}/{destination}/"
+    client.post(move_url)
+    # no task url in response from above request, so can't intelligently wait.
+    # so we'll just sleep for 1 second and hope the certification is done by then.
+    dest_url = f"_ui/v1/collection-versions/?name={name}&repository={destination}"
+    ready = False
+    timeout = 5
+    while not ready:
+        try:
+            client(dest_url, method="GET")
+            # if we aren't done publishing, GalaxyError gets thrown and we skip
+            # past the below line and directly to the `except GalaxyError` line.
+            ready = True
+        except GalaxyError:
+            time.sleep(1)
+            timeout = timeout - 1
+            if timeout < 0:
+                raise
+    return True
