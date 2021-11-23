@@ -33,7 +33,12 @@ def upload_test_collection(client, namespace=None, collection_name=None):
         ready = state in ["completed", "failed"]
     if state == "failed":
         raise GalaxyClientError(json.dumps(task_resp))
-    return task_resp
+    return {
+        "namespace": artifact.namespace,
+        "name": artifact.name,
+        "version": artifact.version,
+        "published": artifact.published,
+    }
 
 
 def upload_artifact(
@@ -84,9 +89,7 @@ def upload_artifact(
             b_hash = to_bytes(sha256(data).hexdigest(), errors="surrogate_or_strict")
 
         # add the hash to the request.
-        form.extend(
-            [part_boundary, b'Content-Disposition: form-data; name="sha256"', b_hash]
-        )
+        form.extend([part_boundary, b'Content-Disposition: form-data; name="sha256"', b_hash])
 
     # only add the file to the request if no_file == False
     if not no_file:
@@ -103,8 +106,7 @@ def upload_artifact(
             form.extend(
                 [
                     part_boundary,
-                    b'Content-Disposition: file; name="file"; filename="%s"'
-                    % to_bytes(file_name),
+                    b'Content-Disposition: file; name="file"; filename="%s"' % to_bytes(file_name),
                     b"Content-Type: application/octet-stream",
                 ]
             )
@@ -121,6 +123,8 @@ def upload_artifact(
         "Authorization": f"Token {client.token}",
     }
 
-    n_url = urljoin(client.galaxy_root, f"content/inbound-{artifact.namespace}/v3/artifacts/collections/")
+    n_url = urljoin(
+        client.galaxy_root, f"content/inbound-{artifact.namespace}/v3/artifacts/collections/"
+    )
     resp = client._http("post", n_url, data=data, headers=headers)
     return resp

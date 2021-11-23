@@ -202,9 +202,10 @@ def main():
                     (namespace, collection_name) = args.rest
 
                 resp = namespaces.create_namespace(client, namespace, None)
-                collections.upload_test_collection(
+                artifact = collections.upload_test_collection(
                     client, namespace=namespace, collection_name=collection_name
                 )
+                print(json.dumps(artifact))
             else:
                 print_unknown_error(args)
 
