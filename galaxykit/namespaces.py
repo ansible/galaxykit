@@ -38,7 +38,7 @@ def get_namespace(client, name):
 
 def get_namespace_collections(client, name):
     try:
-        collection_list = client.get(f"_ui/v1/repo/published/?namespace={name}/")
+        collection_list = client.get(f"_ui/v1/repo/published/?namespace={name}")
         return collection_list
     except Exception as e:
         if e.args[0]["status"] == "404":
