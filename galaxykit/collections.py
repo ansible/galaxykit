@@ -7,6 +7,8 @@ import os
 import json
 from time import sleep
 from urllib.parse import urljoin
+
+from ansible.galaxy.api import GalaxyError
 from orionutils.generator import build_collection
 from .client import GalaxyClientError
 
@@ -89,7 +91,9 @@ def upload_artifact(
             b_hash = to_bytes(sha256(data).hexdigest(), errors="surrogate_or_strict")
 
         # add the hash to the request.
-        form.extend([part_boundary, b'Content-Disposition: form-data; name="sha256"', b_hash])
+        form.extend(
+            [part_boundary, b'Content-Disposition: form-data; name="sha256"', b_hash]
+        )
 
     # only add the file to the request if no_file == False
     if not no_file:
@@ -106,7 +110,8 @@ def upload_artifact(
             form.extend(
                 [
                     part_boundary,
-                    b'Content-Disposition: file; name="file"; filename="%s"' % to_bytes(file_name),
+                    b'Content-Disposition: file; name="file"; filename="%s"'
+                    % to_bytes(file_name),
                     b"Content-Type: application/octet-stream",
                 ]
             )
@@ -124,36 +129,45 @@ def upload_artifact(
     }
 
     n_url = urljoin(
-        client.galaxy_root, f"content/inbound-{artifact.namespace}/v3/artifacts/collections/"
+        client.galaxy_root,
+        f"content/inbound-{artifact.namespace}/v3/artifacts/collections/",
     )
     resp = client._http("post", n_url, data=data, headers=headers)
     return resp
 
 
 def move_collection(
-    client, namespace, collection_name, version="1.0.0", source="staging", destination="published"
+    client,
+    namespace,
+    collection_name,
+    version="1.0.0",
+    source="staging",
+    destination="published",
 ):
     """
     Moves a collection between repositories. The default arguments are for the most common usecase, which
     is moving a collection from the staging to published repositories.
 
-    POST /v3/collections/{namespace}/{collection_name}/versions/{version}/move/{source}/{destination}/
+    POST v3/collections/{namespace}/{collection_name}/versions/{version}/move/{source}/{destination}/
     """
-    move_url = f"/v3/collections/{namespace}/{collection_name}/versions/{version}/move/{source}/{destination}/"
-    client.post(move_url)
+    move_url = f"v3/collections/{namespace}/{collection_name}/versions/{version}/move/{source}/{destination}/"
+    payload = ""
+    client.post(move_url, payload)
     # no task url in response from above request, so can't intelligently wait.
     # so we'll just sleep for 1 second and hope the certification is done by then.
-    dest_url = f"_ui/v1/collection-versions/?name={name}&repository={destination}"
+    dest_url = (
+        f"_ui/v1/collection-versions/?name={collection_name}&repository={destination}"
+    )
     ready = False
     timeout = 5
     while not ready:
         try:
-            client(dest_url, method="GET")
+            client.get(dest_url)
             # if we aren't done publishing, GalaxyError gets thrown and we skip
             # past the below line and directly to the `except GalaxyError` line.
             ready = True
         except GalaxyError:
-            time.sleep(1)
+            sleep(1)
             timeout = timeout - 1
             if timeout < 0:
                 raise

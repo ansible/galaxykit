@@ -71,7 +71,9 @@ def main():
     args = parser.parse_args()
     ignore = args.ignore
     https_verify = not args.ignore_certs
-    client = GalaxyClient(args.server, (args.username, args.password), https_verify=https_verify)
+    client = GalaxyClient(
+        args.server, (args.username, args.password), https_verify=https_verify
+    )
     resp = None
 
     try:
@@ -81,7 +83,9 @@ def main():
                 print(format_list(resp["data"], "username"))
             elif args.operation == "create":
                 username, password = args.rest
-                created, resp = users.get_or_create_user(client, username, password, None)
+                created, resp = users.get_or_create_user(
+                    client, username, password, None
+                )
                 if created:
                     print("Created user", username)
                 else:
@@ -135,7 +139,8 @@ def main():
                 elif subop == "add":
                     groupname, perm = subopargs
                     perms = [
-                        p["permission"] for p in groups.get_permissions(client, groupname)["data"]
+                        p["permission"]
+                        for p in groups.get_permissions(client, groupname)["data"]
                     ]
                     perms = list(set(perms) | set([perm]))
                     resp = groups.set_permissions(client, groupname, perms)
@@ -206,13 +211,19 @@ def main():
                     client, namespace=namespace, collection_name=collection_name
                 )
                 print(json.dumps(artifact))
-            if args.operation == "move":
+            elif args.operation == "move":
                 if len(args.rest) == 2:
                     (namespace, collection_name) = args.rest
                 else:
-                    (namespace, collection_name, version, source, destination) = args.rest
+                    (
+                        namespace,
+                        collection_name,
+                        version,
+                        source,
+                        destination,
+                    ) = args.rest
                 collections.move_collection(
-                    namespace, collection_name, version, source, destination
+                    client, namespace, collection_name, version, source, destination
                 )
             else:
                 print_unknown_error(args)
