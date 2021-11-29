@@ -8,7 +8,6 @@ import json
 from time import sleep
 from urllib.parse import urljoin
 
-from ansible.galaxy.api import GalaxyError
 from orionutils.generator import build_collection
 from .client import GalaxyClientError
 
@@ -153,8 +152,7 @@ def move_collection(
     move_url = f"v3/collections/{namespace}/{collection_name}/versions/{version}/move/{source}/{destination}/"
     payload = ""
     client.post(move_url, payload)
-    # no task url in response from above request, so can't intelligently wait.
-    # so we'll just sleep for 1 second and hope the certification is done by then.
+
     dest_url = (
         f"_ui/v1/collection-versions/?name={collection_name}&repository={destination}"
     )
@@ -163,10 +161,9 @@ def move_collection(
     while not ready:
         try:
             client.get(dest_url)
-            # if we aren't done publishing, GalaxyError gets thrown and we skip
-            # past the below line and directly to the `except GalaxyError` line.
             ready = True
-        except GalaxyError:
+        except GalaxyClientError:
+            breakpoint()
             sleep(1)
             timeout = timeout - 1
             if timeout < 0:
