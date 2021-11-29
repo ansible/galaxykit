@@ -214,6 +214,8 @@ def main():
             elif args.operation == "move":
                 if len(args.rest) == 2:
                     (namespace, collection_name) = args.rest
+                    # defaults to version = 1.0.0, source = staging, destination = published
+                    collections.move_collection(client, namespace, collection_name)
                 else:
                     (
                         namespace,
@@ -222,9 +224,9 @@ def main():
                         source,
                         destination,
                     ) = args.rest
-                collections.move_collection(
-                    client, namespace, collection_name, version, source, destination
-                )
+                    collections.move_collection(
+                        client, namespace, collection_name, version, source, destination
+                    )
             else:
                 print_unknown_error(args)
 
