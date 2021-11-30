@@ -153,9 +153,7 @@ def move_collection(
     payload = ""
     client.post(move_url, payload)
 
-    dest_url = (
-        f"_ui/v1/collection-versions/?name={collection_name}&repository={destination}"
-    )
+    dest_url = f"_ui/v1/repo/{destination}/{namespace}/{collection_name}/"
     ready = False
     timeout = 5
     while not ready:
@@ -163,7 +161,6 @@ def move_collection(
             client.get(dest_url)
             ready = True
         except GalaxyClientError:
-            breakpoint()
             sleep(1)
             timeout = timeout - 1
             if timeout < 0:
