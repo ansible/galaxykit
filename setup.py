@@ -18,7 +18,7 @@ setup(
     name="galaxykit",
     packages={"galaxykit"},
     url="https://github.com/hendersonreed/galaxykit/",
-    version="0.5.2",
+    version="0.5.3",
     install_requires=["requests", "simplejson", "orionutils", "pyyaml"],
     extra_requires={"dev": ["pre-commit"]},
     entry_points={
