@@ -1,3 +1,7 @@
+## Version 0.6.0
+* Add collection move function - accessible via `galaxykit collection move <namespace> <name>` which assumes collection version = 1.0.0 and the source repo = staging and the destination repo = published. Alternatively those arguments can be supplied, in that order (e.g. `galaxykit collection move admin collection_dep_a_asdfasdf 1.2.0 rejected published`.
+* Addition of `--ignore-certs` (short version is `-c`) to enable running against insecure instances of galaxy.
+* Expand return values from some functions to have more valuable information.
 ## Version 0.5.2
 Bugfix: fix double-slash in content URL
 ## Version 0.5.1
