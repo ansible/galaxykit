@@ -7,6 +7,7 @@ import os
 import json
 from time import sleep
 from urllib.parse import urljoin
+
 from orionutils.generator import build_collection
 from .client import GalaxyClientError
 
@@ -33,7 +34,12 @@ def upload_test_collection(client, namespace=None, collection_name=None):
         ready = state in ["completed", "failed"]
     if state == "failed":
         raise GalaxyClientError(json.dumps(task_resp))
-    return task_resp
+    return {
+        "namespace": artifact.namespace,
+        "name": artifact.name,
+        "version": artifact.version,
+        "published": artifact.published,
+    }
 
 
 def upload_artifact(
@@ -121,6 +127,42 @@ def upload_artifact(
         "Authorization": f"Token {client.token}",
     }
 
-    n_url = urljoin(client.galaxy_root, f"content/inbound-{artifact.namespace}/v3/artifacts/collections/")
+    n_url = urljoin(
+        client.galaxy_root,
+        f"content/inbound-{artifact.namespace}/v3/artifacts/collections/",
+    )
     resp = client._http("post", n_url, data=data, headers=headers)
     return resp
+
+
+def move_collection(
+    client,
+    namespace,
+    collection_name,
+    version="1.0.0",
+    source="staging",
+    destination="published",
+):
+    """
+    Moves a collection between repositories. The default arguments are for the most common usecase, which
+    is moving a collection from the staging to published repositories.
+
+    POST v3/collections/{namespace}/{collection_name}/versions/{version}/move/{source}/{destination}/
+    """
+    move_url = f"v3/collections/{namespace}/{collection_name}/versions/{version}/move/{source}/{destination}/"
+    payload = ""
+    client.post(move_url, payload)
+
+    dest_url = f"_ui/v1/repo/{destination}/{namespace}/{collection_name}/"
+    ready = False
+    timeout = 5
+    while not ready:
+        try:
+            client.get(dest_url)
+            ready = True
+        except GalaxyClientError:
+            sleep(1)
+            timeout = timeout - 1
+            if timeout < 0:
+                raise
+    return True
