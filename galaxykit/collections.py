@@ -1,5 +1,5 @@
 """
-Functions for managing collections. Currently only handles uploading test collections.
+Functions for uploading and deleting collections.
 """
 
 import uuid
@@ -165,3 +165,21 @@ def move_collection(
             if timeout < 0:
                 raise
     return True
+
+
+def delete_collection_version(
+    client, namespace, collection_name, version, repo="published"
+):
+    """
+    Deletes a specific collection version
+    """
+    url = f"content/{repo}/v3/collections/{namespace}/{collection_name}/versions/{version}/"
+    return client._http("delete", url)
+
+
+def delete_collection(client, namespace, collection_name):
+    """
+    Deletes all versions of a collection
+    """
+    url = f"content/{repo}/v3/collections/{namespace}/{collection_name}/"
+    return client._http("delete", url)
