@@ -7,9 +7,8 @@ import os
 import json
 from time import sleep
 from urllib.parse import urljoin
-
 from orionutils.generator import build_collection
-from .client import GalaxyClientError
+from .errors import GalaxyClientError
 
 
 def upload_test_collection(client, namespace=None, collection_name=None):

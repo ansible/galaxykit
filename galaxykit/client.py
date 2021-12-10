@@ -12,10 +12,7 @@ from . import containers
 from . import containerutils
 from . import groups
 from . import users
-
-
-class GalaxyClientError(Exception):
-    pass
+from .errors import GalaxyClientError
 
 
 class GalaxyClient:

@@ -2,7 +2,8 @@ import argparse
 import sys
 import json
 
-from .client import GalaxyClient, GalaxyClientError
+from .client import GalaxyClient
+from .errors import GalaxyClientError
 from . import containers
 from . import collections
 from . import groups

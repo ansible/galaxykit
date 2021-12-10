@@ -1,0 +1,2 @@
+class GalaxyClientError(Exception):
+    pass
