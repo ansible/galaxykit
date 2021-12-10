@@ -51,7 +51,9 @@ def main():
     )
     parser.add_argument("operation", type=str, action="store")
     parser.add_argument("rest", type=str, action="store", nargs="*")
-    parser.add_argument("-i", "--ignore", default=False, action="store_true")
+    parser.add_argument(
+        "-i", "--ignore", default=False, action="store_true", help="Ignore API failures"
+    )
     parser.add_argument("-u", "--username", type=str, action="store")
     parser.add_argument("-p", "--password", type=str, action="store")
     parser.add_argument(
