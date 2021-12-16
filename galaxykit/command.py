@@ -9,6 +9,7 @@ from . import groups
 from . import namespaces
 from . import users
 from . import container_images
+from . import registries
 
 EXIT_OK = 0
 EXIT_UNKNOWN_ERROR = 1
@@ -221,6 +222,18 @@ def main():
                 container, image  = args.rest
                 try:
                     resp = container_images.delete_container(client, container, image)
+                except ValueError as e:
+                    if not args.ignore:
+                        print(e)
+                        sys.exit(EXIT_NOT_FOUND)
+            else:
+                print_unknown_error(args) 
+
+        elif args.kind == "registry":
+            if args.operation == "delete":
+                (name,) = args.rest
+                try:
+                    resp = registries.delete_registry(client, name)
                 except ValueError as e:
                     if not args.ignore:
                         print(e)
