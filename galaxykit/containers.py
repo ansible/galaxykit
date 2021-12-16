@@ -1,3 +1,5 @@
+from pprint import pprint
+
 def get_readme(client, container):
     """
     Returns a json response containing the readme
@@ -14,3 +16,13 @@ def set_readme(client, container, readme):
     resp = get_readme(client, container)
     resp["text"] = readme
     return client.put(url, resp)
+
+def delete_container(client, name):
+    """
+    Delete container
+    """
+    delete_url = f"/api/automation-hub/_ui/v1/execution-environments/repositories/{name}/"
+    return client.delete(delete_url, parse_json=False)
+    
+
+    

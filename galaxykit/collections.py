@@ -173,6 +173,6 @@ def delete_collection(client, namespace, collection, version):
     Delete collection version
     """
     delete_url = f"content/published/v3/collections/{namespace}/{collection}/versions/{version}"
-    res = client.delete(delete_url, parse_json=False)
-    #pprint(vars(res))
-    return res
+    return client.delete(delete_url, parse_json=False)
+    
+    

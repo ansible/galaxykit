@@ -85,13 +85,14 @@ def get_namespace_id(client, name):
     else:
         raise ValueError(f"No namespace '{name}' found.")
 
-def delete_namespace(client, namespace):
+def delete_namespace(client, name):
     """
     Delete namespace
     """
-    delete_url = f"/api/automation-hub/_ui/v1/namespaces/{namespace}"
-    res = client.delete(delete_url, parse_json=False)
-    return res
+    delete_url = f"/api/automation-hub/_ui/v1/namespaces/{name}"
+    return client.delete(delete_url, parse_json=False)
+    
+    
 
 
     

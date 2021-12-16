@@ -169,9 +169,9 @@ def main():
                 resp = namespaces.create_namespace(client, name, group)
 
             elif args.operation == "delete":
-                (namespace,) = args.rest
+                (name,) = args.rest
                 try:
-                    resp = namespaces.delete_namespace(client, namespace)
+                    resp = namespaces.delete_namespace(client, name)
                 except ValueError as e:
                     if not args.ignore:
                         print(e)
@@ -204,6 +204,14 @@ def main():
                 else:
                     print("container readme takes either 1 or 2 parameters.")
                     sys.exit(EXIT_UNKNOWN_ERROR)
+            elif args.operation == "delete":
+                (name,) = args.rest
+                try:
+                    resp = containers.delete_container(client, name)
+                except ValueError as e:
+                    if not args.ignore:
+                        print(e)
+                        sys.exit(EXIT_NOT_FOUND)
             else:
                 print_unknown_error(args)
 
