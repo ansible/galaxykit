@@ -22,6 +22,7 @@ def get_or_create_user(
     # check if the user already exists
     user_url = f"_ui/v1/users?username={username}"
     user_resp = client.get(user_url)
+
     if user_resp["meta"]["count"] == 0:
         return True, create_user(client, username, password, group, fname, lname, email)
 
@@ -29,7 +30,7 @@ def get_or_create_user(
 
 
 def create_user(
-    client, username, password, group, fname="", lname="", email="", superuser=False
+    client, username, password, group, *args, **kwargs,
 ):
     """
     Create a new user. All the arguments aside from
@@ -42,6 +43,10 @@ def create_user(
         "pulp_href": f"/pulp/api/v3/groups/{group_id}",
     }
     """
+
+    #define optional arguments
+
+    
     if group is None:
         group = []
     else:
@@ -50,6 +55,11 @@ def create_user(
         assert "name" in group
         assert "pulp_href" in group
         group = [group]
+
+    fname = kwargs.get('first_name', None)
+    lname = kwargs.get('last_name', None)
+    email = kwargs.get('email', None)
+    superuser = kwargs.get('superuser', False)
 
     create_body = {
         "username": username,
