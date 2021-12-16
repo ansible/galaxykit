@@ -1,4 +1,5 @@
 from . import groups
+from pprint import pprint
 
 
 def create_namespace(client, name, group):
@@ -83,6 +84,14 @@ def get_namespace_id(client, name):
         return resp["data"][0]["id"]
     else:
         raise ValueError(f"No namespace '{name}' found.")
+
+def delete_namespace(client, namespace):
+    """
+    Delete namespace
+    """
+    delete_url = f"/api/automation-hub/_ui/v1/namespaces/{namespace}"
+    res = client.delete(delete_url, parse_json=False)
+    return res
 
 
     

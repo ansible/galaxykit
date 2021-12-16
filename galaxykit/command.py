@@ -167,8 +167,16 @@ def main():
                     (name,) = args.rest
                     group = None
                 resp = namespaces.create_namespace(client, name, group)
+
             elif args.operation == "delete":
-                raise NotImplementedError
+                (namespace,) = args.rest
+                try:
+                    resp = namespaces.delete_namespace(client, namespace)
+                except ValueError as e:
+                    if not args.ignore:
+                        print(e)
+                        sys.exit(EXIT_NOT_FOUND)
+
             elif args.operation == "groups":
                 raise NotImplementedError
             elif args.operation == "addgroup":
