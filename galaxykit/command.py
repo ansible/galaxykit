@@ -244,7 +244,11 @@ def main():
                         client, namespace, collection_name, version, source, destination
                     )
             elif args.operation == "delete":
-                namespace, collection, version = args.rest
+                if len(args.rest) == 3:
+                    namespace, collection, version = args.rest
+                if len(args.rest) == 2:
+                    namespace, collection = args.rest
+                    version = None    
                 try:
                     resp = collections.delete_collection(client, namespace, collection, version)
                 except ValueError as e:

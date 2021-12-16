@@ -172,7 +172,12 @@ def delete_collection(client, namespace, collection, version):
     """
     Delete collection version
     """
-    delete_url = f"content/published/v3/collections/{namespace}/{collection}/versions/{version}"
-    return client.delete(delete_url, parse_json=False)
     
+    if version == None:
+        delete_url = f"/api/automation-hub/content/published/v3/collections/{namespace}/{collection}/"
+    else:
+        delete_url = f"content/published/v3/collections/{namespace}/{collection}/versions/{version}"
+
+    return client.delete(delete_url, parse_json=False)
+ 
     
