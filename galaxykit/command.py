@@ -227,8 +227,17 @@ def main():
                     collections.move_collection(
                         client, namespace, collection_name, version, source, destination
                     )
+            elif args.operation == "delete":
+                namespace, collection, version = args.rest
+                try:
+                    resp = collections.delete_collection(client, namespace, collection, version)
+                except ValueError as e:
+                    if not args.ignore:
+                        print(e)
+                        sys.exit(EXIT_NOT_FOUND)
             else:
                 print_unknown_error(args)
+            
 
         elif args.kind == "url":
             if args.operation == "get":

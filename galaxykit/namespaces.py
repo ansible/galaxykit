@@ -83,3 +83,6 @@ def get_namespace_id(client, name):
         return resp["data"][0]["id"]
     else:
         raise ValueError(f"No namespace '{name}' found.")
+
+
+    
