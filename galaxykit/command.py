@@ -8,6 +8,7 @@ from . import collections
 from . import groups
 from . import namespaces
 from . import users
+from . import container_images
 
 EXIT_OK = 0
 EXIT_UNKNOWN_ERROR = 1
@@ -214,6 +215,18 @@ def main():
                         sys.exit(EXIT_NOT_FOUND)
             else:
                 print_unknown_error(args)
+
+        elif args.kind == "container-image":
+            if args.operation == "delete":
+                container, image  = args.rest
+                try:
+                    resp = container_images.delete_container(client, container, image)
+                except ValueError as e:
+                    if not args.ignore:
+                        print(e)
+                        sys.exit(EXIT_NOT_FOUND)
+            else:
+                print_unknown_error(args) 
 
         elif args.kind == "collection":
             if args.operation == "upload":
