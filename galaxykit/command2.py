@@ -39,25 +39,6 @@ def report_error(resp):
                 f"API Failure: HTTP {error['status']} {error['code']}; {error['title']} ({error['detail']})"
             )
 
-def user():
-    
-    return None
-
-def namespace():
-    return None
-
-def collection():
-    return None
-
-def group():
-    return None
-
-def remote_registry():
-    return None
-
-def execution_environment():
-    return None
-
 
 def main():
     parser = argparse.ArgumentParser()
