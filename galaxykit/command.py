@@ -44,6 +44,12 @@ def parse_user(subparsers):
     user_create_parser.add_argument(
         "--last-name", type=str, help="last name of the user to be created."
     )
+    user_create_parser.add_argument(
+        "--is-superuser", help="make a superuser.", action='store_true', default=False,
+    )
+    user_create_parser.add_argument(
+        "--groups", type=str, help="add user to a group."
+    )
     user_create_parser.set_defaults(function="create")
 
     # 'user delete' subcommand
