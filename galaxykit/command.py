@@ -54,7 +54,7 @@ def parse_user(subparsers):
     user_delete_parser.set_defaults(function="delete")
 
 
-def test(commant_to_test):
+def test(command_to_test):
     parser = argparse.ArgumentParser(prog="galaxykit")
     subparsers = parser.add_subparsers()
 
