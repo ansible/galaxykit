@@ -1,6 +1,7 @@
 import argparse
 import sys
 import json
+from typing import Collection
 
 
 def parse_collections(subparsers):
@@ -37,11 +38,49 @@ def parse_namespaces(subparsers):
     namespace_parser = subparsers.add_parser("namespace", help="namespace help")
     namespace_subparser = namespace_parser.add_subparsers()
 
-    # 'namespace list' subcommand
-    namespace_create_parser = namespace_subparser.add_parser("get")
-    namespace_create_parser.add_argument(
-        "namespace", type=str, help="Namespace to be listed."
+    # 'namespace get' subcommand
+    namespace_get_parser = namespace_subparser.add_parser("get", help="Get namespace metadata.")
+    namespace_get_parser.set_defaults(function="get-namespace")
+    namespace_get_parser.add_argument(
+        "namespace", type=str,
     )
+
+    #list Collections subcommand
+    namespace_list_parser = namespace_subparser.add_parser("list-collections", help="Get namespace collections.")
+    namespace_list_parser.set_defaults(function-"get-namespace-collections")
+    namespace_list_parser.add_argument(
+    "namespace", type=str,
+    )
+
+    #create a namespace subcommand
+    namespace_create_parser = namespace_subparser.add_parser("create", help="Create a namespace")
+    namespace_create_parser.set_defaults(function="create-namespace")
+    namespace_create_parser.add_argument(
+    "namespace", type=str,
+    )
+
+    #add group to a namespace subcommand
+    namespace_add_group_parser = namespace_subparser.add_parser("add-group")
+    namespace_add_group_parser.set_defaults(function="namespace-add-group")
+    namespace_add_group_parser.add_argument(
+    "namespace", type=str, help="Namespace name."
+    )
+    namespace_add_group_parser.add_argument(
+    "group", type=str, help="Namespace group."
+    )
+
+    #remove group from a namespace subcommand
+    namespace_remove_group_parser = namespace_subparser.add_parser("remove-group")
+    namespace_remove_group_parser.set_defaults(function="namespace-remove-group")
+    namespace_remove_group_parser.add_argument(
+    "namespace", type=str, help="Namespace name."
+    )
+
+    namespace_add_group_parser.add_argument(
+    "group", type=str, help="Namespace group."
+    )
+
+
 
 
 def parse_user(subparsers):
@@ -49,8 +88,8 @@ def parse_user(subparsers):
     user_subparser = user_parser.add_subparsers()
 
     # 'user list' subcommand
-    user_create_parser = user_subparser.add_parser("list")
-    user_create_parser.set_defaults(function="list")
+    user_list_parser = user_subparser.add_parser("list")
+    user_list_parser.set_defaults(function="list")
 
     # 'user create' subcommand
     user_create_parser = user_subparser.add_parser("create")
@@ -75,14 +114,14 @@ def parse_user(subparsers):
     user_create_parser.add_argument(
         "--groups", type=str, help="add user to a group."
     )
-    user_create_parser.set_defaults(function="create")
+    user_create_parser.set_defaults(function="user create")
 
     # 'user delete' subcommand
     user_delete_parser = user_subparser.add_parser("delete")
     user_delete_parser.add_argument(
         "user_to_delete", type=str, help="username of the user to be deleted."
     )
-    user_delete_parser.set_defaults(function="delete")
+    user_delete_parser.set_defaults(function="user delete")
 
 
 def test(command_to_test):
