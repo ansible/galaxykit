@@ -16,7 +16,32 @@ def parse_groups(subparsers):
 
 
 def parse_namespaces(subparsers):
-    return None
+    """
+    # these three only take 1 positional argument, which is the name of the namespace
+    "get":
+    "list-collections":
+    "create":
+
+    # these take 2 positional arguments, name and group
+    "addgroup":
+    "removegroup":
+
+    # all the below just raise NotImplementedError
+    # TODO: implement these down the line
+    "delete":
+    "groups":
+    "addgroupperm":
+    "removegroupperm":
+    """
+
+    namespace_parser = subparsers.add_parser("namespace", help="namespace help")
+    namespace_subparser = namespace_parser.add_subparsers()
+
+    # 'namespace list' subcommand
+    namespace_create_parser = namespace_subparser.add_parser("get")
+    namespace_create_parser.add_argument(
+        "namespace", type=str, help="Namespace to be listed."
+    )
 
 
 def parse_user(subparsers):
@@ -55,7 +80,7 @@ def parse_user(subparsers):
     # 'user delete' subcommand
     user_delete_parser = user_subparser.add_parser("delete")
     user_delete_parser.add_argument(
-        "selected_user", type=str, help="username of the user to be deleted."
+        "user_to_delete", type=str, help="username of the user to be deleted."
     )
     user_delete_parser.set_defaults(function="delete")
 
@@ -93,7 +118,7 @@ def test(command_to_test):
     print(args)
 
 
-command_to_test = "user create jdoe passwd --email 'jdoe@redhat.com' --first-name John --last-name Doe".split(
+command_to_test = "user create newusername newpasswd --email '$jdoe@redhat.com' --last-name Doe".split(
     " "
 )
 test(command_to_test)
