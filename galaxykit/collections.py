@@ -174,7 +174,7 @@ def delete_collection(client, namespace, collection, version):
     """
     
     if version == None:
-        delete_url = f"/api/automation-hub/content/published/v3/collections/{namespace}/{collection}/"
+        delete_url = f"content/published/v3/collections/{namespace}/{collection}/"
     else:
         delete_url = f"content/published/v3/collections/{namespace}/{collection}/versions/{version}"
 

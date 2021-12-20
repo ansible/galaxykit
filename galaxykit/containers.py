@@ -21,7 +21,7 @@ def delete_container(client, name):
     """
     Delete container
     """
-    delete_url = f"/api/automation-hub/_ui/v1/execution-environments/repositories/{name}/"
+    delete_url = f"_ui/v1/execution-environments/repositories/{name}/"
     return client.delete(delete_url, parse_json=False)
     
 

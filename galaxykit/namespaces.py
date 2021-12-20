@@ -89,7 +89,7 @@ def delete_namespace(client, name):
     """
     Delete namespace
     """
-    delete_url = f"/api/automation-hub/_ui/v1/namespaces/{name}"
+    delete_url = f"_ui/v1/namespaces/{name}"
     return client.delete(delete_url, parse_json=False)
     
     
