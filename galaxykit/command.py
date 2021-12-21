@@ -5,15 +5,38 @@ from typing import Collection
 
 
 def parse_collections(subparsers):
-    return None
+    collection_parser = subparsers.add_parser("collection", help="collection help")
+    collection_subparser = collection_parser.add_subparsers()
 
+    #collection upload subcommand
+    #takes NO positional arguments
+    #optional arguments namespace and collection_name
+    collection_upload_parser = collection_subparser.add_parser("upload", help="upload a collection")
+    collection_upload_parser.set_defaults(function="upload-collection")
+
+    collection_upload_parser.add_argument("--namespace", type=str)
+    collection_upload_parser.add_argument("--collection-name", type-str)
+    collection_upload_parser.add_argument("--version", type=str, default='1.0.0')
+
+    #collection move subcommand
+    #takes 2 positional arguments, namespace and collection_name + optional args
+    collection_move_parser = collection_subparser.add_parser("move", help="move a collection.")
+    collection_move_parser.set_defaults(function="move-collection")
+    collection_move_parser.add_argument("namespace", type=str)
+    collection_move_parser.add_argument("collection-name", type=str)
+    collection_move_parser.add_argument("--version", type=str, default='1.0.0')
+    collection_move_parser.add_argument("--source", type=str, default='staging')
+    collection_move_parser.add_argument("--destination", type=str, default='publishing')
 
 def parse_containers(subparsers):
     return None
 
 
 def parse_groups(subparsers):
-    return None
+    groups_parser = subparsers.add_parser("group", help="group help")
+    groups_subparser = groups_parser.add_subparsers()
+
+
 
 
 def parse_namespaces(subparsers):
