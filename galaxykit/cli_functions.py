@@ -1,9 +1,9 @@
-from .client import GalaxyClient, GalaxyClientError
-from . import containers
-from . import collections
-from . import groups
-from . import namespaces
-from . import users
+from client import GalaxyClient, GalaxyClientError
+import containers
+import collections
+import groups
+import namespaces
+import users
 
 
 def format_list(data, identifier):
@@ -25,8 +25,17 @@ def get_client(args):
         args.server, (args.username, args.password), https_verify=https_verify
     )
 
-
+## users
 def list_users(args):
     client = get_client(args)
     resp = users.get_user_list(client)
     print(format_list(resp["data"], "username"))
+
+
+#containers
+
+##groups
+
+##collections
+
+##namespaces

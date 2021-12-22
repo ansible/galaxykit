@@ -2,7 +2,7 @@ import argparse
 import sys
 import json
 from typing import Collection
-from . import cli_functions
+import cli_functions
 
 
 def parse_collections(subparsers):
@@ -16,7 +16,7 @@ def parse_collections(subparsers):
     collection_upload_parser.set_defaults(function="upload-collection")
 
     collection_upload_parser.add_argument("--namespace", type=str)
-    collection_upload_parser.add_argument("--collection-name", type-str)
+    collection_upload_parser.add_argument("--collection-name", type=str)
     collection_upload_parser.add_argument("--version", type=str, default='1.0.0')
 
     #collection move subcommand
@@ -42,7 +42,7 @@ def parse_containers(subparsers):
     container_get_readme_parser.add_argument(
         "collection_name", help="name of container."
     )
-    container_get_readme_parser.get_defaults(function="container-get-readme")
+    container_get_readme_parser.set_defaults(function="container-get-readme")
 
     # parsing the set-readme subcommand
     container_set_readme_parser = container_subparser.add_parser(
@@ -59,7 +59,7 @@ def parse_containers(subparsers):
 
 
 def parse_groups(subparsers):
- 
+
     group_parser = subparsers.add_parser(
         "group", help="List, create, delete, edit permissions of groups."
     )
@@ -88,35 +88,25 @@ def parse_groups(subparsers):
     group_delete_parser.set_defaults(function="group-delete")
 
     # permissions subcommands
-    group_perm_parser = subparsers.add_parser("perm", help="Permission subcommand")
-    group_perm_subparser = group_parser.add_subparsers()
 
-    """
-        if subop == "list":
-        elif subop == "add":
-        elif subop == "remove":
-    """
+
     # group perm list
-    group_perm_list_parser = group_perm_subparser.add_parser(
-        "list", help="list the permissions of a given group."
-    )
+
+    group_perm_list_parser = subparsers.add_parser('perm-list')
+
     group_perm_list_parser.add_argument("group_name")
     group_perm_list_parser.set_defaults(function="group-perm-list")
 
     # group perm add
-    group_perm_add_parser = group_perm_subparser.add_parser(
-        "add", help="add the passed permission to the given group."
-    )
+    group_perm_add_parser = subparsers.add_parser('perm-add')
     group_perm_add_parser.add_argument("group_name")
     group_perm_add_parser.add_argument("permission_name")
     group_perm_add_parser.set_defaults(function="group-perm-add")
 
     # group perm remove
-    group_perm_remove_parser = group_perm_subparser.remove_parser(
-        "remove", help="remove the passed permission from the given group."
-    )
-    group_perm_remove_parser.remove_argument("group_name")
-    group_perm_remove_parser.remove_argument("permission_name")
+    group_perm_remove_parser = subparsers.add_parser('perm-remove')
+    group_perm_remove_parser.add_argument("group_name")
+    group_perm_remove_parser.add_argument("permission_name")
     group_perm_remove_parser.set_defaults(function="group-perm-remove")
 
 

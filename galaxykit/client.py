@@ -8,10 +8,10 @@ from simplejson import dumps
 
 import requests
 
-from . import containers
-from . import containerutils
-from . import groups
-from . import users
+import containers
+import containerutils
+import groups
+import users
 
 
 class GalaxyClientError(Exception):

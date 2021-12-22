@@ -1,4 +1,4 @@
-from . import groups
+import groups
 
 
 def create_namespace(client, name, group):
