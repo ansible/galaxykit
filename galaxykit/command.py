@@ -9,25 +9,30 @@ def parse_collections(subparsers):
     collection_parser = subparsers.add_parser("collection", help="collection help")
     collection_subparser = collection_parser.add_subparsers()
 
-    #collection upload subcommand
-    #takes NO positional arguments
-    #optional arguments namespace and collection_name
-    collection_upload_parser = collection_subparser.add_parser("upload", help="upload a collection")
+    # collection upload subcommand
+    # takes NO positional arguments
+    # optional arguments namespace and collection_name
+    collection_upload_parser = collection_subparser.add_parser(
+        "upload", help="upload a collection"
+    )
     collection_upload_parser.set_defaults(function="upload-collection")
 
     collection_upload_parser.add_argument("--namespace", type=str)
     collection_upload_parser.add_argument("--collection-name", type=str)
-    collection_upload_parser.add_argument("--version", type=str, default='1.0.0')
+    collection_upload_parser.add_argument("--version", type=str, default="1.0.0")
 
-    #collection move subcommand
-    #takes 2 positional arguments, namespace and collection_name + optional args
-    collection_move_parser = collection_subparser.add_parser("move", help="move a collection.")
+    # collection move subcommand
+    # takes 2 positional arguments, namespace and collection_name + optional args
+    collection_move_parser = collection_subparser.add_parser(
+        "move", help="move a collection."
+    )
     collection_move_parser.set_defaults(function="move-collection")
     collection_move_parser.add_argument("namespace", type=str)
     collection_move_parser.add_argument("collection-name", type=str)
-    collection_move_parser.add_argument("--version", type=str, default='1.0.0')
-    collection_move_parser.add_argument("--source", type=str, default='staging')
-    collection_move_parser.add_argument("--destination", type=str, default='publishing')
+    collection_move_parser.add_argument("--version", type=str, default="1.0.0")
+    collection_move_parser.add_argument("--source", type=str, default="staging")
+    collection_move_parser.add_argument("--destination", type=str, default="publishing")
+
 
 def parse_containers(subparsers):
     container_parser = subparsers.add_parser(
@@ -89,22 +94,21 @@ def parse_groups(subparsers):
 
     # permissions subcommands
 
-
     # group perm list
 
-    group_perm_list_parser = subparsers.add_parser('perm-list')
+    group_perm_list_parser = subparsers.add_parser("perm-list")
 
     group_perm_list_parser.add_argument("group_name")
     group_perm_list_parser.set_defaults(function="group-perm-list")
 
     # group perm add
-    group_perm_add_parser = subparsers.add_parser('perm-add')
+    group_perm_add_parser = subparsers.add_parser("perm-add")
     group_perm_add_parser.add_argument("group_name")
     group_perm_add_parser.add_argument("permission_name")
     group_perm_add_parser.set_defaults(function="group-perm-add")
 
     # group perm remove
-    group_perm_remove_parser = subparsers.add_parser('perm-remove')
+    group_perm_remove_parser = subparsers.add_parser("perm-remove")
     group_perm_remove_parser.add_argument("group_name")
     group_perm_remove_parser.add_argument("permission_name")
     group_perm_remove_parser.set_defaults(function="group-perm-remove")
@@ -176,7 +180,7 @@ def parse_user(subparsers):
 
     # 'user list' subcommand
     user_list_parser = user_subparser.add_parser("list")
-    user_list_parser.set_defaults(function=cli_functions.list_users)
+    user_list_parser.set_defaults(function=cli_functions.user_list)
 
     # 'user create' subcommand
     user_create_parser = user_subparser.add_parser("create")
@@ -187,13 +191,16 @@ def parse_user(subparsers):
         "new_password", type=str, help="password of the user to be created."
     )
     user_create_parser.add_argument(
-        "--email", type=str, help="email of the user to be created."
+        "--email", type=str, help="email of the user to be created.", default=""
     )
     user_create_parser.add_argument(
-        "--first-name", type=str, help="first name of the user to be created."
+        "--first-name",
+        type=str,
+        help="first name of the user to be created.",
+        default="",
     )
     user_create_parser.add_argument(
-        "--last-name", type=str, help="last name of the user to be created."
+        "--last-name", type=str, help="last name of the user to be created.", default=""
     )
     user_create_parser.add_argument(
         "--is-superuser",
@@ -201,15 +208,15 @@ def parse_user(subparsers):
         action="store_true",
         default=False,
     )
-    user_create_parser.add_argument("--groups", type=str, help="add user to a group.")
-    user_create_parser.set_defaults(function="user create")
+    user_create_parser.add_argument("--group", type=str, help="add user to a group.")
+    user_create_parser.set_defaults(function=cli_functions.user_create)
 
     # 'user delete' subcommand
     user_delete_parser = user_subparser.add_parser("delete")
     user_delete_parser.add_argument(
         "user_to_delete", type=str, help="username of the user to be deleted."
     )
-    user_delete_parser.set_defaults(function="user delete")
+    user_delete_parser.set_defaults(function=cli_functions.user_delete)
 
 
 def test(command_to_test):
@@ -241,10 +248,9 @@ def test(command_to_test):
     parse_namespaces(subparsers)
     parse_user(subparsers)
 
+    command_to_test = command_to_test.split(" ")
     args = parser.parse_args(command_to_test)
-    breakpoint()
     args.function(args)
 
 
-command_to_test = "user list".split(" ")
-test(command_to_test)
+breakpoint()

@@ -23,7 +23,9 @@ def get_or_create_user(
     user_url = f"_ui/v1/users?username={username}"
     user_resp = client.get(user_url)
     if user_resp["meta"]["count"] == 0:
-        return True, create_user(client, username, password, group, fname, lname, email)
+        return True, create_user(
+            client, username, password, group, fname, lname, email, superuser
+        )
 
     return False, user_resp["data"][0]
 
@@ -90,11 +92,14 @@ def get_user_id(client, username):
 
 def get_user(client, username):
     """
-    Returns the id for a given username
+    Returns user data for a given username
     """
     user_url = f"_ui/v1/users/?username={username}"
     user_resp = client.get(user_url)
-    return user_resp["data"][0]
+    if user_resp["data"] is not []:
+        return user_resp["data"][0]
+    else:
+        return None
 
 
 def get_user_list(client):
