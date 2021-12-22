@@ -13,6 +13,8 @@ from . import containerutils
 from . import groups
 from . import users
 
+from pprint import pprint
+
 
 class GalaxyClientError(Exception):
     pass
@@ -98,6 +100,10 @@ class GalaxyClient:
         if parse_json:
             try:
                 json = resp.json()
+                # TODO - add command parameter to turn this off/on
+                print('http response:')
+                pprint(vars(resp))
+
             except JSONDecodeError as exc:
                 print(resp.text)
                 raise ValueError("Failed to parse JSON response from API") from exc
