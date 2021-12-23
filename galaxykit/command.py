@@ -8,6 +8,8 @@ from . import collections
 from . import groups
 from . import namespaces
 from . import users
+from . import container_images
+from . import registries
 
 EXIT_OK = 0
 EXIT_UNKNOWN_ERROR = 1
@@ -167,8 +169,16 @@ def main():
                     (name,) = args.rest
                     group = None
                 resp = namespaces.create_namespace(client, name, group)
+
             elif args.operation == "delete":
-                raise NotImplementedError
+                (name,) = args.rest
+                try:
+                    resp = namespaces.delete_namespace(client, name)
+                except ValueError as e:
+                    if not args.ignore:
+                        print(e)
+                        sys.exit(EXIT_NOT_FOUND)
+
             elif args.operation == "groups":
                 raise NotImplementedError
             elif args.operation == "addgroup":
@@ -196,8 +206,40 @@ def main():
                 else:
                     print("container readme takes either 1 or 2 parameters.")
                     sys.exit(EXIT_UNKNOWN_ERROR)
+            elif args.operation == "delete":
+                (name,) = args.rest
+                try:
+                    resp = containers.delete_container(client, name)
+                except ValueError as e:
+                    if not args.ignore:
+                        print(e)
+                        sys.exit(EXIT_NOT_FOUND)
             else:
                 print_unknown_error(args)
+
+        elif args.kind == "container-image":
+            if args.operation == "delete":
+                container, image  = args.rest
+                try:
+                    resp = container_images.delete_container(client, container, image)
+                except ValueError as e:
+                    if not args.ignore:
+                        print(e)
+                        sys.exit(EXIT_NOT_FOUND)
+            else:
+                print_unknown_error(args) 
+
+        elif args.kind == "registry":
+            if args.operation == "delete":
+                (name,) = args.rest
+                try:
+                    resp = registries.delete_registry(client, name)
+                except ValueError as e:
+                    if not args.ignore:
+                        print(e)
+                        sys.exit(EXIT_NOT_FOUND)
+            else:
+                print_unknown_error(args) 
 
         elif args.kind == "collection":
             if args.operation == "upload":
@@ -227,8 +269,21 @@ def main():
                     collections.move_collection(
                         client, namespace, collection_name, version, source, destination
                     )
+            elif args.operation == "delete":
+                if len(args.rest) == 3:
+                    namespace, collection, version = args.rest
+                if len(args.rest) == 2:
+                    namespace, collection = args.rest
+                    version = None    
+                try:
+                    resp = collections.delete_collection(client, namespace, collection, version)
+                except ValueError as e:
+                    if not args.ignore:
+                        print(e)
+                        sys.exit(EXIT_NOT_FOUND)
             else:
                 print_unknown_error(args)
+            
 
         elif args.kind == "url":
             if args.operation == "get":

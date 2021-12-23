@@ -7,6 +7,7 @@ import os
 import json
 from time import sleep
 from urllib.parse import urljoin
+from pprint import pprint
 
 from orionutils.generator import build_collection
 from .client import GalaxyClientError
@@ -166,3 +167,17 @@ def move_collection(
             if timeout < 0:
                 raise
     return True
+
+def delete_collection(client, namespace, collection, version):
+    """
+    Delete collection version
+    """
+    
+    if version == None:
+        delete_url = f"content/published/v3/collections/{namespace}/{collection}/"
+    else:
+        delete_url = f"content/published/v3/collections/{namespace}/{collection}/versions/{version}"
+
+    return client.delete(delete_url, parse_json=False)
+ 
+    
