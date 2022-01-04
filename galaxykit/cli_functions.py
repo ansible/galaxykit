@@ -37,7 +37,7 @@ def user_list(args):
 def user_create(args):
     client = get_client(args)
     if args.group:
-        args.group = users.get_group(client, args.group)
+        args.group = groups.get_group(client, args.group)
     created, resp = users.get_or_create_user(
         client,
         args.new_user,
