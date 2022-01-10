@@ -1,4 +1,4 @@
-## Version 0.6.1
+## Version 0.7.0
 * Add CLI command and function for listing namespaces.
 * Support for deletion of Collections (both versions and whole), Namespaces, Containers, Container Images, Execution Enviroments Registry.
 ## Version 0.6.0
