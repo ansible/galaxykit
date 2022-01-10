@@ -91,7 +91,13 @@ def delete_namespace(client, name):
     """
     delete_url = f"_ui/v1/namespaces/{name}"
     return client.delete(delete_url, parse_json=False)
-    
+
+def get_namespace_list(client):
+    """
+    Returns list of namespaces
+    """
+    return client.get("_ui/v1/namespaces")
+
     
 
 

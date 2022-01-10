@@ -159,6 +159,8 @@ def main():
             if args.operation == "get":
                 (name,) = args.rest
                 print(json.dumps(namespaces.get_namespace(client, name)))
+            elif args.operation == "list":
+                print(json.dumps(namespaces.get_namespace_list(client)))
             elif args.operation == "list-collections":
                 (name,) = args.rest
                 print(json.dumps(namespaces.get_namespace_collections(client, name)))
