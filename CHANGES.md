@@ -1,7 +1,6 @@
-
-
- * Support for deletion of Collections (both versions and whole), Namespaces, Containers, Container Images, Execution Enviroments Registry.
-
+## Version 0.7.0
+* Add CLI command and function for listing namespaces.
+* Support for deletion of Collections (both versions and whole), Namespaces, Containers, Container Images, Execution Enviroments Registry.
 ## Version 0.6.0
 * Add collection move function - accessible via `galaxykit collection move <namespace> <name>` which assumes collection version = 1.0.0 and the source repo = staging and the destination repo = published. Alternatively those arguments can be supplied, in that order (e.g. `galaxykit collection move admin collection_dep_a_asdfasdf 1.2.0 rejected published`.
 * Addition of `--ignore-certs` (short version is `-c`) to enable running against insecure instances of galaxy.
