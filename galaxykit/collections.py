@@ -206,3 +206,40 @@ def collection_sign(
         "version": version,
     }
     return client.post(url, body)
+
+
+def delete_collection_in_repository(client, namespace, collection, repository, version):
+    """
+    Delete collection version in repository
+    """
+    if version == None:
+        delete_url = f"content/{repository}/v3/collections/{namespace}/{collection}/"
+    else:
+        delete_url = f"content/{repository}/v3/collections/{namespace}/{collection}/versions/{version}"
+
+    res = client.delete(delete_url, parse_json=False)
+    pprint(vars(res))
+    return res
+
+
+def delete_all_collections(client):
+    """
+    Delete all collections in system
+    """
+    res = client.get('_ui/v1/collection-versions/?offset=0&limit=10000000')
+    data = res['data']
+    print(len(data))
+
+    for item in data:
+        collection = item['name']
+        namespace = item['namespace']
+        version = item['version']
+        repositories = item['repository_list']
+        print(item['name'])
+        print(item)
+        #print(item)
+
+        #for repository in repositories:
+            #delete_collection_in_repository(client, namespace, collection, repository, version)
+
+    return []
