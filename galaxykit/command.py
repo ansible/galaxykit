@@ -393,6 +393,7 @@ def main():
                     if not args.ignore:
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
+
             elif args.operation == "delete-all": 
                 try:
                     resp = collections.delete_all_collections(client)
@@ -402,7 +403,6 @@ def main():
                         sys.exit(EXIT_NOT_FOUND)
             else:
                 print_unknown_error(args)
-
         elif args.kind == "url":
             if args.operation == "get":
                 (url,) = args.rest

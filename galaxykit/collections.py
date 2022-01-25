@@ -12,6 +12,7 @@ from pprint import pprint
 from orionutils.generator import build_collection
 from .client import GalaxyClientError
 
+from . import namespaces
 
 def collection_info(client, repository, namespace, collection_name, version):
     url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection_name}/versions/{version}/"
@@ -180,7 +181,6 @@ def delete_collection(client, namespace, collection, version):
     """
     Delete collection version
     """
-
     if version == None:
         delete_url = f"v3/plugin/ansible/content/published/collections/index/{namespace}/{collection}/"
     else:
@@ -217,29 +217,24 @@ def delete_collection_in_repository(client, namespace, collection, repository, v
     else:
         delete_url = f"content/{repository}/v3/collections/{namespace}/{collection}/versions/{version}"
 
-    res = client.delete(delete_url, parse_json=False)
-    pprint(vars(res))
-    return res
+    return client.delete(delete_url, parse_json=False)
 
 
 def delete_all_collections(client):
     """
-    Delete all collections in system
+    Delete all collections in approval dashboard including rejected and not approved collections.
     """
+
     res = client.get('_ui/v1/collection-versions/?offset=0&limit=10000000')
     data = res['data']
     print(len(data))
-
+    
     for item in data:
         collection = item['name']
         namespace = item['namespace']
         version = item['version']
         repositories = item['repository_list']
-        print(item['name'])
-        print(item)
-        #print(item)
-
-        #for repository in repositories:
-            #delete_collection_in_repository(client, namespace, collection, repository, version)
-
+        for repository in repositories:
+            res = delete_collection_in_repository(client, namespace, collection, repository, version)
     return []
+
