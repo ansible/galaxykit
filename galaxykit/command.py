@@ -55,6 +55,8 @@ def main():
     parser.add_argument("-i", "--ignore", default=False, action="store_true")
     parser.add_argument("-u", "--username", type=str, action="store")
     parser.add_argument("-p", "--password", type=str, action="store")
+    parser.add_argument("-t", "--token", type=str, action="store")
+    parser.add_argument("-a", "--auth-url", type=str, action="store")
     parser.add_argument(
         "-c",
         "--ignore-certs",
@@ -71,11 +73,23 @@ def main():
     )
 
     args = parser.parse_args()
-    ignore = args.ignore
     https_verify = not args.ignore_certs
+
+    if args.token:
+        creds = {
+            "token": args.token,
+        }
+        if args.auth_url:
+            creds["auth_url"] = args.auth_url
+    else:
+        creds = {
+            "username": args.username,
+            "password": args.password,
+        }
     client = GalaxyClient(
-        args.server, (args.username, args.password), https_verify=https_verify
+        args.server, creds, https_verify=https_verify
     )
+
     resp = None
 
     try:
@@ -193,6 +207,8 @@ def main():
                 raise NotImplementedError
             elif args.operation == "removegroupperm":
                 raise NotImplementedError
+            elif args.operation == "sign":
+                raise NotImplementedError
             else:
                 print_unknown_error(args)
 
@@ -283,6 +299,30 @@ def main():
                     if not args.ignore:
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
+            elif args.operation == "download":
+                raise NotImplementedError
+            elif args.operation == "info":
+                if len(args.rest) == 3:
+                    (namespace, collection_name, version) = args.rest
+                    repository = "published"
+                elif len(args.rest) == 4:
+                    (repository, namespace, collection_name, version) = args.rest
+                else:
+                    print("galaxykit collection info [repository] <namespace> <collection> <version>")
+                    print(args.rest)
+                    sys.exit(EXIT_UNKNOWN_ERROR)
+                print(json.dumps(collections.collection_info(client, repository, namespace, collection_name, version)))
+            elif args.operation == "sign":
+                if len(args.rest) == 3:
+                    (namespace, collection_name, version) = args.rest
+                    repository = "published"
+                elif len(args.rest) == 4:
+                    (repository, namespace, collection_name, version) = args.rest
+                else:
+                    print("galaxykit collection info [repository] <namespace> <collection> <version>")
+                    print(args.rest)
+                    sys.exit(EXIT_UNKNOWN_ERROR)
+                print(json.dumps(collections.collection_sign(client, repository, namespace, collection_name, version)))
             else:
                 print_unknown_error(args)
             
@@ -292,7 +332,9 @@ def main():
                 (url,) = args.rest
                 print(json.dumps(client.get(url)))
             elif args.operation == "post":
-                raise NotImplementedError
+                url = args.rest[0]
+                body = ""# sys.stdin.read()
+                print(json.dumps(client.post(url, body)))
             else:
                 print_unknown_error(args)
 

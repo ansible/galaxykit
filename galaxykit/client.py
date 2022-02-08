@@ -1,6 +1,7 @@
 """
 client.py contains the wrapping interface for all the other modules (aside from cli.py)
 """
+import platform
 import sys
 from urllib.parse import urlparse, urljoin
 from simplejson.errors import JSONDecodeError
@@ -12,10 +13,25 @@ from . import containers
 from . import containerutils
 from . import groups
 from . import users
+from . import __version__ as VERSION
 
 
 class GalaxyClientError(Exception):
     pass
+
+
+
+def user_agent():
+    """Returns a user agent used by ansible-galaxy to include the Ansible version, platform and python version."""
+
+    python_version = sys.version_info
+    return u"galaxy-kit/{version} ({platform}; python:{py_major}.{py_minor}.{py_micro})".format(
+        version=VERSION,
+        platform=platform.system(),
+        py_major=python_version.major,
+        py_minor=python_version.minor,
+        py_micro=python_version.micro,
+    )
 
 
 class GalaxyClient:
@@ -38,22 +54,46 @@ class GalaxyClient:
         container_engine=None,
         container_registry=None,
         container_tls_verify=True,
-        https_verify=True,
+        https_verify=False,
     ):
         self.galaxy_root = galaxy_root
         self.headers = {}
         self.token = None
         self.https_verify = https_verify
-
+        
         if auth:
             if isinstance(auth, dict):
-                self.username = auth["username"]
-                self.password = auth["password"]
+                self.username = auth.get("username")
+                self.password = auth.get("password")
                 self.token = auth.get("token")
+                self.auth_url = auth.get("auth_url")
             elif isinstance(auth, tuple):
                 self.username, self.password = auth
 
-            if self.token is None:
+            token_type = "Token"
+            if self.token and self.auth_url:
+                payload = 'grant_type=refresh_token&client_id=%s&refresh_token=%s' % ('cloud-services', self.token)
+                headers = {
+                    "User-Agent": user_agent(),
+                    "Content-Type": "application/x-www-form-urlencoded",
+                }
+                resp = requests.post(
+                    self.auth_url,
+                    data=payload,
+                    verify=self.https_verify,
+                    headers=headers,
+                )
+                # import pdb;pdb.set_trace()
+                print(">>>", self.auth_url)
+                print(resp.request.body)
+                print("---")
+                json = resp.json()
+                print(json)
+                print("<<<")
+                self.token = json["access_token"]
+                token_type = "Bearer"
+
+            elif self.token is None:
                 auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
                 resp = requests.post(
                     auth_url, auth=(self.username, self.password), verify=False
@@ -66,7 +106,7 @@ class GalaxyClient:
             self.headers.update(
                 {
                     "Accept": "application/json",
-                    "Authorization": f"Token {self.token}",
+                    "Authorization": f"{token_type} {self.token}",
                 }
             )
 
