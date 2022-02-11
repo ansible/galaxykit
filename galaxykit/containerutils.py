@@ -40,6 +40,12 @@ class ContainerClient:
         if auth:  # we only need to auth if creds are supplied
             self.login(*auth, fail_ok=True)
 
+    def add_tls_verify_arg(self, run_args):
+        if self.engine == "podman":
+            run_args.append(f"--tls-verify={self.tls_verify}")
+        if self.engine == "docker":
+            run_args.append(f"--tlsverify={self.tls_verify}")
+
     def login(self, username, password, fail_ok=False):
         run_args = [
             self.engine,
@@ -50,10 +56,9 @@ class ContainerClient:
             "--password",
             password,
         ]
-        if self.engine == "podman":
-            run_args.append(f"--tls-verify={self.tls_verify}")
+        self.add_tls_verify_arg(run_args)
         try:
-            run(run_args)
+            return run(run_args)
         except FileNotFoundError:
             if fail_ok:
                 logger.warn(f"Container engine '{self.engine}' not found.")
@@ -64,10 +69,13 @@ class ContainerClient:
         """
         pull an image from the configured default registry
         """
-        if self.engine == "podman" and not self.tls_verify:
-            run([self.engine, "pull", self.registry + image_name, "--tls-verify=False"])
-        else:
-            run([self.engine, "pull", self.registry + image_name])
+        run_args = [
+            self.engine,
+            "pull",
+            self.registry + image_name,
+        ]
+        self.add_tls_verify_arg(run_args)
+        return run(run_args)
 
     def tag_image(self, image_name, image_tag):
         """
@@ -82,7 +90,7 @@ class ContainerClient:
             image_name,
             full_tag,
         ]
-        run(run_args)
+        return run(run_args)
 
     def push_image(self, image_tag):
         """
@@ -91,8 +99,5 @@ class ContainerClient:
         sep = "" if self.registry.endswith("/") else "/"
         full_tag = f"{self.registry}{sep}{image_tag}"
         run_args = [self.engine, "push", full_tag]
-
-        if self.engine == "podman":
-            run_args.append(f"--tls-verify={self.tls_verify}")
-
-        run(run_args)
+        self.add_tls_verify_arg(run_args)
+        return run(run_args)
