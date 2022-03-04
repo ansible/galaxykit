@@ -1,6 +1,7 @@
 import argparse
 import sys
 import json
+from pprint import pprint
 
 from .client import GalaxyClient, GalaxyClientError
 from . import containers
@@ -102,6 +103,7 @@ def main():
                         sys.exit(EXIT_NOT_FOUND)
             elif args.operation == "group":
                 subop, *subopargs = args.rest
+
                 if subop == "add":
                     username, groupname = subopargs
                     user_data = users.get_user(client, username)
@@ -113,6 +115,22 @@ def main():
                             "pulp_href": f"/pulp/api/v3/groups/{group_id}",
                         }
                     )
+                    resp = users.update_user(client, user_data)
+
+                if subop == "remove":
+                    username, groupname = subopargs
+                    user_data = users.get_user(client, username)
+                    group_id = groups.get_group_id(client, groupname)
+                    old_groups = user_data["groups"]
+                    new_groups = []
+
+                    for group in old_groups:
+                        if group['id'] != group_id:
+                            new_groups.append(group)
+                    
+                    user_data["groups"] = new_groups
+
+                    pprint(user_data)
                     resp = users.update_user(client, user_data)
             else:
                 print_unknown_error(args)
@@ -240,6 +258,16 @@ def main():
                     if not args.ignore:
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
+
+            elif args.operation == "create":
+                name, url, username, password = args.rest
+                try:
+                    resp = registries.create_registry(client, name, url, username, password)
+                except ValueError as e:
+                    if not args.ignore:
+                        print(e)
+                        sys.exit(EXIT_NOT_FOUND)
+
             else:
                 print_unknown_error(args)
 
