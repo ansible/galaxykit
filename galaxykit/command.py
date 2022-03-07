@@ -226,6 +226,7 @@ def main():
                 else:
                     print("container readme takes either 1 or 2 parameters.")
                     sys.exit(EXIT_UNKNOWN_ERROR)
+
             elif args.operation == "delete":
                 (name,) = args.rest
                 try:
@@ -234,6 +235,16 @@ def main():
                     if not args.ignore:
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
+
+            elif args.operation == "create":
+                name, upstream_name, registry = args.rest
+                try:
+                    resp = containers.create_container(client, name, upstream_name, registry)
+                except ValueError as e:
+                    if not args.ignore:
+                        print(e)
+                        sys.exit(EXIT_NOT_FOUND)
+
             else:
                 print_unknown_error(args)
 
@@ -258,7 +269,6 @@ def main():
                     if not args.ignore:
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
-
             elif args.operation == "create":
                 name, url, username, password = args.rest
                 try:
@@ -267,7 +277,6 @@ def main():
                     if not args.ignore:
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
-
             else:
                 print_unknown_error(args)
 

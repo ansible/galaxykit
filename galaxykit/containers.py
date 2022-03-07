@@ -1,4 +1,5 @@
 from pprint import pprint
+from . import registries
 
 
 def get_readme(client, container):
@@ -25,3 +26,22 @@ def delete_container(client, name):
     """
     delete_url = f"_ui/v1/execution-environments/repositories/{name}/"
     return client.delete(delete_url, parse_json=False)
+<<<<<<< HEAD
+=======
+
+def create_container(client, name, upstream_name, registry):
+    """
+    Create container
+    """
+    create_url = f"_ui/v1/execution-environments/remotes/"
+    registry_id = registries.get_registry_pk(client, registry)
+    data = {
+        'name'              : name,
+        'upstream_name'     : upstream_name,
+        'registry'          : registry_id
+    }
+    return client.post(create_url, data)
+    
+
+    
+>>>>>>> 2a77028 (Create EE container)
