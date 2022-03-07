@@ -121,15 +121,7 @@ def main():
                     username, groupname = subopargs
                     user_data = users.get_user(client, username)
                     group_id = groups.get_group_id(client, groupname)
-                    old_groups = user_data["groups"]
-                    new_groups = []
-
-                    for group in old_groups:
-                        if group['id'] != group_id:
-                            new_groups.append(group)
-                    
-                    user_data["groups"] = new_groups
-
+                    user_data["groups"] = list(filter(lambda group: group['id'] != group_id, user_data["groups"]))
                     pprint(user_data)
                     resp = users.update_user(client, user_data)
             else:
