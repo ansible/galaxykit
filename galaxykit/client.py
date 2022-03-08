@@ -83,13 +83,7 @@ class GalaxyClient:
                     verify=self.https_verify,
                     headers=headers,
                 )
-                # import pdb;pdb.set_trace()
-                print(">>>", self.auth_url)
-                print(resp.request.body)
-                print("---")
                 json = resp.json()
-                print(json)
-                print("<<<")
                 self.token = json["access_token"]
                 token_type = "Bearer"
 

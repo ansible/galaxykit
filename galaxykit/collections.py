@@ -14,8 +14,7 @@ from .client import GalaxyClientError
 
 
 def collection_info(client, repository, namespace, collection_name, version):
-    url = f"{client.galaxy_root}content/{repository}/v3/collections/{namespace}/{collection_name}/versions/{version}/"
-    # assert 0, url
+    url = f"content/{repository}/v3/collections/{namespace}/{collection_name}/versions/{version}/"
     return client.get(url)
 
 
@@ -189,7 +188,7 @@ def delete_collection(client, namespace, collection, version):
  
     
 def collection_sign(client, repository, namespace, collection, version, signing_service="ansible-default"):
-    url = f"{client.galaxy_root}content/{repository}/v3/sign/collections/"
+    url = f"content/{repository}/v3/sign/collections/"
     body = {
         "signing_service": signing_service,
         "repository": repository,

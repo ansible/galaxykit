@@ -333,7 +333,7 @@ def main():
                 print(json.dumps(client.get(url)))
             elif args.operation == "post":
                 url = args.rest[0]
-                body = ""# sys.stdin.read()
+                body = sys.stdin.read()
                 print(json.dumps(client.post(url, body)))
             else:
                 print_unknown_error(args)
