@@ -168,16 +168,15 @@ def move_collection(
                 raise
     return True
 
+
 def delete_collection(client, namespace, collection, version):
     """
     Delete collection version
     """
-    
+
     if version == None:
         delete_url = f"content/published/v3/collections/{namespace}/{collection}/"
     else:
         delete_url = f"content/published/v3/collections/{namespace}/{collection}/versions/{version}"
 
     return client.delete(delete_url, parse_json=False)
- 
-    
