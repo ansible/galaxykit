@@ -310,10 +310,18 @@ def main():
                 elif len(args.rest) == 4:
                     (repository, namespace, collection_name, version) = args.rest
                 else:
-                    print("galaxykit collection info [repository] <namespace> <collection> <version>")
+                    print(
+                        "galaxykit collection info [repository] <namespace> <collection> <version>"
+                    )
                     print(args.rest)
                     sys.exit(EXIT_UNKNOWN_ERROR)
-                print(json.dumps(collections.collection_info(client, repository, namespace, collection_name, version)))
+                print(
+                    json.dumps(
+                        collections.collection_info(
+                            client, repository, namespace, collection_name, version
+                        )
+                    )
+                )
             elif args.operation == "sign":
                 if len(args.rest) == 3:
                     (namespace, collection_name, version) = args.rest
@@ -321,10 +329,18 @@ def main():
                 elif len(args.rest) == 4:
                     (repository, namespace, collection_name, version) = args.rest
                 else:
-                    print("galaxykit collection info [repository] <namespace> <collection> <version>")
+                    print(
+                        "galaxykit collection info [repository] <namespace> <collection> <version>"
+                    )
                     print(args.rest)
                     sys.exit(EXIT_UNKNOWN_ERROR)
-                print(json.dumps(collections.collection_sign(client, repository, namespace, collection_name, version)))
+                print(
+                    json.dumps(
+                        collections.collection_sign(
+                            client, repository, namespace, collection_name, version
+                        )
+                    )
+                )
             else:
                 print_unknown_error(args)
 

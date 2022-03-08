@@ -186,8 +186,15 @@ def delete_collection(client, namespace, collection, version):
 
     return client.delete(delete_url, parse_json=False)
 
-    
-def collection_sign(client, repository, namespace, collection, version, signing_service="ansible-default"):
+
+def collection_sign(
+    client,
+    repository,
+    namespace,
+    collection,
+    version,
+    signing_service="ansible-default",
+):
     url = f"content/{repository}/v3/sign/collections/"
     body = {
         "signing_service": signing_service,

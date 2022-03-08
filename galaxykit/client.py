@@ -20,12 +20,11 @@ class GalaxyClientError(Exception):
     pass
 
 
-
 def user_agent():
     """Returns a user agent used by ansible-galaxy to include the Ansible version, platform and python version."""
 
     python_version = sys.version_info
-    return u"galaxy-kit/{version} ({platform}; python:{py_major}.{py_minor}.{py_micro})".format(
+    return "galaxy-kit/{version} ({platform}; python:{py_major}.{py_minor}.{py_micro})".format(
         version=VERSION,
         platform=platform.system(),
         py_major=python_version.major,
@@ -60,7 +59,6 @@ class GalaxyClient:
         self.headers = {}
         self.token = None
         self.https_verify = https_verify
-        
         if auth:
             if isinstance(auth, dict):
                 self.username = auth.get("username")
@@ -72,7 +70,10 @@ class GalaxyClient:
 
             token_type = "Token"
             if self.token and self.auth_url:
-                payload = 'grant_type=refresh_token&client_id=%s&refresh_token=%s' % ('cloud-services', self.token)
+                payload = "grant_type=refresh_token&client_id=%s&refresh_token=%s" % (
+                    "cloud-services",
+                    self.token,
+                )
                 headers = {
                     "User-Agent": user_agent(),
                     "Content-Type": "application/x-www-form-urlencoded",

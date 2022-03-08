@@ -11,7 +11,7 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 main_ns = {}
-ver_path = convert_path('galaxykit/_version.py')
+ver_path = convert_path("galaxykit/_version.py")
 with open(ver_path) as ver_file:
     exec(ver_file.read(), main_ns)
 VERSION = main_ns["__version__"]
