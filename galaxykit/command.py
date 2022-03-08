@@ -5,6 +5,16 @@ from typing import Collection
 import cli_functions
 
 
+def parse_url(subparsers):
+    url_parser = subparsers.add_parser(
+        "url", help="subcommand for directly requesting a given URL."
+    )
+    url_subparser = url_parser.add_subparsers()
+
+    # url get parser
+    #
+
+
 def parse_collections(subparsers):
     collection_parser = subparsers.add_parser("collection", help="collection help")
     collection_subparser = collection_parser.add_subparsers()
@@ -15,7 +25,7 @@ def parse_collections(subparsers):
     collection_upload_parser = collection_subparser.add_parser(
         "upload", help="upload a collection"
     )
-    collection_upload_parser.set_defaults(function="upload-collection")
+    collection_upload_parser.set_defaults(function="collection-upload")
 
     collection_upload_parser.add_argument("--namespace", type=str)
     collection_upload_parser.add_argument("--collection-name", type=str)
@@ -26,12 +36,23 @@ def parse_collections(subparsers):
     collection_move_parser = collection_subparser.add_parser(
         "move", help="move a collection."
     )
-    collection_move_parser.set_defaults(function="move-collection")
+    collection_move_parser.set_defaults(function="collection-move")
     collection_move_parser.add_argument("namespace", type=str)
     collection_move_parser.add_argument("collection-name", type=str)
     collection_move_parser.add_argument("--version", type=str, default="1.0.0")
     collection_move_parser.add_argument("--source", type=str, default="staging")
-    collection_move_parser.add_argument("--destination", type=str, default="publishing")
+    collection_move_parser.add_argument("--destination", type=str, default="published")
+
+    # collection delete subcommand
+    # takes 2 positional arguments, namespace and collection_name + optional args
+    collection_delete_parser = collection_subparser.add_parser(
+        "delete", help="delete a collection."
+    )
+    collection_delete_parser.set_defaults(function="collection-delete")
+    collection_delete_parser.add_argument("namespace", type=str)
+    collection_delete_parser.add_argument("collection-name", type=str)
+    collection_delete_parser.add_argument("--version", type=str, default="1.0.0")
+    collection_delete_parser.add_argument("--repository", type=str, default="published")
 
 
 def parse_containers(subparsers):
@@ -40,27 +61,56 @@ def parse_containers(subparsers):
     )
     container_subparser = container_parser.add_subparsers()
 
-    # parsing the get-readme subcommand
+    # get-readme subcommand
+    # takes 1 positional argument, which is the name of the container
     container_get_readme_parser = container_subparser.add_parser(
         "get-readme", help="Returns the readme for the given container."
     )
     container_get_readme_parser.add_argument(
-        "collection_name", help="name of container."
+        "container_name", help="name of container."
     )
     container_get_readme_parser.set_defaults(function="container-get-readme")
 
-    # parsing the set-readme subcommand
+    # set-readme subcommand
+    # takes 2 positional arguments, which are the name of the container and the new readme (a string)
     container_set_readme_parser = container_subparser.add_parser(
         "set-readme",
         help="Sets the readme for the given container to the passed string.",
     )
     container_set_readme_parser.add_argument(
-        "collection_name", help="Name of container."
+        "container_name", type=str, help="Name of container."
     )
     container_set_readme_parser.add_argument(
-        "new_readme", help="String that will be set as new readme."
+        "new_readme", type=str, help="String that will be set as new readme."
     )
     container_set_readme_parser.set_defaults(function="container-set-readme")
+
+    # delete subcommand
+    # takes just the name of the container as an argument
+    container_delete_parser = container_subparser.add_parser(
+        "delete",
+        help="Deletes a container",
+    )
+    container_delete_parser.add_argument(
+        "container_name", type=str, help="Name of the container to delete"
+    )
+    container_delete_parser.add_argument("image", type=str, help="Image tag to delete")
+    container_set_readme_parser.set_defaults(function="container-delete")
+
+
+def parse_container_registries(subparsers):
+    container_registry_parser = subparsers.add_parser(
+        "container_registry", help="subcommand for manipulating container registries"
+    )
+    container_registry_subparser = container_parser.add_subparsers()
+    container_registry_delete_parser = container_registry_subparser.add_parser(
+        "delete", help="Delete a given container registry."
+    )
+
+    container_registry_delete_parser.add_argument(
+        "registry_name", help="Name of the registry to delete."
+    )
+    container_registry_delete_parser.set_defaults(function="container-registry-delete")
 
 
 def parse_groups(subparsers):
@@ -130,7 +180,7 @@ def parse_namespaces(subparsers):
     namespace_get_parser = namespace_subparser.add_parser(
         "get", help="Get namespace metadata."
     )
-    namespace_get_parser.set_defaults(function="get-namespace")
+    namespace_get_parser.set_defaults(function="namespace-get")
     namespace_get_parser.add_argument(
         "namespace",
         type=str,
@@ -140,7 +190,7 @@ def parse_namespaces(subparsers):
     namespace_list_parser = namespace_subparser.add_parser(
         "list-collections", help="Get namespace collections."
     )
-    namespace_list_parser.set_defaults(function="get-namespace-collections")
+    namespace_list_parser.set_defaults(function="namespace-get-collections")
     namespace_list_parser.add_argument(
         "namespace",
         type=str,
@@ -150,7 +200,7 @@ def parse_namespaces(subparsers):
     namespace_create_parser = namespace_subparser.add_parser(
         "create", help="Create a namespace"
     )
-    namespace_create_parser.set_defaults(function="create-namespace")
+    namespace_create_parser.set_defaults(function="namespace-create")
     namespace_create_parser.add_argument(
         "namespace",
         type=str,
