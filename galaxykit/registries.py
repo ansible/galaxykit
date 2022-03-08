@@ -28,10 +28,10 @@ def create_registry(client, name, url, username, password):
     """
     post_url = f"_ui/v1/execution-environments/registries/"
     registry = {
-        'name'          : name,
-        'url'           : url,
-        'username'      : username,
-        'password'      : password
+        'name': name,
+        'url': url,
+        'username': username,
+        'password': password
     }   
     return client.post(post_url, registry)
     

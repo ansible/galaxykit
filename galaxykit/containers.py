@@ -36,9 +36,9 @@ def create_container(client, name, upstream_name, registry):
     create_url = f"_ui/v1/execution-environments/remotes/"
     registry_id = registries.get_registry_pk(client, registry)
     data = {
-        'name'              : name,
-        'upstream_name'     : upstream_name,
-        'registry'          : registry_id
+        'name': name,
+        'upstream_name': upstream_name,
+        'registry': registry_id
     }
     return client.post(create_url, data)
     

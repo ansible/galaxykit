@@ -122,7 +122,6 @@ def main():
                     user_data = users.get_user(client, username)
                     group_id = groups.get_group_id(client, groupname)
                     user_data["groups"] = list(filter(lambda group: group['id'] != group_id, user_data["groups"]))
-                    pprint(user_data)
                     resp = users.update_user(client, user_data)
             else:
                 print_unknown_error(args)
