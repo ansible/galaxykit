@@ -178,14 +178,14 @@ def delete_collection(client, namespace, collection, version):
     """
     Delete collection version
     """
-    
+
     if version == None:
         delete_url = f"content/published/v3/collections/{namespace}/{collection}/"
     else:
         delete_url = f"content/published/v3/collections/{namespace}/{collection}/versions/{version}"
 
     return client.delete(delete_url, parse_json=False)
- 
+
     
 def collection_sign(client, repository, namespace, collection, version, signing_service="ansible-default"):
     url = f"content/{repository}/v3/sign/collections/"
