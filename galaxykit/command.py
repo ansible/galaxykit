@@ -221,7 +221,7 @@ def main():
 
         elif args.kind == "container-image":
             if args.operation == "delete":
-                container, image  = args.rest
+                container, image = args.rest
                 try:
                     resp = container_images.delete_container(client, container, image)
                 except ValueError as e:
@@ -229,7 +229,7 @@ def main():
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
             else:
-                print_unknown_error(args) 
+                print_unknown_error(args)
 
         elif args.kind == "registry":
             if args.operation == "delete":
@@ -241,7 +241,7 @@ def main():
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
             else:
-                print_unknown_error(args) 
+                print_unknown_error(args)
 
         elif args.kind == "collection":
             if args.operation == "upload":
@@ -276,16 +276,17 @@ def main():
                     namespace, collection, version = args.rest
                 if len(args.rest) == 2:
                     namespace, collection = args.rest
-                    version = None    
+                    version = None
                 try:
-                    resp = collections.delete_collection(client, namespace, collection, version)
+                    resp = collections.delete_collection(
+                        client, namespace, collection, version
+                    )
                 except ValueError as e:
                     if not args.ignore:
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
             else:
                 print_unknown_error(args)
-            
 
         elif args.kind == "url":
             if args.operation == "get":
