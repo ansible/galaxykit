@@ -261,9 +261,9 @@ def main():
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
             elif args.operation == "create":
-                name, url, username, password = args.rest
+                name, url = args.rest
                 try:
-                    resp = registries.create_registry(client, name, url, username, password)
+                    resp = registries.create_registry(client, name, url)
                 except ValueError as e:
                     if not args.ignore:
                         print(e)

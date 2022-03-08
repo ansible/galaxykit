@@ -21,8 +21,7 @@ def delete_registry(client, name):
     delete_url = f"_ui/v1/execution-environments/registries/{pk}/"
     return client.delete(delete_url, parse_json=False)
 
-
-def create_registry(client, name, url, username, password):
+def create_registry(client, name, url):
     """
     Create registry
     """
@@ -30,8 +29,6 @@ def create_registry(client, name, url, username, password):
     registry = {
         'name': name,
         'url': url,
-        'username': username,
-        'password': password
     }   
     return client.post(post_url, registry)
     
