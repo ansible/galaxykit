@@ -38,7 +38,9 @@ def create_container(client, name, upstream_name, registry):
     data = {
         'name': name,
         'upstream_name': upstream_name,
-        'registry': registry_id
+        'registry': registry_id,
+        'exclude_tags': [],
+        'include_tags': []
     }
     return client.post(create_url, data)
     
