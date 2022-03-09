@@ -26,8 +26,7 @@ def delete_container(client, name):
     """
     delete_url = f"_ui/v1/execution-environments/repositories/{name}/"
     return client.delete(delete_url, parse_json=False)
-<<<<<<< HEAD
-=======
+
 
 def create_container(client, name, upstream_name, registry):
     """
@@ -36,14 +35,11 @@ def create_container(client, name, upstream_name, registry):
     create_url = f"_ui/v1/execution-environments/remotes/"
     registry_id = registries.get_registry_pk(client, registry)
     data = {
-        'name': name,
-        'upstream_name': upstream_name,
-        'registry': registry_id,
-        'exclude_tags': [],
-        'include_tags': []
+        "name": name,
+        "upstream_name": upstream_name,
+        "registry": registry_id,
+        "exclude_tags": [],
+        "include_tags": [],
     }
     return client.post(create_url, data)
-    
 
-    
->>>>>>> 2a77028 (Create EE container)

@@ -73,7 +73,6 @@ def delete_permission(client, group_name, permission):
     group_id = get_group(client, group_name)["id"]
     permissions_url = f"_ui/v1/groups/{group_id}/model-permissions/"
     resp = client.get(permissions_url)
-    pprint(resp)
     for perm in resp["data"]:
         if perm["permission"] == permission:
             perm_id = perm["id"]

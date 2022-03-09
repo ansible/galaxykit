@@ -69,6 +69,7 @@ def create_user(
 def update_user(client, user):
     return client.put(f"_ui/v1/users/{user['id']}/", user)
 
+
 def delete_user(client, user):
     user_id = get_user_id(client, user)
     delete_url = f"_ui/v1/users/{user_id}/"

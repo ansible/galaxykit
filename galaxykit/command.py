@@ -121,7 +121,11 @@ def main():
                     username, groupname = subopargs
                     user_data = users.get_user(client, username)
                     group_id = groups.get_group_id(client, groupname)
-                    user_data["groups"] = list(filter(lambda group: group['id'] != group_id, user_data["groups"]))
+                    user_data["groups"] = list(
+                        filter(
+                            lambda group: group["id"] != group_id, user_data["groups"]
+                        )
+                    )
                     resp = users.update_user(client, user_data)
             else:
                 print_unknown_error(args)
@@ -230,7 +234,9 @@ def main():
             elif args.operation == "create":
                 name, upstream_name, registry = args.rest
                 try:
-                    resp = containers.create_container(client, name, upstream_name, registry)
+                    resp = containers.create_container(
+                        client, name, upstream_name, registry
+                    )
                 except ValueError as e:
                     if not args.ignore:
                         print(e)
