@@ -13,6 +13,11 @@ from orionutils.generator import build_collection
 from .client import GalaxyClientError
 
 
+def collection_info(client, repository, namespace, collection_name, version):
+    url = f"content/{repository}/v3/collections/{namespace}/{collection_name}/versions/{version}/"
+    return client.get(url)
+
+
 def upload_test_collection(client, namespace=None, collection_name=None):
     """
     Uploads a test collection generated with orionutils
@@ -180,3 +185,22 @@ def delete_collection(client, namespace, collection, version):
         delete_url = f"content/published/v3/collections/{namespace}/{collection}/versions/{version}"
 
     return client.delete(delete_url, parse_json=False)
+
+
+def collection_sign(
+    client,
+    repository,
+    namespace,
+    collection,
+    version,
+    signing_service="ansible-default",
+):
+    url = f"content/{repository}/v3/sign/collections/"
+    body = {
+        "signing_service": signing_service,
+        "repository": repository,
+        "namespace": namespace,
+        "collection": collection,
+        "version": version,
+    }
+    return client.post(url, body)
