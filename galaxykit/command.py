@@ -359,9 +359,9 @@ def main():
             print(f"Unknown resource type '{args.kind}'")
             sys.exit(EXIT_UNKNOWN_ERROR)
 
-        if resp and not ignore:
+        if resp and not args.ignore:
             report_error(resp)
 
     except GalaxyClientError:
-        if not ignore:
+        if not args.ignore:
             raise
