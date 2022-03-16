@@ -32,4 +32,3 @@ def create_registry(client, name, url):
         "url": url,
     }
     return client.post(post_url, registry)
-

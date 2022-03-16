@@ -42,4 +42,3 @@ def create_container(client, name, upstream_name, registry):
         "include_tags": [],
     }
     return client.post(create_url, data)
-
