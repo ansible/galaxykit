@@ -33,7 +33,23 @@ A changelog, tracking all the updates to the code.
 
 This file, with advice on how to effectively contribute to galaxykit.
 
-### galaxykit:
+### LICENSE.md
+
+This is the GPLv2, which is the same licence galaxy_ng is distributed under.
+
+### README.md
+
+Landing page.
+
+### setup.cfg
+
+Currently just contains a few linter settings.
+
+### setup.py
+
+All the metadata and things used when releasing this utility on PyPi.
+
+### galaxykit/:
 
 The source directory, containing all the code that goes into galaxykit.
 
@@ -51,7 +67,7 @@ The command-line interface logic - this is what gets run when you invoke galaxyk
 
 #### container_images.py
 
-For interacting with individual container images.
+For interacting with individual container images (currently only contains 1 function for deleting a particular image (as opposed to deleting a _container_ which includes all the associated images.))
 
 #### containers.py
 
@@ -77,34 +93,18 @@ Adding new remote container registries.
 
 Adding/deleting users.
 
-### LICENSE.md
-
-This is the GPLv2, which is the same licence galaxy_ng is distributed under.
-
-### README.md
-
-Landing page.
-
-### setup.cfg
-
-Currently just contains a few linter settings.
-
-### setup.py
-
-All the metadata and things used when releasing this utility on PyPi.
-
 
 # Development Practices
 
-Please:
+Please run the [`black`](https://pypi.org/project/black/) code formatter on your code before opening a PR. An easy way to ensure this is done is to install the pre-commit hooks bundled with this repository for any PRs. This is as simple as:
 
-1. Ensure that your PR has a changelog addition for any features or bugs fixed that are contained in your PR.
-2. Run the [`black`](https://pypi.org/project/black/) code formatter on your code before opening a PR. An easy way to ensure this is done is to install the pre-commit hooks bundled with this repository for any PRs. This is as simple as:
-    ```
-    pip install pre_commit
-    pre-commit install
-    pre-commit install-hooks
-    ```
+```
+pip install pre_commit
+pre-commit install
+pre-commit install-hooks
+```
+
+If you don't, CI will make suggestions based on black, and we'll need to get those suggestions into your branch before we merge the PR.
 
 # Release Process
 
