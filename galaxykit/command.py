@@ -1,6 +1,7 @@
 import argparse
 import sys
 import json
+from pprint import pprint
 
 from .client import GalaxyClient, GalaxyClientError
 from . import containers
@@ -116,6 +117,7 @@ def main():
                         sys.exit(EXIT_NOT_FOUND)
             elif args.operation == "group":
                 subop, *subopargs = args.rest
+
                 if subop == "add":
                     username, groupname = subopargs
                     user_data = users.get_user(client, username)
@@ -126,6 +128,17 @@ def main():
                             "name": groupname,
                             "pulp_href": f"/pulp/api/v3/groups/{group_id}",
                         }
+                    )
+                    resp = users.update_user(client, user_data)
+
+                if subop == "remove":
+                    username, groupname = subopargs
+                    user_data = users.get_user(client, username)
+                    group_id = groups.get_group_id(client, groupname)
+                    user_data["groups"] = list(
+                        filter(
+                            lambda group: group["id"] != group_id, user_data["groups"]
+                        )
                     )
                     resp = users.update_user(client, user_data)
             else:
@@ -224,6 +237,7 @@ def main():
                 else:
                     print("container readme takes either 1 or 2 parameters.")
                     sys.exit(EXIT_UNKNOWN_ERROR)
+
             elif args.operation == "delete":
                 (name,) = args.rest
                 try:
@@ -232,6 +246,18 @@ def main():
                     if not args.ignore:
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
+
+            elif args.operation == "create":
+                name, upstream_name, registry = args.rest
+                try:
+                    resp = containers.create_container(
+                        client, name, upstream_name, registry
+                    )
+                except ValueError as e:
+                    if not args.ignore:
+                        print(e)
+                        sys.exit(EXIT_NOT_FOUND)
+
             else:
                 print_unknown_error(args)
 
@@ -252,6 +278,14 @@ def main():
                 (name,) = args.rest
                 try:
                     resp = registries.delete_registry(client, name)
+                except ValueError as e:
+                    if not args.ignore:
+                        print(e)
+                        sys.exit(EXIT_NOT_FOUND)
+            elif args.operation == "create":
+                name, url = args.rest
+                try:
+                    resp = registries.create_registry(client, name, url)
                 except ValueError as e:
                     if not args.ignore:
                         print(e)

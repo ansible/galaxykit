@@ -1,5 +1,6 @@
 import requests
 import json
+from pprint import pprint
 
 
 def get_group(client, group_name):
