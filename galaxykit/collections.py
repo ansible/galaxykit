@@ -22,7 +22,6 @@ def upload_test_collection(client, namespace=None, collection_name=None):
     """
     Uploads a test collection generated with orionutils
     """
-    print("gk upload_test_collection")
     config = {"namespace": namespace or client.username}
     if collection_name is not None:
         config["name"] = collection_name
@@ -133,12 +132,8 @@ def upload_artifact(
     headers = {
         "Content-type": "multipart/form-data; boundary=%s" % boundary,
         "Content-length": f"{len(data)}",
-        "Authorization": f"Token {client.token}",
+        "Authorization": f"{client.token_type} {client.token}",
     }
-
-    # uploads on ephemeral and cloud -must- use basic auth tokens
-    if client.auth_url and ("ephemeral" in client.auth_url or 'console.redhat' in client.auth_url or 'sso' in client.auth_url):
-        headers["Authorization"] = "Basic " + client.get_basic_auth_token()
 
     n_url = urljoin(
         client.galaxy_root,
