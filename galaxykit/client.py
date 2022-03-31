@@ -68,8 +68,7 @@ class GalaxyClient:
                 self.token = auth.get("token")
                 self.auth_url = auth.get("auth_url")
             elif isinstance(auth, tuple):
-                if self.username is None and self.password is None:
-                    self.username, self.password = auth
+                self.username, self.password = auth
 
             self.token_type = "Token"
             if self.token and self.auth_url:
