@@ -137,7 +137,7 @@ def upload_artifact(
     }
 
     # uploads on ephemeral and cloud -must- use basic auth tokens
-    if client.auth_url and "ephemeral" in client.auth_url:
+    if client.auth_url and ("ephemeral" in client.auth_url or 'console.redhat' in client.auth_url or 'sso' in client.auth_url):
         headers["Authorization"] = "Basic " + client.get_basic_auth_token()
 
     n_url = urljoin(
