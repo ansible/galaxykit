@@ -57,7 +57,7 @@ class GalaxyClient:
         container_tls_verify=True,
         https_verify=False,
         username=None,
-        password=None
+        password=None,
     ):
 
         self.auth = auth
@@ -67,7 +67,6 @@ class GalaxyClient:
         self.headers = {}
         self.token = None
         self.https_verify = https_verify
-        print('gk init')
         if auth:
             if isinstance(auth, dict):
                 if self.username is None:
@@ -171,39 +170,32 @@ class GalaxyClient:
 
     def get_basic_auth_token(self):
         # https://github.com/ansible/ansible/blob/devel/lib/ansible/galaxy/token.py#L170-L174
-        token = f'{self.username}:{self.password}'
-        token = base64.b64encode(bytes(token, 'utf-8'))
-        return token.decode('utf-8')
+        token = f"{self.username}:{self.password}"
+        token = base64.b64encode(bytes(token, "utf-8"))
+        return token.decode("utf-8")
 
     def get(self, path, *args, **kwargs):
-        print('gk get')
         return self._http("get", path, *args, **kwargs)
 
     def post(self, *args, **kwargs):
-        print('gk post')
         return self._payload("post", *args, **kwargs)
 
     def put(self, *args, **kwargs):
-        print('gk put')
         return self._payload("put", *args, **kwargs)
 
     def delete(self, path, *args, **kwargs):
-        print('gk delete')
         return self._http("delete", path, *args, **kwargs)
 
     def pull_image(self, image_name):
-        print('gk pull_image')
         """pulls an image with the given credentials"""
         return self.container_client.pull_image(image_name)
 
     def tag_image(self, image_name, newtag):
         """tags a pulled image with the given newtag"""
-        print('gk tag_image')
         return self.container_client.tag_image(image_name, newtag)
 
     def push_image(self, image_tag):
         """pushs a image"""
-        print('gk push_image')
         return self.container_client.push_image(image_tag)
 
     def get_or_create_user(
@@ -213,7 +205,6 @@ class GalaxyClient:
         Returns a "created" flag and user info if that already username exists,
         creates a user if not.
         """
-        print('gk get_or_create_user')
         return users.get_or_create_user(
             self,
             username,
@@ -227,33 +218,28 @@ class GalaxyClient:
 
     def get_user_list(self):
         """returns a list of all the users"""
-        print('gk get_user_list')
         return users.get_user_list(self)
 
     def delete_user(self, username):
         """deletes a user"""
-        print('gk delete_user')
         return users.delete_user(self, username)
 
     def create_group(self, group_name):
         """
         Creates a group
         """
-        print('gk create_group')
         return groups.create_group(self, group_name)
 
     def get_group(self, group_name):
         """
         Returns the data of the group with group_name
         """
-        print('gk get_group')
         return groups.get_group(self, group_name)
 
     def delete_group(self, group_name):
         """
         Deletes the given group
         """
-        print('gk delete_group')
         return groups.delete_group(self, group_name)
 
     def set_permissions(self, group_name, permissions):

@@ -22,7 +22,7 @@ def upload_test_collection(client, namespace=None, collection_name=None):
     """
     Uploads a test collection generated with orionutils
     """
-    print('gk upload_test_collection')
+    print("gk upload_test_collection")
     config = {"namespace": namespace or client.username}
     if collection_name is not None:
         config["name"] = collection_name
@@ -73,7 +73,7 @@ def upload_artifact(
     :return: The import task URI that contains the import results.
     """
 
-    print('gk upload_artifact')
+    print("gk upload_artifact")
 
     def to_bytes(s, errors=None):
         return s.encode("utf8")
@@ -137,8 +137,8 @@ def upload_artifact(
     }
 
     # uploads on ephemeral and cloud -must- use basic auth tokens
-    if client.auth_url and 'ephemeral' in client.auth_url:
-        headers['Authorization'] = 'Basic ' + client.get_basic_auth_token()
+    if client.auth_url and "ephemeral" in client.auth_url:
+        headers["Authorization"] = "Basic " + client.get_basic_auth_token()
 
     n_url = urljoin(
         client.galaxy_root,

@@ -92,7 +92,7 @@ def main():
         creds,
         username=args.username,
         password=args.password,
-        https_verify=https_verify
+        https_verify=https_verify,
     )
 
     resp = None
