@@ -1,7 +1,6 @@
 """
 client.py contains the wrapping interface for all the other modules (aside from cli.py)
 """
-import base64
 import platform
 import sys
 from urllib.parse import urlparse, urljoin
@@ -168,12 +167,6 @@ class GalaxyClient:
         kwargs["headers"] = headers
         kwargs["data"] = body
         return self._http(method, path, *args, **kwargs)
-
-    def get_basic_auth_token(self):
-        # https://github.com/ansible/ansible/blob/devel/lib/ansible/galaxy/token.py#L170-L174
-        token = f"{self.username}:{self.password}"
-        token = base64.b64encode(bytes(token, "utf-8"))
-        return token.decode("utf-8")
 
     def get(self, path, *args, **kwargs):
         return self._http("get", path, *args, **kwargs)
