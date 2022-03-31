@@ -42,6 +42,7 @@ class GalaxyClient:
     headers = None
     galaxy_root = ""
     token = ""
+    token_type = None
     container_client = None
     username = ""
     password = ""
@@ -68,7 +69,7 @@ class GalaxyClient:
             elif isinstance(auth, tuple):
                 self.username, self.password = auth
 
-            token_type = "Token"
+            self.token_type = "Token"
             if self.token and self.auth_url:
                 payload = "grant_type=refresh_token&client_id=%s&refresh_token=%s" % (
                     "cloud-services",
@@ -86,7 +87,7 @@ class GalaxyClient:
                 )
                 json = resp.json()
                 self.token = json["access_token"]
-                token_type = "Bearer"
+                self.token_type = "Bearer"
 
             elif self.token is None:
                 auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
@@ -101,7 +102,7 @@ class GalaxyClient:
             self.headers.update(
                 {
                     "Accept": "application/json",
-                    "Authorization": f"{token_type} {self.token}",
+                    "Authorization": f"{self.token_type} {self.token}",
                 }
             )
 

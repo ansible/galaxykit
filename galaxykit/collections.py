@@ -130,7 +130,7 @@ def upload_artifact(
     headers = {
         "Content-type": "multipart/form-data; boundary=%s" % boundary,
         "Content-length": f"{len(data)}",
-        "Authorization": f"Token {client.token}",
+        "Authorization": f"{client.token_type} {client.token}",
     }
 
     n_url = urljoin(
