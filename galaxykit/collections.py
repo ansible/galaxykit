@@ -25,9 +25,11 @@ def upload_test_collection(client, namespace=None, collection_name=None):
     config = {"namespace": namespace or client.username}
     if collection_name is not None:
         config["name"] = collection_name
+    # cloud importer config requires at least one tag
+    config['tags'] = ['tools']
     artifact = build_collection(
         "skeleton",
-        config=config,
+        config=config
     )
     upload_resp_url = upload_artifact(config, client, artifact)["task"]
 
