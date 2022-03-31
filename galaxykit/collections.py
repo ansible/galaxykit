@@ -72,8 +72,6 @@ def upload_artifact(
     :return: The import task URI that contains the import results.
     """
 
-    print("gk upload_artifact")
-
     def to_bytes(s, errors=None):
         return s.encode("utf8")
 
