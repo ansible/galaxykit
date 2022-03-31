@@ -90,8 +90,6 @@ def main():
     client = GalaxyClient(
         args.server,
         creds,
-        username=args.username,
-        password=args.password,
         https_verify=https_verify,
     )
 

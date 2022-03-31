@@ -39,7 +39,6 @@ class GalaxyClient:
     which all authentication flows.
     """
 
-    auth = None
     headers = None
     galaxy_root = ""
     token = ""
@@ -56,23 +55,16 @@ class GalaxyClient:
         container_registry=None,
         container_tls_verify=True,
         https_verify=False,
-        username=None,
-        password=None,
     ):
 
-        self.auth = auth
-        self.username = username
-        self.password = password
         self.galaxy_root = galaxy_root
         self.headers = {}
         self.token = None
         self.https_verify = https_verify
         if auth:
             if isinstance(auth, dict):
-                if self.username is None:
-                    self.username = auth.get("username")
-                if self.password is None:
-                    self.password = auth.get("password")
+                self.username = auth.get("username")
+                self.password = auth.get("password")
                 self.token = auth.get("token")
                 self.auth_url = auth.get("auth_url")
             elif isinstance(auth, tuple):
