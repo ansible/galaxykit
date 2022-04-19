@@ -223,12 +223,12 @@ def delete_collection_in_repository(client, namespace, collection, repository, v
 def delete_all_collections(client):
     """
     Delete all collections in approval dashboard including rejected and not approved collections.
+    Warning : the galaxykit has no sync of commands yet, so this will be running in the background
+    while the command returns and it may cause unexpected behavior.
     """
 
     res = client.get('_ui/v1/collection-versions/?offset=0&limit=10000000')
     data = res['data']
-    print(len(data))
-    
     for item in data:
         collection = item['name']
         namespace = item['namespace']
