@@ -70,7 +70,39 @@ class GalaxyClient:
                 self.username, self.password = auth
 
             self.token_type = "Token"
-            if self.token and self.auth_url:
+            if not self.token and self.auth_url:
+
+                # https://developers.redhat.com/blog/2020/01/29/api-login-and-jwt-token-generation-using-keycloak
+                # When testing ephemeral environments, we won't have the 
+                # access token up front, so we have to create one via user+pass.
+                # Does this work on real SSO? I have no idea.
+
+                headers = {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+                ds = {
+                    'client_id': 'cloud-services',
+                    'username': self.username,
+                    'password': self.password,
+                    'grant_type': 'password'
+                }
+                rr = requests.post(
+                    self.auth_url,
+                    headers=headers,
+                    data=ds
+                )
+                if rr.status_code != 200:
+                    raise Exception(rr.text)
+                self.token_type = 'Bearer'
+                try:
+                    jdata = rr.json()
+                except Exception as e:
+                    raise Exception(rr.text)
+                if 'access_token' not in jdata:
+                    raise Exception(rr.text)
+                self.token = jdata['access_token']
+
+            elif self.token and self.auth_url:
                 payload = "grant_type=refresh_token&client_id=%s&refresh_token=%s" % (
                     "cloud-services",
                     self.token,
