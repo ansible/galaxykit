@@ -73,16 +73,16 @@ class GalaxyClient:
             if not self.token and self.auth_url:
 
                 # https://developers.redhat.com/blog/2020/01/29/api-login-and-jwt-token-generation-using-keycloak
-                # When testing ephemeral environments, we won't have the 
+                # When testing ephemeral environments, we won't have the
                 # access token up front, so we have to create one via user+pass.
                 # Does this work on real SSO? I have no idea.
 
-                headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+                headers = {"Content-Type": "application/x-www-form-urlencoded"}
                 ds = {
                     "client_id": "cloud-services",
                     "username": self.username,
                     "password": self.password,
-                    "grant_type": "password"
+                    "grant_type": "password",
                 }
                 rr = requests.post(self.auth_url, headers=headers, data=ds)
                 if rr.status_code != 200:
