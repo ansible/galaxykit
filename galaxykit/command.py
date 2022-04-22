@@ -76,7 +76,13 @@ def main():
     args = parser.parse_args()
     https_verify = not args.ignore_certs
 
-    if args.token:
+    if args.auth_url and not args.token:
+        creds = {
+            "auth_url": args.auth_url,
+            "username": args.username,
+            "password": args.password,
+        }
+    elif args.token:
         creds = {
             "token": args.token,
         }
