@@ -77,30 +77,24 @@ class GalaxyClient:
                 # access token up front, so we have to create one via user+pass.
                 # Does this work on real SSO? I have no idea.
 
-                headers = {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
+                headers = {'Content-Type': 'application/x-www-form-urlencoded'}
                 ds = {
-                    'client_id': 'cloud-services',
-                    'username': self.username,
-                    'password': self.password,
-                    'grant_type': 'password'
+                    "client_id": "cloud-services",
+                    "username": self.username,
+                    "password": self.password,
+                    "grant_type": "password"
                 }
-                rr = requests.post(
-                    self.auth_url,
-                    headers=headers,
-                    data=ds
-                )
+                rr = requests.post(self.auth_url, headers=headers, data=ds)
                 if rr.status_code != 200:
                     raise Exception(rr.text)
-                self.token_type = 'Bearer'
+                self.token_type = "Bearer"
                 try:
                     jdata = rr.json()
                 except Exception as e:
                     raise Exception(rr.text)
-                if 'access_token' not in jdata:
+                if "access_token" not in jdata:
                     raise Exception(rr.text)
-                self.token = jdata['access_token']
+                self.token = jdata["access_token"]
 
             elif self.token and self.auth_url:
                 payload = "grant_type=refresh_token&client_id=%s&refresh_token=%s" % (
