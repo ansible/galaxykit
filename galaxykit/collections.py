@@ -14,7 +14,7 @@ from .client import GalaxyClientError
 
 
 def collection_info(client, repository, namespace, collection_name, version):
-    url = f"content/{repository}/v3/collections/{namespace}/{collection_name}/versions/{version}/"
+    url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection_name}/versions/{version}/"
     return client.get(url)
 
 
@@ -182,9 +182,9 @@ def delete_collection(client, namespace, collection, version):
     """
 
     if version == None:
-        delete_url = f"content/published/v3/collections/{namespace}/{collection}/"
+        delete_url = f"v3/plugin/ansible/content/published/collections/index/{namespace}/{collection}/"
     else:
-        delete_url = f"content/published/v3/collections/{namespace}/{collection}/versions/{version}"
+        delete_url = f"v3/plugin/ansible/content/published/collections/index/{namespace}/{collection}/versions/{version}/"
 
     return client.delete(delete_url, parse_json=False)
 
