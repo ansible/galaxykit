@@ -177,15 +177,16 @@ def move_collection(
     return True
 
 
-def delete_collection(client, namespace, collection, version):
+def delete_collection(client, namespace, collection, version = 'None', repository = 'published'):
     """
     Delete collection version
     """
-    if version == None:
-        delete_url = f"v3/plugin/ansible/content/published/collections/index/{namespace}/{collection}/"
+    if version == 'None':
+        delete_url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/"
     else:
-        delete_url = f"v3/plugin/ansible/content/published/collections/index/{namespace}/{collection}/versions/{version}/"
+        delete_url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/versions/{version}/"
 
+    print(delete_url)
     return client.delete(delete_url, parse_json=False)
 
 
@@ -206,35 +207,3 @@ def collection_sign(
         "version": version,
     }
     return client.post(url, body)
-
-
-def delete_collection_in_repository(client, namespace, collection, repository, version):
-    """
-    Delete collection version in repository
-    """
-    if version == None:
-        delete_url = f"content/{repository}/v3/collections/{namespace}/{collection}/"
-    else:
-        delete_url = f"content/{repository}/v3/collections/{namespace}/{collection}/versions/{version}"
-
-    return client.delete(delete_url, parse_json=False)
-
-
-def delete_all_collections(client):
-    """
-    Delete all collections in approval dashboard including rejected and not approved collections.
-    Warning : the galaxykit has no sync of commands yet, so this will be running in the background
-    while the command returns and it may cause unexpected behavior.
-    """
-
-    res = client.get('_ui/v1/collection-versions/?offset=0&limit=10000000')
-    data = res['data']
-    for item in data:
-        collection = item['name']
-        namespace = item['namespace']
-        version = item['version']
-        repositories = item['repository_list']
-        for repository in repositories:
-            res = delete_collection_in_repository(client, namespace, collection, repository, version)
-    return []
-

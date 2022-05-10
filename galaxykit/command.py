@@ -328,6 +328,9 @@ def main():
                         client, namespace, collection_name, version, source, destination
                     )
             elif args.operation == "delete":
+                repository = 'published'
+                if len(args.rest) == 4:
+                    namespace, collection, version, repository = args.rest
                 if len(args.rest) == 3:
                     namespace, collection, version = args.rest
                 if len(args.rest) == 2:
@@ -335,7 +338,7 @@ def main():
                     version = None
                 try:
                     resp = collections.delete_collection(
-                        client, namespace, collection, version
+                        client, namespace, collection, version, repository
                     )
                 except ValueError as e:
                     if not args.ignore:
@@ -381,28 +384,9 @@ def main():
                         )
                     )
                 )
-            elif args.operation == "delete-in-repository":
-                if len(args.rest) == 4 :
-                    namespace, collection, repository, version = args.rest
-                if len(args.rest) == 3:
-                    namespace, collection, repository = args.rest
-                    version = None    
-                try:
-                    resp = collections.delete_collection_in_repository(client, namespace, collection, repository, version)
-                except ValueError as e:
-                    if not args.ignore:
-                        print(e)
-                        sys.exit(EXIT_NOT_FOUND)
-
-            elif args.operation == "delete-all": 
-                try:
-                    resp = collections.delete_all_collections(client)
-                except ValueError as e:
-                    if not args.ignore:
-                        print(e)
-                        sys.exit(EXIT_NOT_FOUND)
             else:
                 print_unknown_error(args)
+
         elif args.kind == "url":
             if args.operation == "get":
                 (url,) = args.rest
