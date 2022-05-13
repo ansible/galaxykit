@@ -335,7 +335,7 @@ def main():
                     namespace, collection, version = args.rest
                 if len(args.rest) == 2:
                     namespace, collection = args.rest
-                    version = None
+                    version = 'None'
                 try:
                     resp = collections.delete_collection(
                         client, namespace, collection, version, repository
