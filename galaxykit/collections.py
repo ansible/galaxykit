@@ -18,11 +18,16 @@ def collection_info(client, repository, namespace, collection_name, version):
     return client.get(url)
 
 
-def upload_test_collection(client, namespace=None, collection_name=None):
+def upload_test_collection(
+    client, namespace=None, collection_name=None, version="1.0.0"
+):
     """
     Uploads a test collection generated with orionutils
     """
-    config = {"namespace": namespace or client.username}
+    config = {
+        "namespace": namespace or client.username,
+        "version": version,
+    }
     if collection_name is not None:
         config["name"] = collection_name
     # cloud importer config requires at least one tag
