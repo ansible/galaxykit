@@ -300,7 +300,9 @@ def main():
                 print_unknown_error(args)
 
         elif args.kind == "collection":
-            if args.operation == "upload":
+            if args.operation == "list":
+                print(json.dumps(collections.get_collection_list(client)))
+            elif args.operation == "upload":
                 if len(args.rest) == 0:
                     (namespace, collection_name, version) = (
                         client.username,

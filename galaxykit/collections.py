@@ -18,6 +18,11 @@ def collection_info(client, repository, namespace, collection_name, version):
     return client.get(url)
 
 
+def get_collection_list(client):
+    url = "_ui/v1/collection-versions/"
+    return client.get(url)
+
+
 def upload_test_collection(
     client, namespace=None, collection_name=None, version="1.0.0"
 ):
