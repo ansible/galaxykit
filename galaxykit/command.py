@@ -302,13 +302,23 @@ def main():
         elif args.kind == "collection":
             if args.operation == "upload":
                 if len(args.rest) == 0:
-                    (namespace, collection_name) = (client.username, None)
-                else:
+                    (namespace, collection_name, version) = (
+                        client.username,
+                        None,
+                        None,
+                    )
+                elif len(args.rest) == 2:
                     (namespace, collection_name) = args.rest
+                    version = "1.0.0"
+                else:
+                    (namespace, collection_name, version) = args.rest
 
                 resp = namespaces.create_namespace(client, namespace, None)
                 artifact = collections.upload_test_collection(
-                    client, namespace=namespace, collection_name=collection_name
+                    client,
+                    namespace=namespace,
+                    collection_name=collection_name,
+                    version=version,
                 )
                 print(json.dumps(artifact))
             elif args.operation == "move":
