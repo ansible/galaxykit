@@ -183,8 +183,6 @@ def delete_collection(
         delete_url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/"
     else:
         delete_url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/versions/{version}/"
-
-    print(delete_url)
     return client.delete(delete_url, parse_json=False)
 
 
