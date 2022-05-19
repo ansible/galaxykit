@@ -12,8 +12,6 @@ from pprint import pprint
 from orionutils.generator import build_collection
 from .client import GalaxyClientError
 
-from . import namespaces
-
 
 def collection_info(client, repository, namespace, collection_name, version):
     url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection_name}/versions/{version}/"
