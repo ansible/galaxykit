@@ -305,7 +305,7 @@ def main():
                     (namespace, collection_name, version) = (
                         client.username,
                         None,
-                        None,
+                        "1.0.0",
                     )
                 elif len(args.rest) == 2:
                     (namespace, collection_name) = args.rest
