@@ -31,11 +31,8 @@ def upload_test_collection(
     if collection_name is not None:
         config["name"] = collection_name
     # cloud importer config requires at least one tag
-    config['tags'] = ['tools']
-    artifact = build_collection(
-        "skeleton",
-        config=config
-    )
+    config["tags"] = ["tools"]
+    artifact = build_collection("skeleton", config=config)
     upload_resp_url = upload_artifact(config, client, artifact)["task"]
 
     ready = False
@@ -181,16 +178,16 @@ def move_collection(
     return True
 
 
-def delete_collection(client, namespace, collection, version):
+def delete_collection(
+    client, namespace, collection, version=None, repository="published"
+):
     """
     Delete collection version
     """
-
     if version == None:
-        delete_url = f"v3/plugin/ansible/content/published/collections/index/{namespace}/{collection}/"
+        delete_url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/"
     else:
-        delete_url = f"v3/plugin/ansible/content/published/collections/index/{namespace}/{collection}/versions/{version}/"
-
+        delete_url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/versions/{version}/"
     return client.delete(delete_url, parse_json=False)
 
 

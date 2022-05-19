@@ -93,9 +93,7 @@ def main():
             "username": args.username,
             "password": args.password,
         }
-    client = GalaxyClient(
-        args.server, creds, https_verify=https_verify
-    )
+    client = GalaxyClient(args.server, creds, https_verify=https_verify)
 
     resp = None
 
@@ -338,14 +336,19 @@ def main():
                         client, namespace, collection_name, version, source, destination
                     )
             elif args.operation == "delete":
+                repository = "published"
+                version = None
+                if len(args.rest) == 4:
+                    namespace, collection, version, repository = args.rest
                 if len(args.rest) == 3:
                     namespace, collection, version = args.rest
                 if len(args.rest) == 2:
                     namespace, collection = args.rest
-                    version = None
                 try:
+                    if version == "None":
+                        version = None
                     resp = collections.delete_collection(
-                        client, namespace, collection, version
+                        client, namespace, collection, version, repository
                     )
                 except ValueError as e:
                     if not args.ignore:
