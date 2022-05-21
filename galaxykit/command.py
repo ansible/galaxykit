@@ -11,6 +11,7 @@ from . import namespaces
 from . import users
 from . import container_images
 from . import registries
+from . import __version__ as VERSION
 
 EXIT_OK = 0
 EXIT_UNKNOWN_ERROR = 1
@@ -43,37 +44,374 @@ def report_error(resp):
             )
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "kind",
-        type=str,
-        action="store",
-        help="Kind of API content to operate against (user, group, namespace)",
+# galaxykit <kind> <operation> [<subop>] (args)
+KIND_OPS = {
+    "collection": {
+        "help": "Collection",
+        "ops": {
+            "list": {
+                "help": "List all collections",
+                "args": None,
+            },
+            "upload": {
+                "args": {
+                    "namespace": {"nargs": "?"},
+                    "collection_name": {"nargs": "?"},
+                    "version": {"nargs": "?"},
+                },
+            },
+            "move": {
+                "args": {
+                    "namespace": {},
+                    "collection_name": {},
+                    "version": {"nargs": "?"},
+                    "source": {"nargs": "?"},
+                    "destination": {"nargs": "?"},
+                },
+            },
+            "delete": {
+                "args": {
+                    "namespace": {},
+                    "collection": {},
+                    "version": {"nargs": "?"},
+                    "repository": {"nargs": "?"},
+                },
+            },
+            "download": None,
+            "info": {
+                "args": {
+                    "repository": {"nargs": "?"},
+                    "namespace": {},
+                    "collection_name": {},
+                    "version": {},
+                },
+            },
+            "sign": {
+                "args": {
+                    "repository": {"nargs": "?"},
+                    "namespace": {},
+                    "collection_name": {},
+                    "version": {},
+                },
+            },
+        },
+    },
+    "namespace": {
+        "help": "Collection Namespace",
+        "ops": {
+            "get": {
+                "args": {
+                    "name": {},
+                }
+            },
+            "list": {"args": None},
+            "list-collections": {
+                "args": {
+                    "name": {},
+                }
+            },
+            "create": {
+                "args": {
+                    "name": {},
+                    "group": {"nargs": "?"},
+                }
+            },
+            "delete": {
+                "args": {
+                    "name": {},
+                }
+            },
+            "groups": None,
+            "addgroup": {
+                "args": {
+                    "name": {},
+                    "group": {},
+                }
+            },
+            "removegroup": {
+                "args": {
+                    "name": {},
+                    "group": {},
+                }
+            },
+            "addgroupperm": None,
+            "removegroupperm": None,
+            "sign": None,
+        },
+    },
+    "container": {
+        "help": "Execution Environment",
+        "ops": {
+            "readme": {
+                "args": {
+                    "container": {},
+                    "readme": {"nargs": "?"},
+                }
+            },
+            "delete": {
+                "args": {
+                    "name": {},
+                }
+            },
+            "create": {
+                "args": {
+                    "name": {},
+                    "upstream_name": {},
+                    "registry": {},
+                }
+            },
+        },
+    },
+    "container-image": {
+        "help": "Execution Environment image",
+        "ops": {
+            "delete": {
+                "args": {
+                    "container": {},
+                    "image": {},
+                }
+            },
+        },
+    },
+    "registry": {
+        "help": "Remote Registry",
+        "ops": {
+            "delete": {
+                "args": {
+                    "name": {},
+                }
+            },
+            "create": {
+                "args": {
+                    "name": {},
+                    "url": {},
+                }
+            },
+        },
+    },
+    "user": {
+        "help": "RBAC User",
+        "ops": {
+            "list": {"args": None},
+            "create": {
+                "args": {
+                    "username": {},
+                    "password": {},
+                }
+            },
+            "delete": {
+                "args": {
+                    "username": {},
+                }
+            },
+            "group": {
+                "subops": {
+                    "add": {
+                        "args": {
+                            "username": {},
+                            "groupname": {},
+                        }
+                    },
+                    "remove": {
+                        "args": {
+                            "username": {},
+                            "groupname": {},
+                        }
+                    },
+                },
+            },
+        },
+    },
+    "group": {
+        "help": "RBAC Group",
+        "ops": {
+            "list": {"args": None},
+            "create": {
+                "args": {
+                    "name": {},
+                }
+            },
+            "delete": {
+                "args": {
+                    "name": {},
+                }
+            },
+            "perm": {
+                "subops": {
+                    "list": {
+                        "args": {
+                            "groupname": {},
+                        }
+                    },
+                    "add": {
+                        "args": {
+                            "groupname": {},
+                            "perm": {},
+                        }
+                    },
+                    "remove": {
+                        "args": {
+                            "groupname": {},
+                            "perm": {},
+                        }
+                    },
+                },
+            },
+        },
+    },
+    "url": {
+        "help": "Generic GET/POST",
+        "ops": {
+            "get": {
+                "args": {
+                    "url": {},
+                }
+            },
+            "post": {
+                "args": {
+                    "url": {},
+                }
+            },
+        },
+    },
+}
+
+
+def parse_args(parser, args):
+    for arg in args:
+        parser.add_argument(arg, **(args[arg]))
+
+
+def parse_subop(subparsers, subop, subop_params):
+    parser = subparsers.add_parser(subop, help=subop_params.get("help"))
+    args = subop_params.get("args")
+
+    if args:
+        parse_args(parser, args)
+
+
+def parse_subops(parser, subops):
+    subparsers = parser.add_subparsers(dest="subop", required=True)
+
+    for subop in subops:
+        subop_params = subops[subop]
+        parse_subop(subparsers, subop, subop_params)
+
+
+def parse_op(subparsers, op, op_params):
+    if op_params == None:
+        help, args, subops = "Not implemented", None, None
+    else:
+        help, args, subops = (
+            op_params.get("help"),
+            op_params.get("args"),
+            op_params.get("subops"),
+        )
+
+    parser = subparsers.add_parser(op, help=help)
+
+    if subops:
+        parse_subops(parser, subops)
+
+    if args:
+        parse_args(parser, args)
+
+
+def parse_ops(parser, ops):
+    subparsers = parser.add_subparsers(
+        dest="operation", help="Operation", required=True
     )
-    parser.add_argument("operation", type=str, action="store")
-    parser.add_argument("rest", type=str, action="store", nargs="*")
-    parser.add_argument("-i", "--ignore", default=False, action="store_true")
-    parser.add_argument("-u", "--username", type=str, action="store")
-    parser.add_argument("-p", "--password", type=str, action="store")
-    parser.add_argument("-t", "--token", type=str, action="store")
-    parser.add_argument("-a", "--auth-url", type=str, action="store")
+
+    for op in ops:
+        op_params = ops[op]
+        parse_op(subparsers, op, op_params)
+
+
+def parse_kind(subparsers, kind, kind_params):
+    parser = subparsers.add_parser(kind, help=kind_params.get("help"))
+    parse_ops(parser, kind_params["ops"])
+
+
+def parse_kinds(parser):
+    subparsers = parser.add_subparsers(
+        dest="kind",
+        help="Kind of API content to operate against",
+        required=True,
+    )
+
+    for kind in KIND_OPS:
+        kind_params = KIND_OPS[kind]
+        parse_kind(subparsers, kind, kind_params)
+
+
+def params_main(parser):
+    parser.add_argument(
+        "-i",
+        "--ignore",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "-u",
+        "--username",
+        action="store",
+        default="admin",
+        type=str,
+    )
+    parser.add_argument(
+        "-p",
+        "--password",
+        action="store",
+        default="admin",
+        type=str,
+    )
+    parser.add_argument(
+        "-t",
+        "--token",
+        action="store",
+        type=str,
+    )
+    parser.add_argument(
+        "-a",
+        "--auth-url",
+        action="store",
+        type=str,
+    )
     parser.add_argument(
         "-c",
         "--ignore-certs",
-        default=False,
         action="store_true",
+        default=False,
         help="Ignore invalid SSL certificates",
     )
     parser.add_argument(
         "-s",
         "--server",
-        type=str,
         action="store",
         default="http://localhost:8002/api/automation-hub/",
+        type=str,
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=("%(prog)s " + VERSION),
     )
 
+
+def main():
+    parser = argparse.ArgumentParser(prog="galaxykit")
+    params_main(parser)
+    parse_kinds(parser)
+
     args = parser.parse_args()
+    if args.debug:
+        pprint(args)
+
     https_verify = not args.ignore_certs
 
     if args.auth_url and not args.token:
