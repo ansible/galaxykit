@@ -19,11 +19,6 @@ EXIT_NOT_FOUND = 2
 EXIT_DUPLICATE = 4
 
 
-def print_unknown_error(args):
-    print(f"Unknown {args.kind} operation '{args.operation}'")
-    sys.exit(EXIT_UNKNOWN_ERROR)
-
-
 def format_list(data, identifier):
     buffer = []
     for datum in data:
@@ -441,7 +436,7 @@ def main():
                 resp = users.get_user_list(client)
                 print(format_list(resp["data"], "username"))
             elif args.operation == "create":
-                username, password = args.rest
+                username, password = args.username, args.password
                 created, resp = users.get_or_create_user(
                     client, username, password, None
                 )
@@ -450,7 +445,7 @@ def main():
                 else:
                     print(f"User {username} already existed")
             elif args.operation == "delete":
-                (username,) = args.rest
+                username = args.username
                 try:
                     resp = users.delete_user(client, username)
                 except ValueError as e:
@@ -458,10 +453,8 @@ def main():
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
             elif args.operation == "group":
-                subop, *subopargs = args.rest
-
-                if subop == "add":
-                    username, groupname = subopargs
+                if args.subop == "add":
+                    username, groupname = args.username, args.groupname
                     user_data = users.get_user(client, username)
                     group_id = groups.get_group_id(client, groupname)
                     user_data["groups"].append(
@@ -472,9 +465,8 @@ def main():
                         }
                     )
                     resp = users.update_user(client, user_data)
-
-                if subop == "remove":
-                    username, groupname = subopargs
+                elif args.subop == "remove":
+                    username, groupname = args.username, args.groupname
                     user_data = users.get_user(client, username)
                     group_id = groups.get_group_id(client, groupname)
                     user_data["groups"] = list(
@@ -483,18 +475,16 @@ def main():
                         )
                     )
                     resp = users.update_user(client, user_data)
-            else:
-                print_unknown_error(args)
 
         elif args.kind == "group":
             if args.operation == "list":
                 resp = groups.get_group_list(client)
                 print(format_list(resp["data"], "name"))
             elif args.operation == "create":
-                (name,) = args.rest
+                name = args.name
                 resp = groups.create_group(client, name)
             elif args.operation == "delete":
-                (name,) = args.rest
+                name = args.name
                 try:
                     resp = groups.delete_group(client, name)
                 except ValueError as e:
@@ -502,47 +492,37 @@ def main():
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
             elif args.operation == "perm":
-                subop, *subopargs = args.rest
-                if subop == "list":
-                    (groupname,) = subopargs
+                if args.subop == "list":
+                    groupname = args.groupname
                     resp = groups.get_permissions(client, groupname)
                     print(format_list(resp["data"], "permission"))
-                elif subop == "add":
-                    groupname, perm = subopargs
+                elif args.subop == "add":
+                    groupname, perm = args.groupname, args.perm
                     perms = [
                         p["permission"]
                         for p in groups.get_permissions(client, groupname)["data"]
                     ]
                     perms = list(set(perms) | set([perm]))
                     resp = groups.set_permissions(client, groupname, perms)
-                elif subop == "remove":
-                    groupname, perm = subopargs
+                elif args.subop == "remove":
+                    groupname, perm = args.groupname, args.perm
                     resp = groups.delete_permission(client, groupname, perm)
-                else:
-                    print(f"Unknown group perm operation '{subop}'")
-                    sys.exit(EXIT_UNKNOWN_ERROR)
-            else:
-                print_unknown_error(args)
 
         elif args.kind == "namespace":
             if args.operation == "get":
-                (name,) = args.rest
+                name = args.name
                 print(json.dumps(namespaces.get_namespace(client, name)))
             elif args.operation == "list":
                 print(json.dumps(namespaces.get_namespace_list(client)))
             elif args.operation == "list-collections":
-                (name,) = args.rest
+                name = args.name
                 print(json.dumps(namespaces.get_namespace_collections(client, name)))
             elif args.operation == "create":
-                if len(args.rest) == 2:
-                    name, group = args.rest
-                else:
-                    (name,) = args.rest
-                    group = None
+                name, group = args.name, args.group
                 resp = namespaces.create_namespace(client, name, group)
 
             elif args.operation == "delete":
-                (name,) = args.rest
+                name = args.name
                 try:
                     resp = namespaces.delete_namespace(client, name)
                 except ValueError as e:
@@ -553,10 +533,10 @@ def main():
             elif args.operation == "groups":
                 raise NotImplementedError
             elif args.operation == "addgroup":
-                name, group = args.rest
+                name, group = args.name, args.group
                 resp = namespaces.add_group(client, name, group)
             elif args.operation == "removegroup":
-                name, group = args.rest
+                name, group = args.name, args.group
                 resp = namespaces.remove_group(client, name, group)
             elif args.operation == "addgroupperm":
                 raise NotImplementedError
@@ -564,24 +544,19 @@ def main():
                 raise NotImplementedError
             elif args.operation == "sign":
                 raise NotImplementedError
-            else:
-                print_unknown_error(args)
 
         elif args.kind == "container":
             if args.operation == "readme":
-                if len(args.rest) == 1:
-                    (container,) = args.rest
+                if args.readme == None:
+                    container = args.container
                     resp = containers.get_readme(client, container)
                     print(resp["text"])
-                elif len(args.rest) == 2:
-                    container, readme = args.rest
-                    resp = containers.set_readme(client, container, readme)
                 else:
-                    print("container readme takes either 1 or 2 parameters.")
-                    sys.exit(EXIT_UNKNOWN_ERROR)
+                    container, readme = args.container, args.readme
+                    resp = containers.set_readme(client, container, readme)
 
             elif args.operation == "delete":
-                (name,) = args.rest
+                name = args.name
                 try:
                     resp = containers.delete_container(client, name)
                 except ValueError as e:
@@ -590,7 +565,11 @@ def main():
                         sys.exit(EXIT_NOT_FOUND)
 
             elif args.operation == "create":
-                name, upstream_name, registry = args.rest
+                name, upstream_name, registry = (
+                    args.name,
+                    args.upstream_name,
+                    args.registry,
+                )
                 try:
                     resp = containers.create_container(
                         client, name, upstream_name, registry
@@ -600,24 +579,19 @@ def main():
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
 
-            else:
-                print_unknown_error(args)
-
         elif args.kind == "container-image":
             if args.operation == "delete":
-                container, image = args.rest
+                container, image = args.container, args.image
                 try:
                     resp = container_images.delete_container(client, container, image)
                 except ValueError as e:
                     if not args.ignore:
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
-            else:
-                print_unknown_error(args)
 
         elif args.kind == "registry":
             if args.operation == "delete":
-                (name,) = args.rest
+                name = args.name
                 try:
                     resp = registries.delete_registry(client, name)
                 except ValueError as e:
@@ -625,31 +599,23 @@ def main():
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
             elif args.operation == "create":
-                name, url = args.rest
+                name, url = args.name, args.url
                 try:
                     resp = registries.create_registry(client, name, url)
                 except ValueError as e:
                     if not args.ignore:
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
-            else:
-                print_unknown_error(args)
 
         elif args.kind == "collection":
             if args.operation == "list":
                 print(json.dumps(collections.get_collection_list(client)))
             elif args.operation == "upload":
-                if len(args.rest) == 0:
-                    (namespace, collection_name, version) = (
-                        client.username,
-                        None,
-                        "1.0.0",
-                    )
-                elif len(args.rest) == 2:
-                    (namespace, collection_name) = args.rest
-                    version = "1.0.0"
-                else:
-                    (namespace, collection_name, version) = args.rest
+                namespace, collection_name, version = (
+                    args.namespace or client.username,
+                    args.collection_name,
+                    args.version or "1.0.0",
+                )
 
                 resp = namespaces.create_namespace(client, namespace, None)
                 artifact = collections.upload_test_collection(
@@ -660,30 +626,23 @@ def main():
                 )
                 print(json.dumps(artifact))
             elif args.operation == "move":
-                if len(args.rest) == 2:
-                    (namespace, collection_name) = args.rest
-                    # defaults to version = 1.0.0, source = staging, destination = published
-                    collections.move_collection(client, namespace, collection_name)
-                else:
-                    (
-                        namespace,
-                        collection_name,
-                        version,
-                        source,
-                        destination,
-                    ) = args.rest
-                    collections.move_collection(
-                        client, namespace, collection_name, version, source, destination
-                    )
+                namespace, collection_name, version, source, destination = (
+                    args.namespace,
+                    args.collection_name,
+                    args.version or "1.0.0",
+                    args.source or "staging",
+                    args.destination or "published",
+                )
+                collections.move_collection(
+                    client, namespace, collection_name, version, source, destination
+                )
             elif args.operation == "delete":
-                repository = "published"
-                version = None
-                if len(args.rest) == 4:
-                    namespace, collection, version, repository = args.rest
-                if len(args.rest) == 3:
-                    namespace, collection, version = args.rest
-                if len(args.rest) == 2:
-                    namespace, collection = args.rest
+                namespace, collection, version, repository = (
+                    args.namespace,
+                    args.collection,
+                    args.version,
+                    args.repository or "published",
+                )
                 try:
                     if version == "None":
                         version = None
@@ -697,17 +656,12 @@ def main():
             elif args.operation == "download":
                 raise NotImplementedError
             elif args.operation == "info":
-                if len(args.rest) == 3:
-                    (namespace, collection_name, version) = args.rest
-                    repository = "published"
-                elif len(args.rest) == 4:
-                    (repository, namespace, collection_name, version) = args.rest
-                else:
-                    print(
-                        "galaxykit collection info [repository] <namespace> <collection> <version>"
-                    )
-                    print(args.rest)
-                    sys.exit(EXIT_UNKNOWN_ERROR)
+                repository, namespace, collection_name, version = (
+                    args.repository or "published",
+                    args.namespace,
+                    args.collection_name,
+                    args.version,
+                )
                 print(
                     json.dumps(
                         collections.collection_info(
@@ -716,17 +670,12 @@ def main():
                     )
                 )
             elif args.operation == "sign":
-                if len(args.rest) == 3:
-                    (namespace, collection_name, version) = args.rest
-                    repository = "published"
-                elif len(args.rest) == 4:
-                    (repository, namespace, collection_name, version) = args.rest
-                else:
-                    print(
-                        "galaxykit collection info [repository] <namespace> <collection> <version>"
-                    )
-                    print(args.rest)
-                    sys.exit(EXIT_UNKNOWN_ERROR)
+                repository, namespace, collection_name, version = (
+                    args.repository or "published",
+                    args.namespace,
+                    args.collection_name,
+                    args.version,
+                )
                 print(
                     json.dumps(
                         collections.collection_sign(
@@ -734,23 +683,15 @@ def main():
                         )
                     )
                 )
-            else:
-                print_unknown_error(args)
 
         elif args.kind == "url":
             if args.operation == "get":
-                (url,) = args.rest
+                url = args.url
                 print(json.dumps(client.get(url)))
             elif args.operation == "post":
-                url = args.rest[0]
+                url = args.url
                 body = sys.stdin.read()
                 print(json.dumps(client.post(url, body)))
-            else:
-                print_unknown_error(args)
-
-        else:
-            print(f"Unknown resource type '{args.kind}'")
-            sys.exit(EXIT_UNKNOWN_ERROR)
 
         if resp and not args.ignore:
             report_error(resp)
