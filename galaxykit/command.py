@@ -49,10 +49,20 @@ KIND_OPS = {
                 "args": None,
             },
             "upload": {
+                "help": "Create and upload a new collection",
                 "args": {
-                    "namespace": {"nargs": "?"},
-                    "collection_name": {"nargs": "?"},
-                    "version": {"nargs": "?"},
+                    "namespace": {
+                        "help": "Collection namespace (optional, defaults to --username)",
+                        "nargs": "?",
+                    },
+                    "collection_name": {
+                        "help": "Collection name (optional, randomly generated)",
+                        "nargs": "?",
+                    },
+                    "version": {
+                        "help": "Version (optional, defaults to 1.0.0)",
+                        "nargs": "?",
+                    },
                 },
             },
             "move": {
@@ -200,18 +210,21 @@ KIND_OPS = {
                 }
             },
             "group": {
+                "help": "User group membership",
                 "subops": {
                     "add": {
+                        "help": "Add user to group",
                         "args": {
                             "username": {},
                             "groupname": {},
-                        }
+                        },
                     },
                     "remove": {
+                        "help": "Remove user from group",
                         "args": {
                             "username": {},
                             "groupname": {},
-                        }
+                        },
                     },
                 },
             },
