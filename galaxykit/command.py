@@ -351,6 +351,7 @@ def params_main(parser):
         "--username",
         action="store",
         default="admin",
+        dest="auth_username",
         type=str,
     )
     parser.add_argument(
@@ -358,6 +359,7 @@ def params_main(parser):
         "--password",
         action="store",
         default="admin",
+        dest="auth_password",
         type=str,
     )
     parser.add_argument(
@@ -412,8 +414,8 @@ def main():
     if args.auth_url and not args.token:
         creds = {
             "auth_url": args.auth_url,
-            "username": args.username,
-            "password": args.password,
+            "username": args.auth_username,
+            "password": args.auth_password,
         }
     elif args.token:
         creds = {
@@ -423,8 +425,8 @@ def main():
             creds["auth_url"] = args.auth_url
     else:
         creds = {
-            "username": args.username,
-            "password": args.password,
+            "username": args.auth_username,
+            "password": args.auth_password,
         }
     client = GalaxyClient(args.server, creds, https_verify=https_verify)
 
