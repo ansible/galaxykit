@@ -54,14 +54,17 @@ KIND_OPS = {
                     "namespace": {
                         "help": "Collection namespace (optional, defaults to --username)",
                         "nargs": "?",
+                        "default": None,
                     },
                     "collection_name": {
                         "help": "Collection name (optional, randomly generated)",
                         "nargs": "?",
+                        "default": None,
                     },
                     "version": {
                         "help": "Version (optional, defaults to 1.0.0)",
                         "nargs": "?",
+                        "default": "1.0.0",
                     },
                 },
             },
@@ -69,23 +72,23 @@ KIND_OPS = {
                 "args": {
                     "namespace": {},
                     "collection_name": {},
-                    "version": {"nargs": "?"},
-                    "source": {"nargs": "?"},
-                    "destination": {"nargs": "?"},
+                    "version": {"nargs": "?", "default": "1.0.0"},
+                    "source": {"nargs": "?", "default": "staging"},
+                    "destination": {"nargs": "?", "default": "published"},
                 },
             },
             "delete": {
                 "args": {
                     "namespace": {},
                     "collection": {},
-                    "version": {"nargs": "?"},
-                    "repository": {"nargs": "?"},
+                    "version": {"nargs": "?", "default": None},
+                    "repository": {"nargs": "?", "default": "published"},
                 },
             },
             "download": None,
             "info": {
                 "args": {
-                    "repository": {"nargs": "?"},
+                    "repository": {"nargs": "?", "default": "published"},
                     "namespace": {},
                     "collection_name": {},
                     "version": {},
@@ -93,7 +96,7 @@ KIND_OPS = {
             },
             "sign": {
                 "args": {
-                    "repository": {"nargs": "?"},
+                    "repository": {"nargs": "?", "default": "published"},
                     "namespace": {},
                     "collection_name": {},
                     "version": {},
@@ -118,7 +121,7 @@ KIND_OPS = {
             "create": {
                 "args": {
                     "name": {},
-                    "group": {"nargs": "?"},
+                    "group": {"nargs": "?", "default": None},
                 }
             },
             "delete": {
@@ -150,7 +153,7 @@ KIND_OPS = {
             "readme": {
                 "args": {
                     "container": {},
-                    "readme": {"nargs": "?"},
+                    "readme": {"nargs": "?", "default": None},
                 }
             },
             "delete": {
