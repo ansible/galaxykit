@@ -19,7 +19,7 @@ def collection_info(client, repository, namespace, collection_name, version):
 
 
 def get_collection_list(client):
-    url = "_ui/v1/collection-versions/?sort=-pulp_created&offset=0&limit=999999"
+    url = "_ui/v1/collection-versions/?limit=999999"
     return client.get(url)
 
 
