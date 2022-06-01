@@ -205,6 +205,11 @@ KIND_OPS = {
                 "args": {
                     "username": {},
                     "password": {},
+                    "--email": {},
+                    "--first_name": {},
+                    "--groups": {},
+                    "--is_superuser": {"default": False},
+                    "--last_name": {},
                 }
             },
             "delete": {
