@@ -208,7 +208,7 @@ KIND_OPS = {
                     "--email": {},
                     "--first_name": {},
                     "--groups": {},
-                    "--is_superuser": {"default": False},
+                    "--is_superuser": {"default": False, "action": argparse.BooleanOptionalAction},
                     "--last_name": {},
                 }
             },
