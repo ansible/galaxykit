@@ -468,12 +468,11 @@ def main():
                 )
                 if created:
                     print("Created user", username)
+                elif not args.ignore:
+                    print(f"User {username} already existed")
+                    sys.exit(EXIT_NOT_FOUND)
                 else:
-                    if not args.ignore:
-                        print(f"User {username} already existed")
-                        sys.exit(EXIT_NOT_FOUND)
-                    else:
-                        print(f"User {username} already existed")
+                    print(f"User {username} already existed")
             elif args.operation == "delete":
                 username = args.username
                 try:
