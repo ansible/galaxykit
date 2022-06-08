@@ -464,7 +464,7 @@ def main():
             elif args.operation == "create":
                 username, password, email, first_name, group, is_superuser, last_name = args.username, args.password. args.email, args.first_name, args.group, args.is_superuser, args.last_name
                 created, resp = users.get_or_create_user(
-                    client, username, password, None
+                    client, username, password, email, first_name, group, is_superuser, last_name, None,
                 )
                 if created:
                     print("Created user", username)
