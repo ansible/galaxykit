@@ -207,10 +207,9 @@ KIND_OPS = {
                     "password": {},
                     "--email": {},
                     "--first_name": {},
-                    "--groups": {},
                     "--is_superuser": {
                         "default": False,
-                         "action": argparse.BooleanOptionalAction,
+                        "action": argparse.BooleanOptionalAction,
                     },
                     "--last_name": {},
                 }
@@ -462,9 +461,22 @@ def main():
                 resp = users.get_user_list(client)
                 print(format_list(resp["data"], "username"))
             elif args.operation == "create":
-                username, password, email, first_name, group, is_superuser, last_name = args.username, args.password. args.email, args.first_name, args.group, args.is_superuser, args.last_name
+                username, password, email, first_name, is_superuser, last_name = (
+                    args.username,
+                    args.password,
+                    args.email,
+                    args.first_name,
+                    args.is_superuser,
+                    args.last_name,
+                )
                 created, resp = users.get_or_create_user(
-                    client, username, password, None, first_name, last_name, email, is_superuser
+                    client,
+                    username,
+                    password,
+                    first_name,
+                    last_name,
+                    email,
+                    is_superuser,
                 )
                 if created:
                     print("Created user", username)
