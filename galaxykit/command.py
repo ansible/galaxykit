@@ -464,10 +464,10 @@ def main():
                 username, password, email, first_name, is_superuser, last_name = (
                     args.username,
                     args.password,
-                    args.email,
-                    args.first_name,
+                    args.email or "",
+                    args.first_name or "",
                     args.is_superuser,
-                    args.last_name,
+                    args.last_name or "",
                 )
                 created, resp = users.get_or_create_user(
                     client,
