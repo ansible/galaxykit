@@ -205,6 +205,13 @@ KIND_OPS = {
                 "args": {
                     "username": {},
                     "password": {},
+                    "--email": {},
+                    "--first_name": {},
+                    "--is_superuser": {
+                        "default": False,
+                        "action": argparse.BooleanOptionalAction,
+                    },
+                    "--last_name": {},
                 }
             },
             "delete": {
@@ -454,12 +461,29 @@ def main():
                 resp = users.get_user_list(client)
                 print(format_list(resp["data"], "username"))
             elif args.operation == "create":
-                username, password = args.username, args.password
+                username, password, email, first_name, is_superuser, last_name = (
+                    args.username,
+                    args.password,
+                    args.email or "",
+                    args.first_name or "",
+                    args.is_superuser,
+                    args.last_name or "",
+                )
                 created, resp = users.get_or_create_user(
-                    client, username, password, None
+                    client,
+                    username,
+                    password,
+                    None,
+                    first_name,
+                    last_name,
+                    email,
+                    is_superuser,
                 )
                 if created:
                     print("Created user", username)
+                elif not args.ignore:
+                    print(f"User {username} already existed")
+                    sys.exit(EXIT_NOT_FOUND)
                 else:
                     print(f"User {username} already existed")
             elif args.operation == "delete":
