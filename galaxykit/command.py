@@ -5,13 +5,14 @@ from pprint import pprint
 
 from .client import GalaxyClient
 from .utils import GalaxyClientError
-from . import containers
 from . import collections
+from . import container_images
+from . import containers
 from . import groups
 from . import namespaces
-from . import users
-from . import container_images
 from . import registries
+from . import roles
+from . import users
 from . import __version__ as VERSION
 
 EXIT_OK = 0
@@ -248,31 +249,72 @@ KIND_OPS = {
             "create": {
                 "args": {
                     "name": {},
-                }
+                },
             },
             "delete": {
                 "args": {
                     "name": {},
-                }
+                },
+            },
+            "role": {
+                "subops": {
+                    "list": {
+                        "args": {
+                            "groupname": {},
+                        },
+                    },
+                    "add": {
+                        "args": {
+                            "groupname": {},
+                            "rolename": {},
+                        },
+                    },
+                    "remove": {
+                        "args": {
+                            "groupname": {},
+                            "rolename": {},
+                        },
+                    },
+                },
+            },
+        },
+    },
+    "role": {
+        "help": "RBAC Role",
+        "ops": {
+            "list": {"args": None},
+            "create": {
+                "args": {
+                    "name": {},
+                    "description": {},
+                    "--permissions": {
+                        "help": "Comma-separated list of permissions",
+                    },
+                },
+            },
+            "delete": {
+                "args": {
+                    "name": {},
+                },
             },
             "perm": {
                 "subops": {
                     "list": {
                         "args": {
-                            "groupname": {},
-                        }
+                            "rolename": {},
+                        },
                     },
                     "add": {
                         "args": {
-                            "groupname": {},
+                            "rolename": {},
                             "perm": {},
-                        }
+                        },
                     },
                     "remove": {
                         "args": {
-                            "groupname": {},
+                            "rolename": {},
                             "perm": {},
-                        }
+                        },
                     },
                 },
             },
@@ -534,22 +576,50 @@ def main():
                     if not args.ignore:
                         print(e)
                         sys.exit(EXIT_NOT_FOUND)
+
+            elif args.operation == "role":
+                if args.subop == "list":
+                    resp = groups.get_roles(client, args.groupname)
+                    print(format_list(resp["results"], "role"))
+                elif args.subop == "add":
+                    resp = groups.add_role(client, args.groupname, args.rolename)
+                elif args.subop == "remove":
+                    resp = groups.remove_role(client, args.groupname, args.rolename)
+
+        elif args.kind == "role":
+            if args.operation == "list":
+                resp = roles.get_role_list(client)
+                print(format_list(resp["results"], "name"))
+            elif args.operation == "create":
+                permissions = args.permissions.split(",") if args.permissions else []
+                try:
+                    resp = roles.create_role(
+                        client, args.name, args.description, permissions
+                    )
+                except ValueError as e:
+                    if not args.ignore:
+                        print(e)
+                        sys.exit(EXIT_NOT_FOUND)
+            elif args.operation == "delete":
+                try:
+                    resp = roles.delete_role(client, args.name)
+                except ValueError as e:
+                    if not args.ignore:
+                        print(e)
+                        sys.exit(EXIT_NOT_FOUND)
+
             elif args.operation == "perm":
                 if args.subop == "list":
-                    groupname = args.groupname
-                    resp = groups.get_permissions(client, groupname)
-                    print(format_list(resp["data"], "permission"))
+                    resp = roles.get_permissions(client, args.rolename)
+                    print(resp)
                 elif args.subop == "add":
-                    groupname, perm = args.groupname, args.perm
-                    perms = [
-                        p["permission"]
-                        for p in groups.get_permissions(client, groupname)["data"]
-                    ]
-                    perms = list(set(perms) | set([perm]))
-                    resp = groups.set_permissions(client, groupname, perms)
+                    resp = roles.set_permissions(
+                        client, args.rolename, add_permissions=[args.perm]
+                    )
                 elif args.subop == "remove":
-                    groupname, perm = args.groupname, args.perm
-                    resp = groups.delete_permission(client, groupname, perm)
+                    resp = roles.set_permissions(
+                        client, args.rolename, remove_permissions=[args.perm]
+                    )
 
         elif args.kind == "namespace":
             if args.operation == "get":
