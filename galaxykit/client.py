@@ -254,12 +254,6 @@ class GalaxyClient:
         """
         return groups.delete_group(self, group_name)
 
-    def set_permissions(self, group_name, permissions):
-        """
-        Assigns the given permissions to the group
-        """
-        return groups.set_permissions(self, group_name, permissions)
-
     def get_container_readme(self, container):
         return containers.get_readme(self, container)
 
