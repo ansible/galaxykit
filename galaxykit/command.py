@@ -290,6 +290,7 @@ KIND_OPS = {
                     "--permissions": {
                         "help": "Comma-separated list of permissions",
                     },
+                    "-p": {"dest": "permissions"},
                 },
             },
             "delete": {
