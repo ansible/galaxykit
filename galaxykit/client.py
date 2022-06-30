@@ -187,6 +187,9 @@ class GalaxyClient:
     def get(self, path, *args, **kwargs):
         return self._http("get", path, *args, **kwargs)
 
+    def patch(self, *args, **kwargs):
+        return self._payload("patch", *args, **kwargs)
+
     def post(self, *args, **kwargs):
         return self._payload("post", *args, **kwargs)
 
