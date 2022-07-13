@@ -7,10 +7,9 @@ import os
 import json
 from time import sleep
 from urllib.parse import urljoin
-from pprint import pprint
 
 from orionutils.generator import build_collection
-from .client import GalaxyClientError
+from .utils import wait_for_task, logger, GalaxyClientError
 
 
 def collection_info(client, repository, namespace, collection_name, version):
@@ -189,11 +188,25 @@ def delete_collection(
     """
     Delete collection version
     """
+    logger.debug(f"Deleting {collection} from {namespace} on {client.galaxy_root}")
     if version == None:
         delete_url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/"
     else:
         delete_url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/versions/{version}/"
-    return client.delete(delete_url, parse_json=False)
+    resp = client.delete(delete_url, parse_json=False)
+    wait_for_task(client, resp)
+    return resp
+
+
+def deprecate_collection(api_client, namespace, collection, repository):
+    logger.debug(f"Deprecating {collection} in {namespace} on {api_client.galaxy_root}")
+    url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/"
+    body = {
+        "deprecated": True
+    }
+    resp = api_client.patch(url, body)
+    wait_for_task(api_client, resp)
+    return resp
 
 
 def collection_sign(

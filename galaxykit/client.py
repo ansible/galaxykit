@@ -13,11 +13,10 @@ from . import containers
 from . import containerutils
 from . import groups
 from . import users
+from . import namespaces
+from . import collections
 from . import __version__ as VERSION
-
-
-class GalaxyClientError(Exception):
-    pass
+from .utils import GalaxyClientError
 
 
 def user_agent():
@@ -193,6 +192,9 @@ class GalaxyClient:
     def put(self, *args, **kwargs):
         return self._payload("put", *args, **kwargs)
 
+    def patch(self, *args, **kwargs):
+        return self._payload("patch", *args, **kwargs)
+
     def delete(self, path, *args, **kwargs):
         return self._http("delete", path, *args, **kwargs)
 
@@ -263,3 +265,17 @@ class GalaxyClient:
 
     def set_container_readme(self, container, readme):
         return containers.set_readme(self, container, readme)
+
+    def create_namespace(self, name, group):
+        """
+        Creates a namespace
+        """
+        return namespaces.create_namespace(self, name, group)
+
+    def delete_collection(self, namespace, collection, version, repository):
+        """deletes a collection"""
+        return collections.delete_collection(self, namespace, collection, version, repository)
+
+    def deprecate_collection(self, namespace, collection, repository):
+        """deprecates a collection"""
+        return collections.deprecate_collection(self, namespace, collection, repository)

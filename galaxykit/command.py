@@ -3,7 +3,8 @@ import sys
 import json
 from pprint import pprint
 
-from .client import GalaxyClient, GalaxyClientError
+from .client import GalaxyClient
+from .utils import GalaxyClientError
 from . import containers
 from . import collections
 from . import groups
