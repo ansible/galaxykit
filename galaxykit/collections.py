@@ -198,14 +198,14 @@ def delete_collection(
     return resp
 
 
-def deprecate_collection(api_client, namespace, collection, repository):
-    logger.debug(f"Deprecating {collection} in {namespace} on {api_client.galaxy_root}")
+def deprecate_collection(client, namespace, collection, repository):
+    logger.debug(f"Deprecating {collection} in {namespace} on {client.galaxy_root}")
     url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/"
     body = {
         "deprecated": True
     }
-    resp = api_client.patch(url, body)
-    wait_for_task(api_client, resp)
+    resp = client.patch(url, body)
+    wait_for_task(client, resp)
     return resp
 
 
