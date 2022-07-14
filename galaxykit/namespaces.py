@@ -17,10 +17,7 @@ def create_namespace(client, name, group):
                     "object_roles": [],
                 }
             )
-        create_body = {
-            "name": name,
-            "groups": ns_groups
-        }
+        create_body = {"name": name, "groups": ns_groups}
         logger.debug(f"Creating namespace {name}. Request body {create_body}")
         return client.post("v3/namespaces/", create_body)
     else:
