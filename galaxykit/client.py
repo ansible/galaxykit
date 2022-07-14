@@ -274,7 +274,9 @@ class GalaxyClient:
 
     def delete_collection(self, namespace, collection, version, repository):
         """deletes a collection"""
-        return collections.delete_collection(self, namespace, collection, version, repository)
+        return collections.delete_collection(
+            self, namespace, collection, version, repository
+        )
 
     def deprecate_collection(self, namespace, collection, repository):
         """deprecates a collection"""
