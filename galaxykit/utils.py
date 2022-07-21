@@ -35,7 +35,7 @@ def wait_for_task(api_client, task, timeout=300, raise_on_error=False):
                 logger.error(resp["error"])
                 if raise_on_error:
                     raise TaskFailed(resp["error"])
-        except BaseException as e:
+        except GalaxyClientError as e:
             if "500" not in str(e):
                 raise
         else:
