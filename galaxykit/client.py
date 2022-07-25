@@ -13,6 +13,9 @@ from . import containers
 from . import containerutils
 from . import groups
 from . import users
+from . import namespaces
+from . import collections
+from . import roles
 from . import __version__ as VERSION
 
 
@@ -196,6 +199,9 @@ class GalaxyClient:
     def put(self, *args, **kwargs):
         return self._payload("put", *args, **kwargs)
 
+    def patch(self, *args, **kwargs):
+        return self._payload("patch", *args, **kwargs)
+
     def delete(self, path, *args, **kwargs):
         return self._http("delete", path, *args, **kwargs)
 
@@ -260,3 +266,49 @@ class GalaxyClient:
 
     def set_container_readme(self, container, readme):
         return containers.set_readme(self, container, readme)
+
+    def create_namespace(self, name, group):
+        """
+        Creates a namespace
+        """
+        return namespaces.create_namespace(self, name, group)
+
+    def delete_collection(self, namespace, collection, version, repository):
+        """deletes a collection"""
+        return collections.delete_collection(
+            self, namespace, collection, version, repository
+        )
+
+    def deprecate_collection(self, namespace, collection, repository):
+        """deprecates a collection"""
+        return collections.deprecate_collection(self, namespace, collection, repository)
+
+    def create_role(self, role_name, description, permissions):
+        """
+        Creates a role
+        """
+        return roles.create_role(self, role_name, description, permissions)
+
+    def delete_role(self, role_name):
+        """
+        Deletes a role
+        """
+        return roles.delete_role(self, role_name)
+
+    def get_role(self, role_name):
+        """
+        Gets a role
+        """
+        return roles.get_role(self, role_name)
+
+    def patch_update_role(self, role_name, updated_body):
+        """
+        Updates a role
+        """
+        return roles.patch_update_role(self, role_name, updated_body)
+
+    def put_update_role(self, role_name, updated_body):
+        """
+        Updates a role
+        """
+        return roles.put_update_role(self, role_name, updated_body)
