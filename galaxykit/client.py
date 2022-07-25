@@ -9,6 +9,7 @@ from simplejson import dumps
 
 import requests
 
+from .utils import GalaxyClientError
 from . import containers
 from . import containerutils
 from . import groups
@@ -17,10 +18,6 @@ from . import namespaces
 from . import collections
 from . import roles
 from . import __version__ as VERSION
-
-
-class GalaxyClientError(Exception):
-    pass
 
 
 def user_agent():

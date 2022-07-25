@@ -10,7 +10,7 @@ from urllib.parse import urljoin
 from pprint import pprint
 
 from orionutils.generator import build_collection
-from .client import GalaxyClientError
+from .utils import GalaxyClientError
 
 
 def collection_info(client, repository, namespace, collection_name, version):

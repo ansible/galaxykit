@@ -3,7 +3,8 @@ import sys
 import json
 from pprint import pprint
 
-from .client import GalaxyClient, GalaxyClientError
+from .client import GalaxyClient
+from .utils import GalaxyClientError
 from . import collections
 from . import container_images
 from . import containers
@@ -289,7 +290,7 @@ KIND_OPS = {
                     "--permissions": {
                         "help": "Comma-separated list of permissions",
                     },
-                    "-p": { "dest": "permissions" },
+                    "-p": {"dest": "permissions"},
                 },
             },
             "delete": {
