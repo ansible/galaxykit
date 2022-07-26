@@ -47,3 +47,9 @@ def wait_for_task(api_client, task, timeout=300, raise_on_error=False):
 
 class GalaxyClientError(Exception):
     pass
+
+
+class GalaxyClientHttpError(GalaxyClientError):
+    def __init__(self, http_error_codes):
+        super().__init__(http_error_codes)
+        self.http_error_codes = http_error_codes

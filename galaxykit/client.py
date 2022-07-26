@@ -16,7 +16,7 @@ from . import users
 from . import namespaces
 from . import collections
 from . import __version__ as VERSION
-from .utils import GalaxyClientError
+from .utils import GalaxyClientHttpError
 
 
 def user_agent():
@@ -163,10 +163,11 @@ class GalaxyClient:
                 print(resp.text)
                 raise ValueError("Failed to parse JSON response from API") from exc
             if "errors" in json:
-                # {'errors': [{'status': '403', 'code': 'not_authenticated', 'title': 'Authentication credentials were not provided.'}]}
-                raise GalaxyClientError(*json["errors"])
+                raise GalaxyClientHttpError(json["errors"])
             return json
         else:
+            if resp.status_code > 400:
+                raise GalaxyClientHttpError(resp.status_code)
             return resp
 
     def _payload(self, method, path, body, *args, **kwargs):
