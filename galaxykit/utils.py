@@ -3,7 +3,6 @@ import logging
 import json
 import time
 from urllib.parse import urljoin
-from ansible.galaxy.api import GalaxyError
 
 
 logger = logging.getLogger(__name__)
@@ -16,6 +15,10 @@ class TaskWaitingTimeout(Exception):
 class TaskFailed(Exception):
     def __init__(self, message):
         self.message = message
+
+
+class GalaxyClientError(Exception):
+    pass
 
 
 def wait_for_task(api_client, task, timeout=300, raise_on_error=False):
@@ -36,14 +39,10 @@ def wait_for_task(api_client, task, timeout=300, raise_on_error=False):
                 logger.error(resp["error"])
                 if raise_on_error:
                     raise TaskFailed(resp["error"])
-        except GalaxyError as e:
+        except GalaxyClientError as e:
             if "500" not in str(e):
                 raise
         else:
             ready = resp["state"] not in ("running", "waiting")
         time.sleep(5)
     return resp
-
-
-class GalaxyClientError(Exception):
-    pass
