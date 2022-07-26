@@ -17,6 +17,10 @@ class TaskFailed(Exception):
         self.message = message
 
 
+class GalaxyClientError(Exception):
+    pass
+
+
 def wait_for_task(api_client, task, timeout=300, raise_on_error=False):
     if isinstance(task, dict):
         url = urljoin(api_client.galaxy_root, task["task"])
@@ -42,7 +46,3 @@ def wait_for_task(api_client, task, timeout=300, raise_on_error=False):
             ready = resp["state"] not in ("running", "waiting")
         time.sleep(5)
     return resp
-
-
-class GalaxyClientError(Exception):
-    pass
