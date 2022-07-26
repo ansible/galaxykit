@@ -166,7 +166,7 @@ class GalaxyClient:
                 raise GalaxyClientHttpError(json["errors"])
             return json
         else:
-            if resp.status_code > 400:
+            if resp.status_code >= 400:
                 raise GalaxyClientHttpError(resp.status_code)
             return resp
 
