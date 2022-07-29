@@ -10,7 +10,7 @@ def community_remote_config(
         "username": username,
         "password": password,
         "tls_validation": tls_validation,
-        "signed_only": signed_only
+        "signed_only": signed_only,
     }
     return client.put(remote_url, body)
 
