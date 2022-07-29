@@ -4,7 +4,7 @@ def community_remote_config(
     """
     Configures community remote repository
     """
-    remote_url = 'content/community/v3/sync/config/'
+    remote_url = "content/community/v3/sync/config/"
     body = {
         "url": url,
         "username": username,
