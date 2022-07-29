@@ -9,14 +9,15 @@ from simplejson import dumps
 
 import requests
 
+from .utils import GalaxyClientError
 from . import containers
 from . import containerutils
 from . import groups
 from . import users
 from . import namespaces
 from . import collections
+from . import roles
 from . import __version__ as VERSION
-from .utils import GalaxyClientError
 
 
 def user_agent():
@@ -163,10 +164,11 @@ class GalaxyClient:
                 print(resp.text)
                 raise ValueError("Failed to parse JSON response from API") from exc
             if "errors" in json:
-                # {'errors': [{'status': '403', 'code': 'not_authenticated', 'title': 'Authentication credentials were not provided.'}]}
                 raise GalaxyClientError(*json["errors"])
             return json
         else:
+            if resp.status_code >= 400:
+                raise GalaxyClientError(resp.status_code)
             return resp
 
     def _payload(self, method, path, body, *args, **kwargs):
@@ -254,23 +256,17 @@ class GalaxyClient:
         """
         return groups.delete_group(self, group_name)
 
-    def set_permissions(self, group_name, permissions):
-        """
-        Assigns the given permissions to the group
-        """
-        return groups.set_permissions(self, group_name, permissions)
-
     def get_container_readme(self, container):
         return containers.get_readme(self, container)
 
     def set_container_readme(self, container, readme):
         return containers.set_readme(self, container, readme)
 
-    def create_namespace(self, name, group):
+    def create_namespace(self, name, group, object_roles=None):
         """
         Creates a namespace
         """
-        return namespaces.create_namespace(self, name, group)
+        return namespaces.create_namespace(self, name, group, object_roles)
 
     def delete_collection(self, namespace, collection, version, repository):
         """deletes a collection"""
@@ -281,3 +277,45 @@ class GalaxyClient:
     def deprecate_collection(self, namespace, collection, repository):
         """deprecates a collection"""
         return collections.deprecate_collection(self, namespace, collection, repository)
+
+    def create_role(self, role_name, description, permissions):
+        """
+        Creates a role
+        """
+        return roles.create_role(self, role_name, description, permissions)
+
+    def delete_role(self, role_name):
+        """
+        Deletes a role
+        """
+        return roles.delete_role(self, role_name)
+
+    def get_role(self, role_name):
+        """
+        Gets a role
+        """
+        return roles.get_role(self, role_name)
+
+    def patch_update_role(self, role_name, updated_body):
+        """
+        Updates a role
+        """
+        return roles.patch_update_role(self, role_name, updated_body)
+
+    def put_update_role(self, role_name, updated_body):
+        """
+        Updates a role
+        """
+        return roles.put_update_role(self, role_name, updated_body)
+
+    def add_user_to_group(self, username, group_id):
+        """
+        Adds a user to a group
+        """
+        return groups.add_user_to_group(self, username, group_id)
+
+    def add_role_to_group(self, role_name, group_id):
+        """
+        Adds a role to a group
+        """
+        return groups.add_role_to_group(self, role_name, group_id)

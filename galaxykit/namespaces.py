@@ -2,11 +2,12 @@ from . import groups
 from .utils import logger
 
 
-def create_namespace(client, name, group):
+def create_namespace(client, name, group, object_roles=None):
     try:
         get_namespace(client, name)
     except KeyError:
         ns_groups = []
+        object_roles = [] if object_roles is None else object_roles
         if group:
             group_id = groups.get_group_id(client, group)
             ns_groups.append(
@@ -14,7 +15,7 @@ def create_namespace(client, name, group):
                     "id": group_id,
                     "name": group,
                     "object_permissions": ["change_namespace", "upload_to_namespace"],
-                    "object_roles": [],
+                    "object_roles": object_roles,
                 }
             )
         create_body = {"name": name, "groups": ns_groups}
