@@ -1,4 +1,6 @@
-def community_remote_config(client, url, username, password, tls_validation=False, signed_only=True):
+def community_remote_config(
+    client, url, username, password, tls_validation=False, signed_only=True
+):
     """
     Configures community remote repository
     """
