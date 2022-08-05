@@ -1,14 +1,16 @@
-def community_remote_config(client, url, username, password, tls_validation=False, signed_only=True):
+def community_remote_config(
+    client, url, username, password, tls_validation=False, signed_only=True
+):
     """
     Configures community remote repository
     """
-    remote_url = 'content/community/v3/sync/config/'
+    remote_url = "content/community/v3/sync/config/"
     body = {
         "url": url,
         "username": username,
         "password": password,
         "tls_validation": tls_validation,
-        "signed_only": signed_only
+        "signed_only": signed_only,
     }
     return client.put(remote_url, body)
 
