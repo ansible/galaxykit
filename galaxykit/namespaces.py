@@ -23,7 +23,7 @@ def create_namespace(client, name, group, object_roles=None):
         return client.post("v3/namespaces/", create_body)
     else:
         if group:
-            add_group(client, name, group)
+            add_group(client, name, group, object_roles)
 
 
 def get_namespace(client, name):
@@ -53,14 +53,16 @@ def update_namespace(client, namespace):
     return client.put(f"v3/namespaces/{name}/", namespace)
 
 
-def add_group(client, ns_name, group_name):
+def add_group(client, ns_name, group_name, object_roles=None):
     namespace = get_namespace(client, ns_name)
     group = groups.get_group(client, group_name)
+    object_roles = [] if object_roles is None else object_roles
     namespace["groups"].append(
         {
             "id": group["id"],
             "name": group["name"],
             "object_permissions": ["change_namespace", "upload_to_namespace"],
+            "object_roles": object_roles,
         }
     )
     return update_namespace(client, namespace)
