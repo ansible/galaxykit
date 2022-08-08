@@ -11,24 +11,12 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: "3.8"
-
-      - name: Checking dir
-        run: echo $(ls)
-
-      - name: Update apt
-        run: sudo apt update
-
-      - name: Install pip
-        run: sudo apt install pip
         
       - name: install dependencies
-        run: sudo pip install requests simplejson orionutils pyyaml
-
-      - name: install dependencies_olny_simplejson
-        run: sudo pip install simplejson
-  
-      - name: Python is running
-        run: python -c 'print("Hi")'
+        run: pip install --user --upgrade --editable .
 
       - name: Galaxykit help is running
-        run: python -c 'from galaxykit.command import main;main();' -u admin -p admin --help
+        run: galaxykit -u admin -p admin --help
+
+      - name: Galaxykit greet is running
+        run: galaxykit -u admin -p admin greet hello
