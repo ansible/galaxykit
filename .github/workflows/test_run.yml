@@ -20,3 +20,4 @@ jobs:
 
       - name: Galaxykit greet is running
         run: galaxykit -u admin -p admin greet hello
+        
