@@ -131,7 +131,6 @@ class GalaxyClient:
                     container_registry,
                     tls_verify=container_tls_verify,
                 )
-    
     def _refresh_jwt_token(self):
         if not self.original_token:
             self.original_token = self.token
@@ -173,7 +172,7 @@ class GalaxyClient:
             method, url, headers=headers, verify=self.https_verify, *args, **kwargs
         )
 
-        if 'Invalid JWT token' in resp.text and 'claim expired' in resp.text:
+        if "Invalid JWT token" in resp.text and "claim expired" in resp.text:
             self._refresh_jwt_token()
             self._update_auth_headers()
             resp = requests.request(
