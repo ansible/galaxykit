@@ -40,6 +40,7 @@ class GalaxyClient:
 
     headers = None
     galaxy_root = ""
+    original_token = None
     token = ""
     token_type = None
     container_client = None
@@ -96,23 +97,7 @@ class GalaxyClient:
                 self.token = jdata["access_token"]
 
             elif self.token and self.auth_url:
-                payload = "grant_type=refresh_token&client_id=%s&refresh_token=%s" % (
-                    "cloud-services",
-                    self.token,
-                )
-                headers = {
-                    "User-Agent": user_agent(),
-                    "Content-Type": "application/x-www-form-urlencoded",
-                }
-                resp = requests.post(
-                    self.auth_url,
-                    data=payload,
-                    verify=self.https_verify,
-                    headers=headers,
-                )
-                json = resp.json()
-                self.token = json["access_token"]
-                self.token_type = "Bearer"
+                self._refresh_jwt_token()
 
             elif self.token is None:
                 auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
@@ -124,12 +109,7 @@ class GalaxyClient:
                 except JSONDecodeError:
                     print(f"Failed to fetch token: {resp.text}", file=sys.stderr)
 
-            self.headers.update(
-                {
-                    "Accept": "application/json",
-                    "Authorization": f"{self.token_type} {self.token}",
-                }
-            )
+            self._update_auth_headers()
 
             if container_engine:
                 if not (self.username and self.password):
@@ -147,6 +127,38 @@ class GalaxyClient:
                     container_registry,
                     tls_verify=container_tls_verify,
                 )
+    
+    def _refresh_jwt_token(self):
+        if not self.original_token:
+            self.original_token = self.token
+        else:
+            print("!!!! REFRESHING JWT TOKEN !!!!")
+
+        payload = "grant_type=refresh_token&client_id=%s&refresh_token=%s" % (
+            "cloud-services",
+            self.original_token,
+        )
+        headers = {
+            "User-Agent": user_agent(),
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+        resp = requests.post(
+            self.auth_url,
+            data=payload,
+            verify=self.https_verify,
+            headers=headers,
+        )
+        json = resp.json()
+        self.token = json["access_token"]
+        self.token_type = "Bearer"
+
+    def _update_auth_headers(self):
+        self.headers.update(
+            {
+                "Accept": "application/json",
+                "Authorization": f"{self.token_type} {self.token}",
+            }
+        )
 
     def _http(self, method, path, *args, **kwargs):
         url = urljoin(self.galaxy_root, path)
@@ -156,11 +168,18 @@ class GalaxyClient:
         resp = requests.request(
             method, url, headers=headers, verify=self.https_verify, *args, **kwargs
         )
+
+        if 'Invalid JWT token' in resp.text and 'claim expired' in resp.text:
+            self._refresh_jwt_token()
+            self._update_auth_headers()
+            resp = requests.request(
+                method, url, headers=headers, verify=self.https_verify, *args, **kwargs
+            )
+
         if parse_json:
             try:
                 json = resp.json()
             except JSONDecodeError as exc:
-                print(resp.text)
                 raise ValueError("Failed to parse JSON response from API") from exc
             if "errors" in json:
                 # {'errors': [{'status': '403', 'code': 'not_authenticated', 'title': 'Authentication credentials were not provided.'}]}
