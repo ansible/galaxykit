@@ -131,6 +131,7 @@ class GalaxyClient:
                     container_registry,
                     tls_verify=container_tls_verify,
                 )
+
     def _refresh_jwt_token(self):
         if not self.original_token:
             self.original_token = self.token
