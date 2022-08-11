@@ -1,6 +1,7 @@
 """
 client.py contains the wrapping interface for all the other modules (aside from cli.py)
 """
+import logging
 import platform
 import sys
 from urllib.parse import urlparse, urljoin
@@ -17,6 +18,9 @@ from . import namespaces
 from . import collections
 from . import __version__ as VERSION
 from .utils import GalaxyClientError
+
+
+logger = logging.getLogger(__name__)
 
 
 def user_agent():
@@ -132,7 +136,7 @@ class GalaxyClient:
         if not self.original_token:
             self.original_token = self.token
         else:
-            print("!!!! REFRESHING JWT TOKEN !!!!")
+            logger.warning("Refreshing JWT Token and retrying request")
 
         payload = "grant_type=refresh_token&client_id=%s&refresh_token=%s" % (
             "cloud-services",
