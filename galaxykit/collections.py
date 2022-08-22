@@ -17,6 +17,11 @@ def collection_info(client, repository, namespace, collection_name, version):
     return client.get(url)
 
 
+def get_collection(client, namespace, collection_name, version):
+    collection_url = f"v3/collections/{namespace}/{collection_name}/versions/{version}/"
+    return client.get(collection_url)
+
+
 def get_collection_list(client):
     url = "_ui/v1/collection-versions/?limit=999999"
     return client.get(url)

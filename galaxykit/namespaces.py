@@ -2,11 +2,12 @@ from . import groups
 from .utils import logger
 
 
-def create_namespace(client, name, group):
+def create_namespace(client, name, group, object_roles=None):
     try:
         get_namespace(client, name)
     except KeyError:
         ns_groups = []
+        object_roles = [] if object_roles is None else object_roles
         if group:
             group_id = groups.get_group_id(client, group)
             ns_groups.append(
@@ -14,7 +15,7 @@ def create_namespace(client, name, group):
                     "id": group_id,
                     "name": group,
                     "object_permissions": ["change_namespace", "upload_to_namespace"],
-                    "object_roles": [],
+                    "object_roles": object_roles,
                 }
             )
         create_body = {"name": name, "groups": ns_groups}
@@ -22,7 +23,7 @@ def create_namespace(client, name, group):
         return client.post("v3/namespaces/", create_body)
     else:
         if group:
-            add_group(client, name, group)
+            add_group(client, name, group, object_roles)
 
 
 def get_namespace(client, name):
@@ -52,14 +53,16 @@ def update_namespace(client, namespace):
     return client.put(f"v3/namespaces/{name}/", namespace)
 
 
-def add_group(client, ns_name, group_name):
+def add_group(client, ns_name, group_name, object_roles=None):
     namespace = get_namespace(client, ns_name)
     group = groups.get_group(client, group_name)
+    object_roles = [] if object_roles is None else object_roles
     namespace["groups"].append(
         {
             "id": group["id"],
             "name": group["name"],
-            "object_roles": ["galaxy.namespace_owner"],
+            "object_permissions": ["change_namespace", "upload_to_namespace"],
+            "object_roles": object_roles,
         }
     )
     return update_namespace(client, namespace)
