@@ -59,7 +59,7 @@ def add_group(client, ns_name, group_name):
         {
             "id": group["id"],
             "name": group["name"],
-            "object_roles": ["galaxy.namespace_owner"],
+            "object_roles": ["galaxy.collection_namespace_owner"],
         }
     )
     return update_namespace(client, namespace)
