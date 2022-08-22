@@ -1,3 +1,31 @@
+## Version 0.8.0
+Remove references to GalaxyError (#55)
+commit utils.py (#54)
+added methods for sync testing
+Keep python3.8 compatibility - argparse.BooleanOptionalAction is 3.9+; fix superuser creation
+Merge pull request #49 from ShaiahWren/add-extra-fields-user-create
+Merge pull request #47 from himdel/command-parse
+command: create subparsers from data
+Merge pull request #45 from ansible/add-repo-options
+Add support for listing and deleting all collections
+Delete Collections - add ability to delete collections in different repositories (#25)
+Merge pull request #44 from ansible/add-version-upload
+Added support for upload exact collection version
+collection info, collection delete - use v3/plugin/ansible/ URLs (#42)
+Use user+pass to fetch an auth_token from Keycloak  (#41)
+Merge pull request #40 from himdel/ee_include_tags_latest
+container create: add include_tags=latest
+Add a default tag to the new collections to pass cloud requirements. (#38)
+fix sso auth for collection uploads (#37)
+Add CONTRIBUTE.md for guidance (#32)
+Fix github action - allow the workflow to add suggestions, not just warnings
+Added support for Keycloak and collection signing (#28)
+Create container exclude and include tags addition
+Remove username and password from create registry
+Create EE container
+User remove group + regitry create
+Add github action to run black and suggest the changes
+Run black, commit results
 ## Version 0.7.0
 * Add CLI command and function for listing namespaces.
 * Support for deletion of Collections (both versions and whole), Namespaces, Containers, Container Images, Execution Enviroments Registry.

@@ -105,3 +105,4 @@ venv.bak/
 # Editors
 .vscode/
 .idea/
+.*.sw[po]
