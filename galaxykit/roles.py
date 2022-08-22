@@ -53,7 +53,28 @@ def create_role(client, role_name, description, permissions):
     return resp
 
 
+def patch_update_role(client, role_name, updated_body):
+    """
+    Updates a role. It can be partially updated.
+    """
+    role = get_role(client, role_name)
+    pulp_href = role["pulp_href"]
+    return client.patch(pulp_href, updated_body)
+
+
+def put_update_role(client, role_name, updated_body):
+    """
+    Updates a role. Entire data has to be provided.
+    """
+    role = get_role(client, role_name)
+    pulp_href = role["pulp_href"]
+    return client.put(pulp_href, updated_body)
+
+
 def delete_role(client, role_name):
+    """
+    Deletes an rbac role
+    """
     role_id = get_role_id(client, role_name)
     delete_url = f"pulp/api/v3/roles/{role_id}/"
     return client.delete(delete_url, parse_json=False)

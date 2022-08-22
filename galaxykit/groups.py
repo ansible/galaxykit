@@ -86,3 +86,21 @@ def get_group_list(client):
     Returns list of group names of groups in the system
     """
     return client.get("_ui/v1/groups/")
+
+
+def add_user_to_group(client, username, group_id):
+    """
+    Adds a user to a group
+    """
+    user_to_group_url = f"_ui/v1/groups/{group_id}/users/"
+    user_to_group_body = {"username": username}
+    return client.post(user_to_group_url, user_to_group_body)
+
+
+def add_role_to_group(client, role_name, group_id):
+    """
+    Adds a role to a group
+    """
+    role_to_group_url = f"pulp/api/v3/groups/{group_id}/roles/"
+    body = {"role": role_name, "content_object": None}
+    return client.post(role_to_group_url, body)
