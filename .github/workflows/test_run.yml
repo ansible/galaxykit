@@ -1,0 +1,22 @@
+name: "Test run"
+
+on: [ 'pull_request' ]
+
+jobs:
+  test_run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+
+      - name: install dependencies
+        run: pip install --user --upgrade --editable .
+
+      - name: Galaxykit help is running
+        run: galaxykit -u admin -p admin --help
+
+      - name: Galaxykit greet is running
+        run: galaxykit -u admin -p admin greet hello

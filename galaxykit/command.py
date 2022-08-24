@@ -14,6 +14,7 @@ from . import registries
 from . import roles
 from . import users
 from . import __version__ as VERSION
+from . import greet
 
 EXIT_OK = 0
 EXIT_UNKNOWN_ERROR = 1
@@ -43,6 +44,15 @@ def report_error(resp):
 
 # galaxykit <kind> <operation> [<subop>] (args)
 KIND_OPS = {
+    "greet": {
+        "help": "Prints hello using help op.",
+        "ops": {
+            "hello": {
+                "help": "Prints hello.",
+                "args": None,
+            },
+        },
+    },
     "collection": {
         "help": "Collection",
         "ops": {
@@ -495,6 +505,10 @@ def main():
             "username": args.auth_username,
             "password": args.auth_password,
         }
+
+    if args.kind == "greet":
+        creds = None
+
     client = GalaxyClient(args.server, creds, https_verify=https_verify)
 
     resp = None
@@ -806,6 +820,10 @@ def main():
                 url = args.url
                 body = sys.stdin.read()
                 print(json.dumps(client.post(url, body)))
+
+        elif args.kind == "greet":
+            if args.operation == "hello":
+                greet.hello()
 
         if resp and not args.ignore:
             report_error(resp)
