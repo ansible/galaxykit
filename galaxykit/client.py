@@ -19,7 +19,7 @@ from . import namespaces
 from . import collections
 from . import roles
 from . import __version__ as VERSION
-
+from pkg_resources import parse_version
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +51,7 @@ class GalaxyClient:
     container_client = None
     username = ""
     password = ""
+    rbac_enabled = None
 
     def __init__(
         self,
@@ -132,6 +133,7 @@ class GalaxyClient:
                     container_registry,
                     tls_verify=container_tls_verify,
                 )
+        self.rbac_enabled = self.is_rbac_available()
 
     def _refresh_jwt_token(self):
         if not self.original_token:
@@ -342,3 +344,7 @@ class GalaxyClient:
         Adds a role to a group
         """
         return groups.add_role_to_group(self, role_name, group_id)
+
+    def is_rbac_available(self):
+        galaxy_ng_version = self.get("")["galaxy_ng_version"]
+        return parse_version(galaxy_ng_version) >= parse_version("4.6.0dev")
