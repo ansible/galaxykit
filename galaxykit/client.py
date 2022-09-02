@@ -166,6 +166,11 @@ class GalaxyClient:
             }
         )
 
+    def _is_rbac_available(self):
+        resp = requests.get(self.galaxy_root, headers=self.headers)
+        galaxy_ng_version = resp.json()["galaxy_ng_version"]
+        return parse_version(galaxy_ng_version) >= parse_version("4.6.0dev")
+
     def _http(self, method, path, *args, **kwargs):
         if self.rbac_enabled is None:
             self.rbac_enabled = self._is_rbac_available()
@@ -346,7 +351,3 @@ class GalaxyClient:
         Adds a role to a group
         """
         return groups.add_role_to_group(self, role_name, group_id)
-
-    def _is_rbac_available(self):
-        galaxy_ng_version = self.get("")["galaxy_ng_version"]
-        return parse_version(galaxy_ng_version) >= parse_version("4.6.0dev")
