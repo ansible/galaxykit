@@ -133,7 +133,6 @@ class GalaxyClient:
                     container_registry,
                     tls_verify=container_tls_verify,
                 )
-        self.rbac_enabled = self._is_rbac_available()
 
     def _refresh_jwt_token(self):
         if not self.original_token:
@@ -168,6 +167,9 @@ class GalaxyClient:
         )
 
     def _http(self, method, path, *args, **kwargs):
+        if self.rbac_enabled is None:
+            self.rbac_enabled = self._is_rbac_available()
+
         url = urljoin(self.galaxy_root, path)
         headers = kwargs.pop("headers", self.headers)
         parse_json = kwargs.pop("parse_json", True)
