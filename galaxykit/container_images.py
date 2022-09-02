@@ -9,7 +9,7 @@ def delete_container(client, container, image):
     return client.delete(delete_url, parse_json=False)
 
 
-def get_container(client, container):
+def get_container_images(client, container):
     """
     Gets container images
     """
