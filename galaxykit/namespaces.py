@@ -11,14 +11,12 @@ def create_namespace(client, name, group, object_roles=None):
         if group:
             group_id = groups.get_group_id(client, group)
             _group = {
-                    "id": group_id,
-                    "name": group,
-                    "object_permissions": ["change_namespace", "upload_to_namespace"],
-                }
+                "id": group_id,
+                "name": group,
+                "object_permissions": ["change_namespace", "upload_to_namespace"],
+            }
             if client.rbac_enabled:
                 _group["object_roles"] = object_roles
-            else:
-                logger.debug(f"Ignoring object_roles {object_roles}. RBAC not available.")
             ns_groups.append(_group)
         create_body = {"name": name, "groups": ns_groups}
         logger.debug(f"Creating namespace {name}. Request body {create_body}")
@@ -60,14 +58,12 @@ def add_group(client, ns_name, group_name, object_roles=None):
     group = groups.get_group(client, group_name)
     object_roles = [] if object_roles is None else object_roles
     _group = {
-            "id": group["id"],
-            "name": group["name"],
-            "object_permissions": ["change_namespace", "upload_to_namespace"],
-        }
+        "id": group["id"],
+        "name": group["name"],
+        "object_permissions": ["change_namespace", "upload_to_namespace"],
+    }
     if client.rbac_enabled:
         _group["object_roles"] = object_roles
-    else:
-        logger.debug(f"Ignoring object_roles {object_roles}. RBAC not available.")
     namespace["groups"].append(_group)
     return update_namespace(client, namespace)
 
