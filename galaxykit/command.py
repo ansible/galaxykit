@@ -506,9 +506,6 @@ def main():
             "password": args.auth_password,
         }
 
-    if args.kind == "greet":
-        creds = None
-
     client = GalaxyClient(args.server, creds, https_verify=https_verify)
 
     resp = None
