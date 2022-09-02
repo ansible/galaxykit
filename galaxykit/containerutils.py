@@ -54,6 +54,7 @@ class ContainerClient:
             run_args.append(f"--tls-verify={self.tls_verify}")
         try:
             run(run_args)
+            logger.debug(f"Logged in with user {username}")
         except FileNotFoundError:
             if fail_ok:
                 logger.warn(f"Container engine '{self.engine}' not found.")
@@ -95,4 +96,4 @@ class ContainerClient:
         if self.engine == "podman":
             run_args.append(f"--tls-verify={self.tls_verify}")
 
-        run(run_args)
+        return run(run_args, capture_output=True).returncode

@@ -7,6 +7,7 @@ import sys
 from urllib.parse import urlparse, urljoin
 from simplejson.errors import JSONDecodeError
 from simplejson import dumps
+from pkg_resources import parse_version
 
 import requests
 
@@ -19,7 +20,6 @@ from . import namespaces
 from . import collections
 from . import roles
 from . import __version__ as VERSION
-
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +51,7 @@ class GalaxyClient:
     container_client = None
     username = ""
     password = ""
+    rbac_enabled = None
 
     def __init__(
         self,
@@ -166,6 +167,9 @@ class GalaxyClient:
         )
 
     def _http(self, method, path, *args, **kwargs):
+        if self.rbac_enabled is None:
+            self.rbac_enabled = self._is_rbac_available()
+
         url = urljoin(self.galaxy_root, path)
         headers = kwargs.pop("headers", self.headers)
         parse_json = kwargs.pop("parse_json", True)
@@ -342,3 +346,7 @@ class GalaxyClient:
         Adds a role to a group
         """
         return groups.add_role_to_group(self, role_name, group_id)
+
+    def _is_rbac_available(self):
+        galaxy_ng_version = self.get("")["galaxy_ng_version"]
+        return parse_version(galaxy_ng_version) >= parse_version("4.6.0dev")

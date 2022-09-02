@@ -10,14 +10,14 @@ def create_namespace(client, name, group, object_roles=None):
         object_roles = [] if object_roles is None else object_roles
         if group:
             group_id = groups.get_group_id(client, group)
-            ns_groups.append(
-                {
-                    "id": group_id,
-                    "name": group,
-                    "object_permissions": ["change_namespace", "upload_to_namespace"],
-                    "object_roles": object_roles,
-                }
-            )
+            _group = {
+                "id": group_id,
+                "name": group,
+                "object_permissions": ["change_namespace", "upload_to_namespace"],
+            }
+            if client.rbac_enabled:
+                _group["object_roles"] = object_roles
+            ns_groups.append(_group)
         create_body = {"name": name, "groups": ns_groups}
         logger.debug(f"Creating namespace {name}. Request body {create_body}")
         return client.post("v3/namespaces/", create_body)
@@ -57,14 +57,14 @@ def add_group(client, ns_name, group_name, object_roles=None):
     namespace = get_namespace(client, ns_name)
     group = groups.get_group(client, group_name)
     object_roles = [] if object_roles is None else object_roles
-    namespace["groups"].append(
-        {
-            "id": group["id"],
-            "name": group["name"],
-            "object_permissions": ["change_namespace", "upload_to_namespace"],
-            "object_roles": object_roles,
-        }
-    )
+    _group = {
+        "id": group["id"],
+        "name": group["name"],
+        "object_permissions": ["change_namespace", "upload_to_namespace"],
+    }
+    if client.rbac_enabled:
+        _group["object_roles"] = object_roles
+    namespace["groups"].append(_group)
     return update_namespace(client, namespace)
 
 
