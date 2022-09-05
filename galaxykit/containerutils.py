@@ -67,7 +67,9 @@ class ContainerClient:
         pull an image from the configured default registry
         """
         if self.engine == "podman" and not self.tls_verify:
-            run_command([self.engine, "pull", self.registry + image_name, "--tls-verify=False"])
+            run_command(
+                [self.engine, "pull", self.registry + image_name, "--tls-verify=False"]
+            )
         else:
             run_command([self.engine, "pull", self.registry + image_name])
 
@@ -106,7 +108,7 @@ def run_command(run_args):
         # python 3.6 or higher
         result = run(run_args, capture_output=True)
     except TypeError:
-        # older version of python
+        # older versions of python
         result = run(run_args, stderr=PIPE, stdout=PIPE)
     finally:
         logger.debug(f"Run command stderr: {result.stderr.decode('utf-8')}")
