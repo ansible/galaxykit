@@ -95,5 +95,9 @@ class ContainerClient:
 
         if self.engine == "podman":
             run_args.append(f"--tls-verify={self.tls_verify}")
-
-        return run(run_args, capture_output=True).returncode
+        try:
+            # python 3.6 or higher
+            return run(run_args, capture_output=True).returncode
+        except TypeError:
+            # older version of python
+            return run(run_args, stderr=PIPE, stdout=PIPE).returncode
