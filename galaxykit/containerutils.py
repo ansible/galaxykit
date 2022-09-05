@@ -54,7 +54,7 @@ class ContainerClient:
         if self.engine == "podman":
             run_args.append(f"--tls-verify={self.tls_verify}")
         try:
-            run(run_args)
+            run_command(run_args)
             logger.debug(f"Logged in with user {username}")
         except FileNotFoundError:
             if fail_ok:
@@ -67,9 +67,9 @@ class ContainerClient:
         pull an image from the configured default registry
         """
         if self.engine == "podman" and not self.tls_verify:
-            run([self.engine, "pull", self.registry + image_name, "--tls-verify=False"])
+            run_command([self.engine, "pull", self.registry + image_name, "--tls-verify=False"])
         else:
-            run([self.engine, "pull", self.registry + image_name])
+            run_command([self.engine, "pull", self.registry + image_name])
 
     def tag_image(self, image_name, image_tag):
         """
@@ -84,7 +84,7 @@ class ContainerClient:
             image_name,
             full_tag,
         ]
-        run(run_args)
+        run_command(run_args)
 
     def push_image(self, image_tag):
         """
@@ -96,12 +96,20 @@ class ContainerClient:
 
         if self.engine == "podman":
             run_args.append(f"--tls-verify={self.tls_verify}")
-        try:
-            # python 3.6 or higher
-            result = run(run_args, capture_output=True)
-        except TypeError:
-            # older version of python
-            result = run(run_args, stderr=PIPE, stdout=PIPE)
-        finally:
-            logger.debug(result.stderr.decode("utf-8"))
-            return result.returncode
+
+        return run_command(run_args)
+
+
+def run_command(run_args):
+    logger.debug(f"Run command run_args: {' '.join(run_args)}")
+    try:
+        # python 3.6 or higher
+        result = run(run_args, capture_output=True)
+    except TypeError:
+        # older version of python
+        result = run(run_args, stderr=PIPE, stdout=PIPE)
+    finally:
+        logger.debug(f"Run command stderr: {result.stderr.decode('utf-8')}")
+        logger.debug(f"Run command stdout: {result.stdout.decode('utf-8')}")
+        logger.debug(f"Run command return code: {result.returncode}")
+        return result.returncode
