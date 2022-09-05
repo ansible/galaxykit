@@ -98,7 +98,10 @@ class ContainerClient:
             run_args.append(f"--tls-verify={self.tls_verify}")
         try:
             # python 3.6 or higher
-            return run(run_args, capture_output=True).returncode
+            result = run(run_args, capture_output=True)
         except TypeError:
             # older version of python
-            return run(run_args, stderr=PIPE, stdout=PIPE).returncode
+            result = run(run_args, stderr=PIPE, stdout=PIPE)
+        finally:
+            logger.debug(result.stderr.decode("utf-8"))
+            return result.returncode

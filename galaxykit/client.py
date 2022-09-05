@@ -51,7 +51,7 @@ class GalaxyClient:
     container_client = None
     username = ""
     password = ""
-    rbac_enabled = None
+    _rbac_enabled = None
 
     def __init__(
         self,
@@ -172,8 +172,8 @@ class GalaxyClient:
         return parse_version(galaxy_ng_version) >= parse_version("4.6.0dev")
 
     def _http(self, method, path, *args, **kwargs):
-        if self.rbac_enabled is None:
-            self.rbac_enabled = self._is_rbac_available()
+        # if self._rbac_enabled is None:
+        #    self._rbac_enabled = self._is_rbac_available()
 
         url = urljoin(self.galaxy_root, path)
         headers = kwargs.pop("headers", self.headers)
@@ -351,3 +351,9 @@ class GalaxyClient:
         Adds a role to a group
         """
         return groups.add_role_to_group(self, role_name, group_id)
+
+    @property
+    def rbac_enabled(self):
+        if self._rbac_enabled is None:
+            self._rbac_enabled = self._is_rbac_available()
+        return self._rbac_enabled
