@@ -6,6 +6,7 @@ i.e. cli commands with podman, e.g. podman pull, podman image tag, etc.
 
 from logging import getLogger
 from subprocess import run
+from subprocess import PIPE
 
 
 logger = getLogger(__name__)
