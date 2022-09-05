@@ -172,9 +172,6 @@ class GalaxyClient:
         return parse_version(galaxy_ng_version) >= parse_version("4.6.0dev")
 
     def _http(self, method, path, *args, **kwargs):
-        # if self._rbac_enabled is None:
-        #    self._rbac_enabled = self._is_rbac_available()
-
         url = urljoin(self.galaxy_root, path)
         headers = kwargs.pop("headers", self.headers)
         parse_json = kwargs.pop("parse_json", True)
