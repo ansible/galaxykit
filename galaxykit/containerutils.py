@@ -104,14 +104,8 @@ class ContainerClient:
 
 def run_command(run_args):
     logger.debug(f"Run command run_args: {' '.join(run_args)}")
-    try:
-        # python 3.6 or higher
-        result = run(run_args, capture_output=True)
-    except TypeError:
-        # older versions of python
-        result = run(run_args, stderr=PIPE, stdout=PIPE)
-    finally:
-        logger.debug(f"Run command stderr: {result.stderr.decode('utf-8')}")
-        logger.debug(f"Run command stdout: {result.stdout.decode('utf-8')}")
-        logger.debug(f"Run command return code: {result.returncode}")
-        return result.returncode
+    result = run(run_args, stderr=PIPE, stdout=PIPE)
+    logger.debug(f"Run command stderr: {result.stderr.decode('utf-8')}")
+    logger.debug(f"Run command stdout: {result.stdout.decode('utf-8')}")
+    logger.debug(f"Run command return code: {result.returncode}")
+    return result.returncode
