@@ -53,3 +53,11 @@ def add_owner_to_ee(client, ee_name, group_name, object_roles):
     existing_groups.append({"name": group_name, "object_roles": object_roles})
     data = {"groups": existing_groups}
     return client.put(url, data)
+
+
+def inspect_container_namespace(client, ee_name):
+    """
+    Inspect a container namepsace
+    """
+    url = f"_ui/v1/execution-environments/namespaces/{ee_name}/"
+    return client.get(url)
