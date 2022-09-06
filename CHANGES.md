@@ -1,3 +1,6 @@
+## Version 0.10.1
+* Handle an RBAC version check case where the property is checked before the first request
+* Debug logging for external commands (docker/podman)
 ## Version 0.10.0
 * Support for RBAC in galaxy_ng 4.6.0dev and greater
 * Refresh JWT tokens when expired
