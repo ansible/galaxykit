@@ -104,3 +104,22 @@ def add_role_to_group(client, role_name, group_id):
     role_to_group_url = f"pulp/api/v3/groups/{group_id}/roles/"
     body = {"role": role_name, "content_object": None}
     return client.post(role_to_group_url, body)
+
+
+def set_permissions(client, group_name, permissions):
+    """
+    This is for hub versions up to 4.5. RBAC is introduced in hub 4.6 and roles must be used.
+
+    Assigns the given permissions to the group.
+    `permissions` must be a list of strings, each one recognized as a permission by the backend. See
+    them listed at the link below:
+    https://github.com/ansible/galaxy_ng/blob/ca503375077a225a5fb215e6fb2c6ae47e09cfd7/galaxy_ng/app/api/ui/serializers/user.py#L122
+    Container permissions are in another file:
+    https://github.com/ansible/galaxy_ng/blob/009385fb3a1a34d1df9ff369e2e15c3fa27869b3/galaxy_ng/app/access_control/statements/pulp_container.py#L139
+    The permissions are the ones that match the "namespace.permission-name" format.
+    """
+    group_id = get_group(client, group_name)["id"]
+    permissions_url = f"_ui/v1/groups/{group_id}/model-permissions/"
+    for perm in permissions:
+        payload = {"permission": perm}
+        client.post(permissions_url, payload)
