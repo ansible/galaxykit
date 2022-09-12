@@ -11,7 +11,7 @@ from pkg_resources import parse_version
 
 import requests
 
-from .utils import GalaxyClientError
+from .utils import GalaxyClientError, BasicAuthToken
 from . import containers
 from . import containerutils
 from . import groups
@@ -183,6 +183,19 @@ class GalaxyClient:
         if "Invalid JWT token" in resp.text and "claim expired" in resp.text:
             self._refresh_jwt_token()
             self._update_auth_headers()
+            resp = requests.request(
+                method, url, headers=headers, verify=self.https_verify, *args, **kwargs
+            )
+
+        if "Invalid token" in resp.text:
+            # If invalid token, let's retry with basic auth token
+            token = BasicAuthToken(self.username, self.password).get()
+            self.headers.update(
+                {
+                    "Accept": "application/json",
+                    "Authorization": f"Basic {token}",
+                }
+            )
             resp = requests.request(
                 method, url, headers=headers, verify=self.https_verify, *args, **kwargs
             )
