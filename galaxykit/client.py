@@ -52,6 +52,7 @@ class GalaxyClient:
     username = ""
     password = ""
     _rbac_enabled = None
+    auth_url = None
 
     def __init__(
         self,
