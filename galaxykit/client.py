@@ -191,8 +191,8 @@ class GalaxyClient:
         elif "Invalid token" in resp.text:
             # If invalid token, let's retry with basic auth token
             token = BasicAuthToken(self.username, self.password)
-            headers = token.headers()
-            self.headers.update(headers)
+            new_token_headers = token.headers()
+            headers.update(new_token_headers)
             resp = requests.request(
                 method, url, headers=headers, verify=self.https_verify, *args, **kwargs
             )
