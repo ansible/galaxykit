@@ -150,7 +150,6 @@ class GalaxyClient:
             "post",
             self.auth_url,
             data=payload,
-            verify=self.https_verify,
             headers=headers,
         )
         self.token = json["access_token"]
