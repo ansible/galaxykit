@@ -11,7 +11,7 @@ from pkg_resources import parse_version
 
 import requests
 
-from .utils import GalaxyClientError, BasicAuthToken
+from .utils import GalaxyClientError
 from . import containers
 from . import containerutils
 from . import groups
