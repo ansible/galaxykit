@@ -1,6 +1,7 @@
 import argparse
-import sys
 import json
+import logging
+import sys
 from pprint import pprint
 
 from .client import GalaxyClient
@@ -20,6 +21,9 @@ EXIT_OK = 0
 EXIT_UNKNOWN_ERROR = 1
 EXIT_NOT_FOUND = 2
 EXIT_DUPLICATE = 4
+EXIT_SERVER_VERSION = 8
+
+logger = logging.getLogger(__name__)
 
 
 def format_list(data, identifier):
@@ -37,7 +41,7 @@ def format_list(data, identifier):
 def report_error(resp):
     if "errors" in resp:
         for error in resp["errors"]:
-            print(
+            logger.error(
                 f"API Failure: HTTP {error['status']} {error['code']}; {error['title']} ({error['detail']})"
             )
 
@@ -266,6 +270,29 @@ KIND_OPS = {
                     "name": {},
                 },
             },
+            # For galaxy_ng <4.6
+            "permission": {
+                "subops": {
+                    "list": {
+                        "args": {
+                            "groupname": {},
+                        },
+                    },
+                    "add": {
+                        "args": {
+                            "groupname": {},
+                            "perm": {},
+                        },
+                    },
+                    "remove": {
+                        "args": {
+                            "groupname": {},
+                            "perm": {},
+                        },
+                    },
+                },
+            },
+            # for galaxy_ng >=4.6
             "role": {
                 "subops": {
                     "list": {
@@ -602,39 +629,66 @@ def main():
                     resp = groups.remove_role(client, args.groupname, args.rolename)
 
         elif args.kind == "role":
-            if args.operation == "list":
-                resp = roles.get_role_list(client)
-                print(format_list(resp["results"], "name"))
-            elif args.operation == "create":
-                permissions = args.permissions.split(",") if args.permissions else []
-                try:
-                    resp = roles.create_role(
-                        client, args.name, args.description, permissions
+            if client.rbac_enabled():
+                if args.operation == "list":
+                    resp = roles.get_role_list(client)
+                    print(format_list(resp["results"], "name"))
+                elif args.operation == "create":
+                    permissions = (
+                        args.permissions.split(",") if args.permissions else []
                     )
-                except ValueError as e:
-                    if not args.ignore:
-                        print(e)
-                        sys.exit(EXIT_NOT_FOUND)
-            elif args.operation == "delete":
-                try:
-                    resp = roles.delete_role(client, args.name)
-                except ValueError as e:
-                    if not args.ignore:
-                        print(e)
-                        sys.exit(EXIT_NOT_FOUND)
+                    try:
+                        resp = roles.create_role(
+                            client, args.name, args.description, permissions
+                        )
+                    except ValueError as e:
+                        if not args.ignore:
+                            print(e)
+                            sys.exit(EXIT_NOT_FOUND)
+                elif args.operation == "delete":
+                    try:
+                        resp = roles.delete_role(client, args.name)
+                    except ValueError as e:
+                        if not args.ignore:
+                            print(e)
+                            sys.exit(EXIT_NOT_FOUND)
+            else:
+                logger.error(
+                    f"The `{args.kind}` subcommand is not supported for server versions below 4.6"
+                )
+                sys.exit(EXIT_SERVER_VERSION)
 
-            elif args.operation == "perm":
-                if args.subop == "list":
+        # The `perm` sub-command acts on group objects in versions 4.5 and below
+        # and on role objects in versions 4.6 and above.
+        elif args.operation == "perm":
+            if args.subop == "list":
+                if client.rbac_enabled():
                     resp = roles.get_permissions(client, args.rolename)
                     print(resp)
-                elif args.subop == "add":
+                else:
+                    resp = groups.get_permissions(client, groupname)
+                    print(format_list(resp["data"], "permission"))
+            elif args.subop == "add":
+                if client.rbac_enabled():
                     resp = roles.set_permissions(
                         client, args.rolename, add_permissions=[args.perm]
                     )
-                elif args.subop == "remove":
+                else:
+                    groupname, perm = args.groupname, args.perm
+                    perms = [
+                        p["permission"]
+                        for p in groups.get_permissions(client, groupname)["data"]
+                    ]
+                    perms = list(set(perms) | set([perm]))
+                    resp = groups.set_permissions(client, groupname, perms)
+            elif args.subop == "remove":
+                if client.rbac_enabled():
                     resp = roles.set_permissions(
                         client, args.rolename, remove_permissions=[args.perm]
                     )
+                else:
+                    groupname, perm = args.groupname, args.perm
+                    resp = groups.delete_permission(client, groupname, perm)
 
         elif args.kind == "namespace":
             if args.operation == "get":
@@ -689,7 +743,7 @@ def main():
                     resp = containers.delete_container(client, name)
                 except ValueError as e:
                     if not args.ignore:
-                        print(e)
+                        logger.error(e)
                         sys.exit(EXIT_NOT_FOUND)
 
             elif args.operation == "create":
@@ -704,7 +758,7 @@ def main():
                     )
                 except ValueError as e:
                     if not args.ignore:
-                        print(e)
+                        logger.error(e)
                         sys.exit(EXIT_NOT_FOUND)
 
         elif args.kind == "container-image":
@@ -714,7 +768,7 @@ def main():
                     resp = container_images.delete_container(client, container, image)
                 except ValueError as e:
                     if not args.ignore:
-                        print(e)
+                        logger.error(e)
                         sys.exit(EXIT_NOT_FOUND)
 
         elif args.kind == "registry":
@@ -724,7 +778,7 @@ def main():
                     resp = registries.delete_registry(client, name)
                 except ValueError as e:
                     if not args.ignore:
-                        print(e)
+                        logger.error(e)
                         sys.exit(EXIT_NOT_FOUND)
             elif args.operation == "create":
                 name, url = args.name, args.url
@@ -732,7 +786,7 @@ def main():
                     resp = registries.create_registry(client, name, url)
                 except ValueError as e:
                     if not args.ignore:
-                        print(e)
+                        logger.error(e)
                         sys.exit(EXIT_NOT_FOUND)
 
         elif args.kind == "collection":
@@ -779,7 +833,7 @@ def main():
                     )
                 except ValueError as e:
                     if not args.ignore:
-                        print(e)
+                        logger.error(e)
                         sys.exit(EXIT_NOT_FOUND)
             elif args.operation == "download":
                 raise NotImplementedError

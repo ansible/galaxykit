@@ -45,6 +45,7 @@ class GalaxyClient:
 
     headers = None
     galaxy_root = ""
+    auth_url = None
     original_token = None
     token = ""
     token_type = None
@@ -52,6 +53,7 @@ class GalaxyClient:
     username = ""
     password = ""
     _rbac_enabled = None
+    _server_version = None
 
     def __init__(
         self,
@@ -90,16 +92,12 @@ class GalaxyClient:
                     "password": self.password,
                     "grant_type": "password",
                 }
-                rr = requests.post(self.auth_url, headers=headers, data=ds)
-                if rr.status_code != 200:
-                    raise Exception(rr.text)
+                jdata = self._http("post", self.auth_url, headers=headers, data=ds)
                 self.token_type = "Bearer"
-                try:
-                    jdata = rr.json()
-                except Exception as e:
-                    raise Exception(rr.text)
                 if "access_token" not in jdata:
-                    raise Exception(rr.text)
+                    raise GalaxyClientError(
+                        f"`access_token` not found in JWT response."
+                    )
                 self.token = jdata["access_token"]
 
             elif self.token and self.auth_url:
@@ -107,11 +105,11 @@ class GalaxyClient:
 
             elif self.token is None:
                 auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
-                resp = requests.post(
-                    auth_url, auth=(self.username, self.password), verify=False
+                resp = self._http(
+                    "post", auth_url, auth=(self.username, self.password), headers=None
                 )
                 try:
-                    self.token = resp.json().get("token")
+                    self.token = resp.get("token")
                 except JSONDecodeError:
                     print(f"Failed to fetch token: {resp.text}", file=sys.stderr)
 
@@ -148,13 +146,13 @@ class GalaxyClient:
             "User-Agent": user_agent(),
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        resp = requests.post(
+        json = self._http(
+            "post",
             self.auth_url,
             data=payload,
             verify=self.https_verify,
             headers=headers,
         )
-        json = resp.json()
         self.token = json["access_token"]
         self.token_type = "Bearer"
 
@@ -166,9 +164,11 @@ class GalaxyClient:
             }
         )
 
+    def _get_server_version(self):
+        return self._http("get", self.galaxy_root)["galaxy_ng_version"]
+
     def _is_rbac_available(self):
-        resp = requests.get(self.galaxy_root, headers=self.headers)
-        galaxy_ng_version = resp.json()["galaxy_ng_version"]
+        galaxy_ng_version = self.server_version
         return parse_version(galaxy_ng_version) >= parse_version("4.6.0dev")
 
     def _http(self, method, path, *args, **kwargs):
@@ -191,6 +191,9 @@ class GalaxyClient:
             try:
                 json = resp.json()
             except JSONDecodeError as exc:
+                logging.error(
+                    f"Cannot parse expected JSON response ({url}): {resp.text}"
+                )
                 raise ValueError("Failed to parse JSON response from API") from exc
             if "errors" in json:
                 raise GalaxyClientError(*json["errors"])
@@ -285,6 +288,12 @@ class GalaxyClient:
         """
         return groups.delete_group(self, group_name)
 
+    def set_permissions(self, group_name, permissions):
+        """
+        Assigns the given permissions to the group
+        """
+        return groups.set_permissions(self, group_name, permissions)
+
     def get_container_readme(self, container):
         return containers.get_readme(self, container)
 
@@ -354,3 +363,9 @@ class GalaxyClient:
         if self._rbac_enabled is None:
             self._rbac_enabled = self._is_rbac_available()
         return self._rbac_enabled
+
+    @property
+    def server_version(self):
+        if self._server_version is None:
+            self._server_version = self._get_server_version()
+        return self._server_version
