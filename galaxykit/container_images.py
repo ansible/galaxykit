@@ -15,3 +15,45 @@ def get_container_images(client, container):
     """
     get_url = f"_ui/v1/execution-environments/repositories/{container}/_content/images/"
     return client.get(get_url)
+
+
+def get_container_history(client, container):
+    """
+    Gets container history
+    """
+    get_url = (
+        f"_ui/v1/execution-environments/repositories/{container}/_content/history/"
+    )
+    return client.get(get_url)
+
+
+def get_containers(client):
+    """
+    Gets containers
+    """
+    url = "_ui/v1/execution-environments/repositories/"
+    return client.get(url)
+
+
+def get_container(client, name):
+    """
+    Gets a container
+    """
+    url = f"_ui/v1/execution-environments/repositories/{name}/"
+    return client.get(url)
+
+
+def get_container_readme(client, name):
+    """
+    Gets container's readme
+    """
+    url = f"_ui/v1/execution-environments/repositories/{name}/_content/readme/"
+    return client.get(url)
+
+
+def put_container_readme(client, name, data):
+    """
+    Updates container's readme
+    """
+    url = f"_ui/v1/execution-environments/repositories/{name}/_content/readme/"
+    return client.put(url, body=data)

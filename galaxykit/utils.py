@@ -4,7 +4,6 @@ import json
 import time
 from urllib.parse import urljoin
 
-
 logger = logging.getLogger(__name__)
 
 

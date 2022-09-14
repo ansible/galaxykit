@@ -104,3 +104,11 @@ def get_user_list(client):
     Returns list of usernames of users in the system
     """
     return client.get("_ui/v1/users/")
+
+
+def update_me(client, data):
+    return client.put(f"_ui/v1/me/", data)
+
+
+def get_me(client):
+    return client.get(f"_ui/v1/me/")
