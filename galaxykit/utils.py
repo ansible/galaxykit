@@ -46,31 +46,3 @@ def wait_for_task(api_client, task, timeout=300, raise_on_error=False):
             ready = resp["state"] not in ("running", "waiting")
         time.sleep(5)
     return resp
-
-
-class BasicAuthToken(object):
-    token_type = "Basic"
-
-    def __init__(self, username, password=None):
-        self.username = username
-        self.password = password
-        self._token = None
-
-    @staticmethod
-    def _encode_token(username, password):
-        token = "%s:%s" % (username, password)
-        b64_val = base64.b64encode(
-            str.encode(token, encoding="utf-8", errors="surrogate_or_strict")
-        )
-        return b64_val.decode("utf-8")
-
-    def get(self):
-        if self._token:
-            return self._token
-        self._token = self._encode_token(self.username, self.password)
-
-        return self._token
-
-    def headers(self):
-        headers = {"Authorization": "%s %s" % (self.token_type, self.get())}
-        return headers

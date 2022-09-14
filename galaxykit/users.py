@@ -108,3 +108,7 @@ def get_user_list(client):
 
 def update_me(client, data):
     return client.put(f"_ui/v1/me/", data)
+
+
+def get_me(client):
+    return client.get(f"_ui/v1/me/")

@@ -167,15 +167,6 @@ class GalaxyClient:
     def _get_server_version(self):
         return self._http("get", self.galaxy_root)["galaxy_ng_version"]
 
-    def _get_new_token(self):
-        token = BasicAuthToken(self.username, self.password)
-        new_token_headers = token.headers()
-        self.headers.update(new_token_headers)
-        self.auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
-        resp = self._http("post", self.auth_url, headers=self.headers)
-        self.token = resp["token"]
-        self.token_type = "Token"
-
     def _is_rbac_available(self):
         galaxy_ng_version = self.server_version
         return parse_version(galaxy_ng_version) >= parse_version("4.6.0dev")
@@ -192,15 +183,6 @@ class GalaxyClient:
         if "Invalid JWT token" in resp.text and "claim expired" in resp.text:
             self._refresh_jwt_token()
             self._update_auth_headers()
-            resp = requests.request(
-                method, url, headers=headers, verify=self.https_verify, *args, **kwargs
-            )
-
-        elif "Invalid token" in resp.text:
-            # If invalid token, let's retry with a new one
-            self._get_new_token()
-            self._update_auth_headers()
-            # retry request with new token
             resp = requests.request(
                 method, url, headers=headers, verify=self.https_verify, *args, **kwargs
             )
