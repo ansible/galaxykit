@@ -1,5 +1,4 @@
 """Utility functions"""
-import base64
 import logging
 import json
 import time
