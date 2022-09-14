@@ -1,3 +1,10 @@
+## Version 0.11.0
+## Version 0.11.0
+* Expand version check support across permission/role functionality in different commands
+* Make sure all requests go through our HTTP wrapper to apply TLS options uniformly
+* Use proper logger more
+* Added several new container functions
+* Added get_me/update_me functions
 ## Version 0.10.1
 * Handle an RBAC version check case where the property is checked before the first request
 * Debug logging for external commands (docker/podman)
