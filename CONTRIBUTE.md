@@ -121,9 +121,11 @@ So far we've been using `twine` to upload releases to PyPi.
 
 ## steps after the release PR:
 
-1. verify you are on the correct branch (you should be on main, just after having merged the new release PR.)
+1. tag the release and push to git.
 
-2. build the dist folder:
+2. verify you are on the correct branch (you should be on main, just after having merged the new release PR and pushed the new tag.)
+
+3. build the dist folder:
 
     The below snippet builds both a binary wheel and a source distribution.
 
@@ -131,7 +133,7 @@ So far we've been using `twine` to upload releases to PyPi.
     python setup.py sdist bdist_wheel
     ```
 
-3. use twine to upload a release to test pypi:
+4. use twine to upload a release to test pypi:
 
     ```shell
     twine upload --repository testpypi dist/*
@@ -139,7 +141,7 @@ So far we've been using `twine` to upload releases to PyPi.
 
     Note that twine relies on a `~/.pypirc` file that defines the various servers, usernames, and other config it needs.
 
-4. install from testpypi to make sure things work as expected:
+5. install from testpypi to make sure things work as expected:
 
     ```shell
     pip install -i https://test.pypi.org/pypi galaxykit
@@ -147,10 +149,8 @@ So far we've been using `twine` to upload releases to PyPi.
 
     Once you have it installed, you can run tests with it, etc, to verify that it's working as expected.
 
-5. release to real pypi
+6. release to real pypi
 
     ```shell
     twine upload --repository pypi dist/*
     ```
-
-6. tag the release and push to git
