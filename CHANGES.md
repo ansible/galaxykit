@@ -1,5 +1,4 @@
 ## Version 0.11.0
-## Version 0.11.0
 * Expand version check support across permission/role functionality in different commands
 * Make sure all requests go through our HTTP wrapper to apply TLS options uniformly
 * Use proper logger more
