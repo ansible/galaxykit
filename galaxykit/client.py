@@ -166,6 +166,17 @@ class GalaxyClient:
             }
         )
 
+    def _get_new_token(self):
+        token = BasicAuthToken(self.username, self.password)
+        new_token_headers = token.headers()
+        self.headers.update(new_token_headers)
+        self.auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
+        resp = requests.request(
+            "POST", self.auth_url, headers=self.headers, verify=self.https_verify
+        )
+        self.token = resp.json()["token"]
+        self.token_type = "Token"
+
     def _is_rbac_available(self):
         resp = requests.get(self.galaxy_root, headers=self.headers)
         galaxy_ng_version = resp.json()["galaxy_ng_version"]
@@ -188,10 +199,10 @@ class GalaxyClient:
             )
 
         elif "Invalid token" in resp.text:
-            # If invalid token, let's retry with basic auth token
-            token = BasicAuthToken(self.username, self.password)
-            new_token_headers = token.headers()
-            headers.update(new_token_headers)
+            # If invalid token, let's retry with a new one
+            self._get_new_token()
+            self._update_auth_headers()
+            # retry request with new token
             resp = requests.request(
                 method, url, headers=headers, verify=self.https_verify, *args, **kwargs
             )
