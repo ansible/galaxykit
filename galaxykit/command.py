@@ -634,7 +634,9 @@ def main():
                     resp = roles.get_role_list(client)
                     print(format_list(resp["results"], "name"))
                 elif args.operation == "create":
-                    permissions = args.permissions.split(",") if args.permissions else []
+                    permissions = (
+                        args.permissions.split(",") if args.permissions else []
+                    )
                     try:
                         resp = roles.create_role(
                             client, args.name, args.description, permissions
@@ -651,7 +653,9 @@ def main():
                             print(e)
                             sys.exit(EXIT_NOT_FOUND)
             else:
-                logger.error(f"The `{args.kind}` subcommand is not supported for server versions below 4.6")
+                logger.error(
+                    f"The `{args.kind}` subcommand is not supported for server versions below 4.6"
+                )
                 sys.exit(EXIT_SERVER_VERSION)
 
         # The `perm` sub-command acts on group objects in versions 4.5 and below

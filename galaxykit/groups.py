@@ -153,7 +153,7 @@ def add_permissions(client, group_name, permissions):
         req_payload = {
             "permission": perm,
         }
-        client.post( permissions_url, req_payload)
+        client.post(permissions_url, req_payload)
 
 
 def delete_permission(client, group_name, permission):

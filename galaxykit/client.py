@@ -95,7 +95,9 @@ class GalaxyClient:
                 jdata = self._http("post", self.auth_url, headers=headers, data=ds)
                 self.token_type = "Bearer"
                 if "access_token" not in jdata:
-                    raise GalaxyClientError(f"`access_token` not found in JWT response.")
+                    raise GalaxyClientError(
+                        f"`access_token` not found in JWT response."
+                    )
                 self.token = jdata["access_token"]
 
             elif self.token and self.auth_url:
@@ -103,7 +105,9 @@ class GalaxyClient:
 
             elif self.token is None:
                 auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
-                resp = self._http("post", auth_url, auth=(self.username, self.password), headers=None)
+                resp = self._http(
+                    "post", auth_url, auth=(self.username, self.password), headers=None
+                )
                 try:
                     self.token = resp.get("token")
                 except JSONDecodeError:
@@ -159,7 +163,7 @@ class GalaxyClient:
                 "Authorization": f"{self.token_type} {self.token}",
             }
         )
-    
+
     def _get_server_version(self):
         return self._http("get", self.galaxy_root)["galaxy_ng_version"]
 
@@ -187,7 +191,9 @@ class GalaxyClient:
             try:
                 json = resp.json()
             except JSONDecodeError as exc:
-                logging.error(f"Cannot parse expected JSON response ({url}): {resp.text}")
+                logging.error(
+                    f"Cannot parse expected JSON response ({url}): {resp.text}"
+                )
                 raise ValueError("Failed to parse JSON response from API") from exc
             if "errors" in json:
                 raise GalaxyClientError(*json["errors"])
@@ -357,7 +363,7 @@ class GalaxyClient:
         if self._rbac_enabled is None:
             self._rbac_enabled = self._is_rbac_available()
         return self._rbac_enabled
-    
+
     @property
     def server_version(self):
         if self._server_version is None:
