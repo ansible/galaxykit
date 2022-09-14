@@ -21,7 +21,9 @@ def get_container_history(client, container):
     """
     Gets container history
     """
-    get_url = f"_ui/v1/execution-environments/repositories/{container}/_content/history/"
+    get_url = (
+        f"_ui/v1/execution-environments/repositories/{container}/_content/history/"
+    )
     return client.get(get_url)
 
 
@@ -55,4 +57,3 @@ def put_container_readme(client, name, data):
     """
     url = f"_ui/v1/execution-environments/repositories/{name}/_content/readme/"
     return client.put(url, body=data)
-

@@ -172,9 +172,7 @@ class GalaxyClient:
         new_token_headers = token.headers()
         self.headers.update(new_token_headers)
         self.auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
-        resp = requests.request(
-            "POST", self.auth_url, headers=self.headers, verify=self.https_verify
-        )
+        resp = self._http("post", self.auth_url, headers=self.headers)
         self.token = resp.json()["token"]
         self.token_type = "Token"
 
