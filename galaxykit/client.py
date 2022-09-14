@@ -173,7 +173,7 @@ class GalaxyClient:
         self.headers.update(new_token_headers)
         self.auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
         resp = self._http("post", self.auth_url, headers=self.headers)
-        self.token = resp.json()["token"]
+        self.token = resp["token"]
         self.token_type = "Token"
 
     def _is_rbac_available(self):
