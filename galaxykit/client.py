@@ -121,7 +121,6 @@ class GalaxyClient:
 
             self._update_auth_headers()
 
-    
     @property
     def container_client(self):
         """Only create a container client if its actually needed."""
@@ -143,7 +142,6 @@ class GalaxyClient:
                 tls_verify=self._container_tls_verify,
             )
         return self._container_client
-
 
     def _refresh_jwt_token(self):
         if not self.original_token:

@@ -43,7 +43,7 @@ class ContainerClient:
         self.tls_verify = tls_verify
         self.auth = auth
 
-        if auth: # we only need to auth if creds are supplied
+        if auth:  # we only need to auth if creds are supplied
             self.login(*auth, fail_ok=True)
     
     def _check_login(self):
@@ -124,7 +124,7 @@ class ContainerClient:
 
 
 def run_command(run_args, retcode=0):
-    cmd_string = ' '.join(run_args)
+    cmd_string = " ".join(run_args)
     logger.debug(f"Run command run_args: {cmd_string}")
     result = run(run_args, stderr=PIPE, stdout=PIPE)
     logger.debug(f"Run command stderr: {result.stderr.decode('utf-8')}")
@@ -132,5 +132,7 @@ def run_command(run_args, retcode=0):
     logger.debug(f"Run command return code: {result.returncode}")
     if retcode is not None:
         if result.returncode != retcode:
-            raise GalaxyClientError(f"Container engine command failed (retcode {result.returncode}): {cmd_string}")
+            raise GalaxyClientError(
+                f"Container engine command failed (retcode {result.returncode}): {cmd_string}"
+            )
     return result.returncode
