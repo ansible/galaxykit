@@ -2,6 +2,7 @@ import json
 from pprint import pprint
 
 from . import roles
+from .utils import GalaxyClientError
 
 
 def get_group(client, group_name):
@@ -24,11 +25,18 @@ def get_group_id(client, group_name):
         raise ValueError(f"No group '{group_name}' found.")
 
 
-def create_group(client, group_name):
+def create_group(client, group_name, exists_ok=True):
     """
     Creates a group
     """
-    return client.post("_ui/v1/groups/", {"name": group_name})
+    try:
+        return client.post("_ui/v1/groups/", {"name": group_name})
+    except GalaxyClientError as e:
+        if e.status_code == 409 and exists_ok:
+            # ok, already exists
+            pass
+        else:
+            raise
 
 
 def delete_group(client, group_name):

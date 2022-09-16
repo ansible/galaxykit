@@ -4,10 +4,12 @@ Holds all of the functions used by GalaxyClient to handle container operations.
 i.e. cli commands with podman, e.g. podman pull, podman image tag, etc.
 """
 
+from curses import use_default_colors
 from logging import getLogger
 from subprocess import run
 from subprocess import PIPE
 
+from .utils import GalaxyClientError
 
 logger = getLogger(__name__)
 
@@ -21,6 +23,8 @@ class ContainerClient:
     engine = ""
     registry = ""
     tls_verify = True
+
+    last_login_username = None
 
     def __init__(
         self,
@@ -37,11 +41,21 @@ class ContainerClient:
         self.engine = engine
         self.registry = registry
         self.tls_verify = tls_verify
+        self.auth = auth
 
         if auth:  # we only need to auth if creds are supplied
             self.login(*auth, fail_ok=True)
+    
+    def _check_login(self):
+        if self.auth:
+            username, _ = self.auth
+            if username != self.last_login_username:
+                self.login(self.username, self.password)
 
     def login(self, username, password, fail_ok=False):
+        if username == self.last_login_username:
+            return
+
         run_args = [
             self.engine,
             "login",
@@ -56,6 +70,10 @@ class ContainerClient:
         try:
             run_command(run_args)
             logger.debug(f"Logged in with user {username}")
+            self.username = username
+            self.password = password
+            # ! keep
+            ContainerClient.last_login_username = username
         except FileNotFoundError:
             if fail_ok:
                 logger.warn(f"Container engine '{self.engine}' not found.")
@@ -66,6 +84,7 @@ class ContainerClient:
         """
         pull an image from the configured default registry
         """
+        self._check_login()
         if self.engine == "podman" and not self.tls_verify:
             run_command(
                 [self.engine, "pull", self.registry + image_name, "--tls-verify=False"]
@@ -77,6 +96,7 @@ class ContainerClient:
         """
         Tags an image with the given tag (prepends the registry to the tag.)
         """
+        self._check_login()
         sep = "" if self.registry.endswith("/") else "/"
         full_tag = f"{self.registry}{sep}{image_tag}"
         run_args = [
@@ -92,6 +112,7 @@ class ContainerClient:
         """
         Pushes an image to the registry
         """
+        self._check_login()
         sep = "" if self.registry.endswith("/") else "/"
         full_tag = f"{self.registry}{sep}{image_tag}"
         run_args = [self.engine, "push", full_tag]
@@ -102,10 +123,16 @@ class ContainerClient:
         return run_command(run_args)
 
 
-def run_command(run_args):
-    logger.debug(f"Run command run_args: {' '.join(run_args)}")
+def run_command(run_args, retcode=0):
+    cmd_string = " ".join(run_args)
+    logger.debug(f"Run command run_args: {cmd_string}")
     result = run(run_args, stderr=PIPE, stdout=PIPE)
     logger.debug(f"Run command stderr: {result.stderr.decode('utf-8')}")
     logger.debug(f"Run command stdout: {result.stdout.decode('utf-8')}")
     logger.debug(f"Run command return code: {result.returncode}")
+    if retcode is not None:
+        if result.returncode != retcode:
+            raise GalaxyClientError(
+                f"Container engine command failed (retcode {result.returncode}): {cmd_string}"
+            )
     return result.returncode
