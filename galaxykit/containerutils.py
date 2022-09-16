@@ -44,7 +44,6 @@ class ContainerClient:
 
         if auth:  # we only need to auth if creds are supplied
             self.login(*auth, fail_ok=True)
-    
     def _check_login(self):
         """Ensure any associated crednetials are the last or current login."""
         if self.auth:
