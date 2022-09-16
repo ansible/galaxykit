@@ -4,7 +4,6 @@ Holds all of the functions used by GalaxyClient to handle container operations.
 i.e. cli commands with podman, e.g. podman pull, podman image tag, etc.
 """
 
-from curses import use_default_colors
 from logging import getLogger
 from subprocess import run
 from subprocess import PIPE
@@ -47,6 +46,7 @@ class ContainerClient:
             self.login(*auth, fail_ok=True)
     
     def _check_login(self):
+        """Ensure any associated crednetials are the last or current login."""
         if self.auth:
             username, _ = self.auth
             if username != self.last_login_username:
@@ -72,7 +72,11 @@ class ContainerClient:
             logger.debug(f"Logged in with user {username}")
             self.username = username
             self.password = password
-            # ! keep
+            # Remember the last successful logged in user across all ContainerClient
+            # instances. This is because podman or docker can only allow a single user
+            # logged in at a time. If operations are done with the same user, we can
+            # use the existing logged in status. If the last login was by a different
+            # user, we'll need to perform a new login to change the active user session.
             ContainerClient.last_login_username = username
         except FileNotFoundError:
             if fail_ok:
