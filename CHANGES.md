@@ -1,3 +1,7 @@
+## Version 0.11.1
+September 16, 2022
+* Don't log into your container registry until you try to use the container client
+* Re-authenticate to the registry when detecting a different account has been authenticated
 ## Version 0.11.0
 * Expand version check support across permission/role functionality in different commands
 * Make sure all requests go through our HTTP wrapper to apply TLS options uniformly
