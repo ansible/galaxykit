@@ -54,6 +54,7 @@ class GalaxyClient:
     password = ""
     _rbac_enabled = None
     _server_version = None
+    _container_client = None
 
     def __init__(
         self,
@@ -68,6 +69,10 @@ class GalaxyClient:
         self.headers = {}
         self.token = None
         self.https_verify = https_verify
+        self._container_engine = container_engine
+        self._container_registry = container_registry
+        self._container_tls_verify = container_tls_verify
+
         if auth:
             if isinstance(auth, dict):
                 self.username = auth.get("username")
@@ -96,7 +101,8 @@ class GalaxyClient:
                 self.token_type = "Bearer"
                 if "access_token" not in jdata:
                     raise GalaxyClientError(
-                        f"`access_token` not found in JWT response."
+                        f"`access_token` not found in JWT response.",
+                        json=jdata,
                     )
                 self.token = jdata["access_token"]
 
@@ -115,22 +121,29 @@ class GalaxyClient:
 
             self._update_auth_headers()
 
-            if container_engine:
-                if not (self.username and self.password):
-                    raise ValueError(
-                        "Cannot use container engine commands without username and password for authentication."
-                    )
-                container_registry = (
-                    container_registry
-                    or urlparse(self.galaxy_root).netloc.split(":")[0] + ":5001"
-                )
+    
+    @property
+    def container_client(self):
+        """Only create a container client if its actually needed."""
 
-                self.container_client = containerutils.ContainerClient(
-                    (self.username, self.password),
-                    container_engine,
-                    container_registry,
-                    tls_verify=container_tls_verify,
+        if self._container_client is None:
+            if not (self.username and self.password):
+                raise ValueError(
+                    "Cannot use container engine commands without username and password for authentication."
                 )
+            container_registry = (
+                self._container_registry
+                or urlparse(self.galaxy_root).netloc.split(":")[0] + ":5001"
+            )
+
+            self._container_client = containerutils.ContainerClient(
+                (self.username, self.password),
+                self._container_engine,
+                container_registry,
+                tls_verify=self._container_tls_verify,
+            )
+        return self._container_client
+
 
     def _refresh_jwt_token(self):
         if not self.original_token:
@@ -195,11 +208,11 @@ class GalaxyClient:
                 )
                 raise ValueError("Failed to parse JSON response from API") from exc
             if "errors" in json:
-                raise GalaxyClientError(*json["errors"])
+                raise GalaxyClientError(resp, *json["errors"])
             return json
         else:
             if resp.status_code >= 400:
-                raise GalaxyClientError(resp.status_code)
+                raise GalaxyClientError(resp, resp.status_code)
             return resp
 
     def _payload(self, method, path, body, *args, **kwargs):
