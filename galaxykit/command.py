@@ -629,7 +629,7 @@ def main():
                     resp = groups.remove_role(client, args.groupname, args.rolename)
 
         elif args.kind == "role":
-            if client.rbac_enabled():
+            if client.rbac_enabled:
                 if args.operation == "list":
                     resp = roles.get_role_list(client)
                     print(format_list(resp["results"], "name"))
@@ -662,14 +662,14 @@ def main():
         # and on role objects in versions 4.6 and above.
         elif args.operation == "perm":
             if args.subop == "list":
-                if client.rbac_enabled():
+                if client.rbac_enabled:
                     resp = roles.get_permissions(client, args.rolename)
                     print(resp)
                 else:
                     resp = groups.get_permissions(client, groupname)
                     print(format_list(resp["data"], "permission"))
             elif args.subop == "add":
-                if client.rbac_enabled():
+                if client.rbac_enabled:
                     resp = roles.set_permissions(
                         client, args.rolename, add_permissions=[args.perm]
                     )
@@ -682,7 +682,7 @@ def main():
                     perms = list(set(perms) | set([perm]))
                     resp = groups.set_permissions(client, groupname, perms)
             elif args.subop == "remove":
-                if client.rbac_enabled():
+                if client.rbac_enabled:
                     resp = roles.set_permissions(
                         client, args.rolename, remove_permissions=[args.perm]
                     )
