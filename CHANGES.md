@@ -1,3 +1,6 @@
+## Version 0.11.2
+September 26, 2022
+* Fix rbac_enabled references as a method, should be property
 ## Version 0.11.1
 September 16, 2022
 * Don't log into your container registry until you try to use the container client
