@@ -9,13 +9,14 @@ from .utils import GalaxyClientError
 from . import collections
 from . import container_images
 from . import containers
+from . import greet
 from . import groups
 from . import namespaces
 from . import registries
 from . import roles
+from . import tasks
 from . import users
 from . import __version__ as VERSION
-from . import greet
 
 EXIT_OK = 0
 EXIT_UNKNOWN_ERROR = 1
@@ -210,6 +211,26 @@ KIND_OPS = {
                     "name": {},
                     "url": {},
                 }
+            },
+        },
+    },
+    "task": {
+        "help": "Task",
+        "ops": {
+            "list": {
+                "args": {
+                    "--only_running": {
+                        "action": "store_true",
+                        "default": False,
+                    },
+                },
+            },
+            "wait": {
+                "args": {
+                    "id": {
+                        "help": "A task uuid, pulp_href, or 'all'",
+                    },
+                },
             },
         },
     },
@@ -788,6 +809,17 @@ def main():
                     if not args.ignore:
                         logger.error(e)
                         sys.exit(EXIT_NOT_FOUND)
+
+        elif args.kind == "task":
+            if args.operation == "list":
+                resp = tasks.get_tasks(client, args.only_running)
+                print(format_list(resp["results"], "name"))
+            elif args.operation == "wait":
+                if args.id == "all":
+                    resp = tasks.wait_all(client)
+                else:
+                    task_id = tasks.pulp_href_to_id(args.id)
+                    resp = tasks.wait_task(client, task_id)
 
         elif args.kind == "collection":
             if args.operation == "list":
