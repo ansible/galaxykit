@@ -8,7 +8,7 @@ def get_registry_pk(client, name):
     user_url = f"_ui/v1/execution-environments/registries/?name={name}"
     resp = client.get(user_url)
     if resp["data"]:
-        return resp["data"][0]["pk"]
+        return resp["data"][0]["id"]
     else:
         raise ValueError(f"No registry '{name}' found.")
 
