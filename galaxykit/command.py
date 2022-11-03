@@ -494,6 +494,11 @@ def params_main(parser):
         type=str,
     )
     parser.add_argument(
+        "--cookie",
+        action="store",
+        type=str,
+    )
+    parser.add_argument(
         "-a",
         "--auth-url",
         action="store",
@@ -548,6 +553,10 @@ def main():
         }
         if args.auth_url:
             creds["auth_url"] = args.auth_url
+    elif args.cookie:
+        creds = {
+            "cookie": args.cookie,
+        }
     else:
         creds = {
             "username": args.auth_username,

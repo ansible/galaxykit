@@ -68,6 +68,7 @@ class GalaxyClient:
         self.galaxy_root = galaxy_root
         self.headers = {}
         self.token = None
+        self.cookie = None
         self.https_verify = https_verify
         self._container_engine = container_engine
         self._container_registry = container_registry
@@ -79,6 +80,7 @@ class GalaxyClient:
                 self.password = auth.get("password")
                 self.token = auth.get("token")
                 self.auth_url = auth.get("auth_url")
+                self.cookie = auth.get("cookie")
             elif isinstance(auth, tuple):
                 self.username, self.password = auth
 
@@ -109,7 +111,7 @@ class GalaxyClient:
             elif self.token and self.auth_url:
                 self._refresh_jwt_token()
 
-            elif self.token is None:
+            elif (self.token is None) and (self.cookie is None):
                 auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
                 resp = self._http(
                     "post", auth_url, auth=(self.username, self.password), headers=None
@@ -167,12 +169,12 @@ class GalaxyClient:
         self.token_type = "Bearer"
 
     def _update_auth_headers(self):
-        self.headers.update(
-            {
-                "Accept": "application/json",
-                "Authorization": f"{self.token_type} {self.token}",
-            }
-        )
+        self.headers.update({"Accept": "application/json"})
+
+        if self.cookie:
+            self.headers.update({"Cookie": self.cookie})
+        else:
+            self.headers.update({"Authorization": f"{self.token_type} {self.token}"})
 
     def _get_server_version(self):
         return self._http("get", self.galaxy_root)["galaxy_ng_version"]
