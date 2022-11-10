@@ -1,5 +1,4 @@
 from pprint import pprint
-from packaging import version
 from . import registries
 
 

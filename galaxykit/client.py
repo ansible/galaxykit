@@ -384,7 +384,7 @@ class GalaxyClient:
     @property
     def ui_endpoint_prefix(self):
         if self._ui_endpoint_prefix is None:
-            if parse_version(self.server_version) > parse_version("4.6.0dev"):
+            if parse_version(self.server_version) > parse_version("4.6.2"):
                 # the endpoints that used to be under _ui/v1/ moved to v3/plugin/ after 4.6.2
                 self._ui_endpoint_prefix = "v3/plugin/"
             else:
