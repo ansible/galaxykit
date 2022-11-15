@@ -55,7 +55,7 @@ class GalaxyClient:
     _rbac_enabled = None
     _server_version = None
     _container_client = None
-    _ui_endpoint_prefix = None
+    _ui_ee_endpoint_prefix = None
 
     def __init__(
         self,
@@ -382,11 +382,11 @@ class GalaxyClient:
         return self._server_version
 
     @property
-    def ui_endpoint_prefix(self):
-        if self._ui_endpoint_prefix is None:
+    def ui_ee_endpoint_prefix(self):
+        if self._ui_ee_endpoint_prefix is None:
             if parse_version(self.server_version) > parse_version("4.6.2"):
-                # the endpoints that used to be under _ui/v1/ moved to v3/plugin/ after 4.6.2
-                self._ui_endpoint_prefix = "v3/plugin/"
+                # the EE endpoints that used to be under _ui/v1/ moved to v3/plugin/ after 4.6.2
+                self._ui_ee_endpoint_prefix = "v3/plugin/"
             else:
-                self._ui_endpoint_prefix = "_ui/v1/"
-        return self._ui_endpoint_prefix
+                self._ui_ee_endpoint_prefix = "_ui/v1/"
+        return self._ui_ee_endpoint_prefix
