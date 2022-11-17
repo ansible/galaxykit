@@ -1,4 +1,5 @@
 from pprint import pprint
+from pkg_resources import parse_version
 
 
 def get_registry_pk(client, name):
@@ -8,7 +9,10 @@ def get_registry_pk(client, name):
     user_url = f"_ui/v1/execution-environments/registries/?name={name}"
     resp = client.get(user_url)
     if resp["data"]:
-        return resp["data"][0]["id"]
+        if parse_version(client.server_version) >= parse_version("4.7.0dev"):
+            return resp["data"][0]["id"]
+        else:
+            return resp["data"][0]["pk"]
     else:
         raise ValueError(f"No registry '{name}' found.")
 
