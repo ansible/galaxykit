@@ -67,7 +67,34 @@ KIND_OPS = {
         "ops": {
             "list": {
                 "help": "List all collections",
-                "args": None,
+                "args": {
+                    "repository": {
+                        "help": "Repository to list collections from (defaults to 'published')",
+                        "nargs": "?",
+                        "default": "published",
+                    },
+                    "limit": {
+                        "help": "Maximum number of collections to show.",
+                        "nargs": "?",
+                        "default": None,
+                        "short": "-l",
+                        "long": "--limit",
+                    },
+                    "offset": {
+                        "help": "Collection offset to begin list at. Used for paging.",
+                        "nargs": "?",
+                        "default": None,
+                        "short": "-o",
+                        "long": "--offset",
+                    },
+                    "keywords": {
+                        "help": "Filter by results that contain one or more keywords",
+                        "nargs": "*",
+                        "default": None,
+                        "short": "-k",
+                        "long": "--keywords",
+                    },
+                },
             },
             "upload": {
                 "help": "Create and upload a new collection",
@@ -117,7 +144,17 @@ KIND_OPS = {
                     "namespace": {},
                     "collection": {},
                     "version": {"nargs": "?", "default": None},
-                    "repository": {"nargs": "?", "default": "published"},
+                    "repository": {
+                        "short": "-r",
+                        "long": "--repository",
+                        "default": "published,staging,rejected",
+                    },
+                    "dependents": {
+                        "short": "-d",
+                        "long": "--dependents",
+                        "default": False,
+                        "action": "store_true",
+                    },
                 },
             },
             "download": None,
@@ -489,7 +526,15 @@ KIND_OPS = {
 
 def parse_args(parser, args):
     for arg in args:
-        parser.add_argument(arg, **(args[arg]))
+        flag_args=[]
+        if "short" in args[arg]:
+            flag_args.append("-" + args[arg].pop("short").strip("-"))
+        if "long" in args[arg]:
+            flag_args.append("--" + args[arg].pop("long").strip("-"))
+        if not flag_args:
+            flag_args.append(arg)
+        
+        parser.add_argument(*flag_args, **(args[arg]))
 
 
 def parse_subop(subparsers, subop, subop_params):
@@ -1001,7 +1046,13 @@ def main():
 
         elif args.kind == "collection":
             if args.operation == "list":
-                print(json.dumps(collections.get_collection_list(client)))
+                resp = collections.get_collection_list(
+                    client,
+                    args.repository,
+                    keywords=args.keywords,
+                    limit=args.limit,
+                )
+                print(json.dumps(resp))
             elif args.operation == "upload":
                 namespace, collection_name, version, path = (
                     args.namespace or client.username,
@@ -1053,18 +1104,20 @@ def main():
                     "copy",
                 )
             elif args.operation == "delete":
-                namespace, collection, version, repository = (
+                namespace, collection, version, repository, dependents = (
                     args.namespace,
                     args.collection,
                     args.version,
-                    args.repository or "published",
+                    args.repository.split(","),
+                    args.dependents
                 )
                 try:
                     if version == "None":
                         version = None
                     resp = collections.delete_collection(
-                        client, namespace, collection, version, repository
+                        client, namespace, collection, version, repository, dependents
                     )
+                    print(json.dumps(resp))
                 except ValueError as e:
                     if not args.ignore:
                         logger.error(e)
