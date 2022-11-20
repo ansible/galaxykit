@@ -34,7 +34,7 @@ def create_container(client, name, upstream_name, registry):
     """
     Create container
     """
-    create_url = f"{client.ui_ee_endpoint_prefix}execution-environments/remotes/"
+    create_url = f"_ui/v1/execution-environments/remotes/"
     registry_id = registries.get_registry_pk(client, registry)
     data = {
         "name": name,
