@@ -20,6 +20,7 @@ from . import namespaces
 from . import collections
 from . import roles
 from . import __version__ as VERSION
+from .constants import RBAC_VERSION, EE_ENDPOINTS_CHANGE_VERSION
 
 logger = logging.getLogger(__name__)
 
@@ -180,7 +181,7 @@ class GalaxyClient:
 
     def _is_rbac_available(self):
         galaxy_ng_version = self.server_version
-        return parse_version(galaxy_ng_version) >= parse_version("4.6.0dev")
+        return parse_version(galaxy_ng_version) >= parse_version(RBAC_VERSION)
 
     def _http(self, method, path, *args, **kwargs):
         url = urljoin(self.galaxy_root, path)
@@ -384,7 +385,7 @@ class GalaxyClient:
     @property
     def ui_ee_endpoint_prefix(self):
         if self._ui_ee_endpoint_prefix is None:
-            if parse_version(self.server_version) >= parse_version("4.7.0dev"):
+            if parse_version(self.server_version) >= parse_version(EE_ENDPOINTS_CHANGE_VERSION):
                 # the EE endpoints that used to be under _ui/v1/ moved to v3/plugin/ starting with 4.7.0dev
                 self._ui_ee_endpoint_prefix = "v3/plugin/"
             else:

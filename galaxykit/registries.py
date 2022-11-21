@@ -1,5 +1,6 @@
 from pprint import pprint
 from pkg_resources import parse_version
+from .constants import EE_ENDPOINTS_CHANGE_VERSION
 
 
 def get_registry_pk(client, name):
@@ -9,7 +10,7 @@ def get_registry_pk(client, name):
     user_url = f"_ui/v1/execution-environments/registries/?name={name}"
     resp = client.get(user_url)
     if resp["data"]:
-        if parse_version(client.server_version) >= parse_version("4.7.0dev"):
+        if parse_version(client.server_version) >= parse_version(EE_ENDPOINTS_CHANGE_VERSION):
             return resp["data"][0]["id"]
         else:
             return resp["data"][0]["pk"]
