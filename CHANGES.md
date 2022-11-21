@@ -1,3 +1,7 @@
+## Version 0.12
+November 21, 2022
+* Update EE repository URLs and add backwards compatibility
+* Task list/wait: wait for a specific task and list waiting/running tasks
 ## Version 0.11.2
 September 26, 2022
 * Fix rbac_enabled references as a method, should be property
