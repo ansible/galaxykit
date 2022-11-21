@@ -52,7 +52,9 @@ def add_owner_to_ee(client, ee_name, group_name, role):
     """
     Add owner to Execution Environment
     """
-    if parse_version(client.server_version) >= parse_version(EE_ENDPOINTS_CHANGE_VERSION):
+    if parse_version(client.server_version) >= parse_version(
+        EE_ENDPOINTS_CHANGE_VERSION
+    ):
         url = f"pulp/api/v3/pulp_container/namespaces/?name={ee_name}"
         pulp_href = client.get(url)["results"][0]["pulp_href"]
         ns_id = pulp_href.split("/")[-2]
