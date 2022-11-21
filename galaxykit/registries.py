@@ -10,7 +10,9 @@ def get_registry_pk(client, name):
     user_url = f"_ui/v1/execution-environments/registries/?name={name}"
     resp = client.get(user_url)
     if resp["data"]:
-        if parse_version(client.server_version) >= parse_version(EE_ENDPOINTS_CHANGE_VERSION):
+        if parse_version(client.server_version) >= parse_version(
+            EE_ENDPOINTS_CHANGE_VERSION
+        ):
             return resp["data"][0]["id"]
         else:
             return resp["data"][0]["pk"]
