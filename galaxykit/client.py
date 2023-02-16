@@ -220,11 +220,11 @@ class GalaxyClient:
             body = dumps(body)
         if isinstance(body, str):
             body = body.encode("utf8")
-        headers = {
-            **kwargs.pop("headers", self.headers),
-            "Content-Type": "application/json;charset=utf-8",
-            "Content-length": str(len(body)),
-        }
+        headers = {}
+        headers.update(self.headers)
+        headers.update(**kwargs.pop("headers", self.headers))
+        headers.setdefault("Content-Type", "application/json;charset=utf-8")
+        headers.setdefault("Content-Length", str(len(body)))
         kwargs["headers"] = headers
         kwargs["data"] = body
         return self._http(method, path, *args, **kwargs)
