@@ -7,9 +7,11 @@ import os
 import json
 from time import sleep
 from urllib.parse import urljoin
+from pkg_resources import parse_version
 
 from orionutils.generator import build_collection
 from .utils import wait_for_task, logger, GalaxyClientError
+from .constants import EE_ENDPOINTS_CHANGE_VERSION
 
 
 def collection_info(client, repository, namespace, collection_name, version):
@@ -146,10 +148,16 @@ def upload_artifact(
         "Authorization": f"{client.token_type} {client.token}",
     }
 
-    n_url = urljoin(
-        client.galaxy_root,
-        f"v3/artifacts/collections/",
-    )
+    if parse_version(client.server_version) >= parse_version(
+        EE_ENDPOINTS_CHANGE_VERSION
+    ):
+        col_upload_path = f"v3/artifacts/collections/"
+    else:
+        col_upload_path = (
+            f"content/inbound-{artifact.namespace}/v3/artifacts/collections/"
+        )
+
+    n_url = urljoin(client.galaxy_root, col_upload_path)
     resp = client._http("post", n_url, data=data, headers=headers)
     return resp
 
