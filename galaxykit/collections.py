@@ -148,7 +148,7 @@ def upload_artifact(
 
     n_url = urljoin(
         client.galaxy_root,
-        f"content/inbound-{artifact.namespace}/v3/artifacts/collections/",
+        f"v3/artifacts/collections/",
     )
     resp = client._http("post", n_url, data=data, headers=headers)
     return resp
