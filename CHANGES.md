@@ -1,3 +1,6 @@
+## Version 0.13
+March 10, 2023
+* Remove inbound repo logic for Hub >= 4.7
 ## Version 0.12
 November 21, 2022
 * Update EE repository URLs and add backwards compatibility
