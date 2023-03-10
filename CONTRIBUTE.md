@@ -115,7 +115,7 @@ So far we've been using `twine` to upload releases to PyPi.
 ## Creating the release PR:
 
 1. Create a new branch and check it out, something like `release-v0.7.1`
-2. Update the version number in setup.py.
+2. Update the version number in `galaxykit/_version.py`.
 3. Add the version that's going to be released the top of CHANGES.md, above all the changes that are going to be released.
 4. Push those changes, and make the PR in GitHub.
 
