@@ -17,6 +17,8 @@ from . import roles
 from . import tasks
 from . import users
 from . import __version__ as VERSION
+from . import remotes
+from . import repositories
 
 EXIT_OK = 0
 EXIT_UNKNOWN_ERROR = 1
@@ -194,6 +196,39 @@ KIND_OPS = {
                 "args": {
                     "container": {},
                     "image": {},
+                }
+            },
+        },
+    },
+     "remote": {
+        "help": "Remote repository",
+        "ops": {
+            "delete": {
+                "args": {
+                    "name": {},
+                }
+            },
+            "create": {
+                "args": {
+                    "name": {},
+                    "url": {},
+                }
+            },
+        },
+    },
+     "repository": {
+        "help": "Local repository",
+        "ops": {
+            "delete": {
+                "args": {
+                    "name": {},
+                }
+            },
+            "create": {
+                "args": {
+                    "name": {},
+                    "--pipeline" : {},
+                    "--remote" : {},
                 }
             },
         },
@@ -805,6 +840,42 @@ def main():
                 name, url = args.name, args.url
                 try:
                     resp = registries.create_registry(client, name, url)
+                except ValueError as e:
+                    if not args.ignore:
+                        logger.error(e)
+                        sys.exit(EXIT_NOT_FOUND)
+
+        elif args.kind == "remote":
+            if args.operation == "delete":
+                name = args.name
+                try:
+                    resp = remotes.delete_remote(client, name)
+                except ValueError as e:
+                    if not args.ignore:
+                        logger.error(e)
+                        sys.exit(EXIT_NOT_FOUND)
+            elif args.operation == "create":
+                name, url = args.name, args.url
+                try:
+                    resp = remotes.create_remote(client, name, url)
+                except ValueError as e:
+                    if not args.ignore:
+                        logger.error(e)
+                        sys.exit(EXIT_NOT_FOUND)
+
+        elif args.kind == "repository":
+            if args.operation == "delete":
+                name = args.name
+                try:
+                    resp = repositories.delete_repository(client, name)
+                except ValueError as e:
+                    if not args.ignore:
+                        logger.error(e)
+                        sys.exit(EXIT_NOT_FOUND)
+            elif args.operation == "create":
+                name, pipeline, remote = args.name, args.pipeline, args.remote
+                try:
+                    resp = repositories.create_repository(client, name, pipeline, remote)
                 except ValueError as e:
                     if not args.ignore:
                         logger.error(e)

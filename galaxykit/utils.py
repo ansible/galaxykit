@@ -73,3 +73,7 @@ def wait_for_task(api_client, task, timeout=300, raise_on_error=False):
             ready = resp["state"] not in ("running", "waiting")
         time.sleep(5)
     return resp
+
+def parse_pulp_id(pulp_href):
+    return pulp_href.split("/")[-2]
+

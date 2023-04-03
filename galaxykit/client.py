@@ -191,7 +191,7 @@ class GalaxyClient:
         resp = requests.request(
             method, url, headers=headers, verify=self.https_verify, *args, **kwargs
         )
-
+        
         if "Invalid JWT token" in resp.text and "claim expired" in resp.text:
             self._refresh_jwt_token()
             self._update_auth_headers()
