@@ -63,8 +63,9 @@ def create_remote(client, name, url, signed_only=False, tls_validation=False, pa
     """
     Create remote
     """
-    post_url = f"pulp/api/v3/remotes/ansible/collection/"
-    registry = {
+    params = params or {}
+    remote_url = "pulp/api/v3/remotes/ansible/collection/"
+    body = {
         "name": name,
         "url": url,
         "tls_validation": tls_validation,
@@ -72,7 +73,7 @@ def create_remote(client, name, url, signed_only=False, tls_validation=False, pa
         "signed_only": signed_only,
         **params
     }
-    return client.post(post_url, registry)
+    return client.post(remote_url, body)
 
 
 def view_remotes(client, name=None):

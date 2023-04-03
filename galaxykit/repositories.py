@@ -47,7 +47,8 @@ def delete_repository(client, name):
     """
     pk = get_repository_pk(client, name)
     delete_url = f"pulp/api/v3/repositories/ansible/ansible/{pk}/"
-    return client.delete(delete_url, parse_json=False)
+    task_resp = client.delete(delete_url)
+    return wait_for_task(client, task_resp)
 
 
 def create_repository(client, name, pipeline, remote, description=None, private=False, hide_from_search=False):
@@ -97,7 +98,6 @@ def search_collection(client, **search_param):
     response = client.get(search_url)
     client.galaxy_root = galaxy_root_bck
     return response
-
 
 # move out from here
 
@@ -187,13 +187,13 @@ def set_certification(client, collection, level="published", upload_signatures=T
         artifact_pulp_id = one_version["id"]
         # FIXME: used unified url join utility below
         artifact_pulp_href = (
-                "/"
-                + _urljoin(
-            urlparse(client.galaxy_root).path,
-            "pulp/api/v3/content/ansible/collection_versions/",
-            artifact_pulp_id,
-        )
-                + "/"
+            "/"
+            + _urljoin(
+                urlparse(client.galaxy_root).path,
+                "pulp/api/v3/content/ansible/collection_versions/",
+                artifact_pulp_id,
+            )
+            + "/"
         )
 
         data = {
@@ -257,7 +257,7 @@ def setup_multipart(path: str, data: dict) -> dict:
     data = b"\r\n".join(buffer)
     headers = {
         "Content-Type": "multipart/form-data; boundary=%s"
-                        % boundary[2:].decode("ascii"),  # strip --
+        % boundary[2:].decode("ascii"),  # strip --
         "Content-Length": str(len(data)),
     }
 
@@ -268,7 +268,7 @@ def setup_multipart(path: str, data: dict) -> dict:
 
 
 def add_multipart_field(
-        boundary: bytes, buffer: List[bytes], name: Union[str, bytes], value: Union[str, bytes]
+    boundary: bytes, buffer: List[bytes], name: Union[str, bytes], value: Union[str, bytes]
 ):
     if isinstance(name, str):
         name = name.encode("utf8")
