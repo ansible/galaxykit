@@ -30,7 +30,7 @@ def get_collection_list(client):
 
 
 def upload_test_collection(
-    client, namespace=None, collection_name=None, version="1.0.0"
+        client, namespace=None, collection_name=None, version="1.0.0"
 ):
     """
     Uploads a test collection generated with orionutils
@@ -64,12 +64,12 @@ def upload_test_collection(
 
 
 def upload_artifact(
-    config,
-    client,
-    artifact,
-    hash=True,
-    no_filename=False,
-    no_file=False,
+        config,
+        client,
+        artifact,
+        hash=True,
+        no_filename=False,
+        no_file=False,
 ):
     """
     Publishes a collection to a Galaxy server and returns the import task URI.
@@ -149,7 +149,7 @@ def upload_artifact(
     }
 
     if parse_version(client.server_version) >= parse_version(
-        EE_ENDPOINTS_CHANGE_VERSION
+            EE_ENDPOINTS_CHANGE_VERSION
     ):
         col_upload_path = f"v3/artifacts/collections/"
     else:
@@ -163,12 +163,12 @@ def upload_artifact(
 
 
 def move_collection(
-    client,
-    namespace,
-    collection_name,
-    version="1.0.0",
-    source="staging",
-    destination="published",
+        client,
+        namespace,
+        collection_name,
+        version="1.0.0",
+        source="staging",
+        destination="published",
 ):
     """
     Moves a collection between repositories. The default arguments are for the most common usecase, which
@@ -196,7 +196,7 @@ def move_collection(
 
 
 def delete_collection(
-    client, namespace, collection, version=None, repository="published"
+        client, namespace, collection, version=None, repository="published"
 ):
     """
     Delete collection version
@@ -221,12 +221,12 @@ def deprecate_collection(client, namespace, collection, repository):
 
 
 def collection_sign(
-    client,
-    repository,
-    namespace,
-    collection,
-    version,
-    signing_service="ansible-default",
+        client,
+        repository,
+        namespace,
+        collection,
+        version,
+        signing_service="ansible-default",
 ):
     url = f"content/{repository}/v3/sign/collections/"
     body = {
@@ -237,3 +237,24 @@ def collection_sign(
         "version": version,
     }
     return client.post(url, body)
+
+
+def sign_collection(client, cv_href, repo_pulp_href):
+    results = client.get("pulp/api/v3/signing-services/?name=ansible-default")
+    signing_service = results["results"][0]
+    body = {
+        "content_units": [cv_href],
+        "signing_service": signing_service["pulp_href"]
+    }
+    resp = client.post(f'{repo_pulp_href}sign/', body)
+
+    resp = wait_for_task(client, resp)
+    assert resp['state'] == 'completed'
+
+
+def copy_collection(client):
+    pass
+
+
+# def move_collection(client):
+#    pass

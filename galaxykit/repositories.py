@@ -41,21 +41,43 @@ def get_all_repositories(client):
     return client.get(url)["results"]
 
 
-def create_repository(client, name):
+def create_repository(client, name, description=None, private=False, remote=None):
     """
     Creates a repository
     """
     create_repo_url = "pulp/api/v3/repositories/ansible/ansible/"
-    body = {"name": name}
+    body = {"name": name, "private": private}
+    body.update({"description": description}) if description is not None else False
+    body.update({"remote": remote}) if remote is not None else False
     return client.post(create_repo_url, body)
 
 
-def search_collection(client, repository='', by='name', search_string=''):
+def patch_update_repository(client, repository_id, update_body):
+    update_repo_url = f"pulp/api/v3/repositories/ansible/ansible/{repository_id}/"
+    return client.patch(update_repo_url, update_body)
+
+
+def put_update_repository(client, repository_id, update_body):
+    update_repo_url = f"pulp/api/v3/repositories/ansible/ansible/{repository_id}/"
+    return client.put(update_repo_url, update_body)
+
+
+def search_collection(client, **search_param):
     # get rid of the api_prefix
+    galaxy_root_bck = client.galaxy_root
     client.galaxy_root = client.galaxy_root.split('api/automation-hub/')[0]
     search_url = f'pulp_ansible/galaxy/default/api/v3/' \
-                 f'plugin/ansible/search/collection-versions/?repository={repository}&{by}={search_string}'
-    return client.get(search_url)
+                 f'plugin/ansible/search/collection-versions/?'
+    for key, value in search_param.items():
+        if isinstance(value, list):
+            param = '&'.join([f"{key}={v}" for v in value])
+        else:
+            param = f"{key}={value}"
+        search_url += f"{param}&"
+    search_url = search_url[:-1]
+    response = client.get(search_url)
+    client.galaxy_root = galaxy_root_bck
+    return response
 
 
 # move out from here
@@ -146,13 +168,13 @@ def set_certification(client, collection, level="published", upload_signatures=T
         artifact_pulp_id = one_version["id"]
         # FIXME: used unified url join utility below
         artifact_pulp_href = (
-            "/"
-            + _urljoin(
-                urlparse(client.galaxy_root).path,
-                "pulp/api/v3/content/ansible/collection_versions/",
-                artifact_pulp_id,
-            )
-            + "/"
+                "/"
+                + _urljoin(
+            urlparse(client.galaxy_root).path,
+            "pulp/api/v3/content/ansible/collection_versions/",
+            artifact_pulp_id,
+        )
+                + "/"
         )
 
         data = {
@@ -216,7 +238,7 @@ def setup_multipart(path: str, data: dict) -> dict:
     data = b"\r\n".join(buffer)
     headers = {
         "Content-Type": "multipart/form-data; boundary=%s"
-        % boundary[2:].decode("ascii"),  # strip --
+                        % boundary[2:].decode("ascii"),  # strip --
         "Content-Length": str(len(data)),
     }
 
@@ -227,7 +249,7 @@ def setup_multipart(path: str, data: dict) -> dict:
 
 
 def add_multipart_field(
-    boundary: bytes, buffer: List[bytes], name: Union[str, bytes], value: Union[str, bytes]
+        boundary: bytes, buffer: List[bytes], name: Union[str, bytes], value: Union[str, bytes]
 ):
     if isinstance(name, str):
         name = name.encode("utf8")
@@ -240,3 +262,29 @@ def add_multipart_field(
         b"",
         value,
     ]
+
+
+def get_distribution_id(client, name):
+    ansible_distribution_path = f"/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/?name={name}"
+    resp = client.get(ansible_distribution_path)
+    return resp["results"][0]["pulp_href"].split("/")[-2]
+
+
+def copy_content_between_repos(client, cv_hrefs, source_repo_href, destination_repo_hrefs):
+    url = f"{source_repo_href}copy_collection_version/"
+    body = {
+        "collection_versions": cv_hrefs,
+        "destination_repositories": destination_repo_hrefs,
+        # "signing_service": ""
+    }
+    return client.post(url, body)
+
+
+def move_content_between_repos(client, cv_hrefs, source_repo_href, destination_repo_hrefs):
+    url = f"{source_repo_href}move_collection_version/"
+    body = {
+        "collection_versions": cv_hrefs,
+        "destination_repositories": destination_repo_hrefs,
+        # "signing_service": ""
+    }
+    return client.post(url, body)
