@@ -229,6 +229,7 @@ KIND_OPS = {
                     "name": {},
                     "--pipeline" : {},
                     "--remote" : {},
+                    "--create_distribution" : {}
                 }
             },
         },
@@ -873,9 +874,9 @@ def main():
                         logger.error(e)
                         sys.exit(EXIT_NOT_FOUND)
             elif args.operation == "create":
-                name, pipeline, remote = args.name, args.pipeline, args.remote
+                name, pipeline, remote, distribution = args.name, args.pipeline, args.remote, args.create_distribution
                 try:
-                    resp = repositories.create_repository(client, name, pipeline, remote)
+                    resp = repositories.create_repository(client, name, pipeline, remote, distribution)
                 except ValueError as e:
                     if not args.ignore:
                         logger.error(e)
