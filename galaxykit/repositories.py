@@ -1,5 +1,6 @@
 from . import remotes
 from . import utils
+from . import tasks
 
 def get_repository_pk(client, name):
     """
@@ -27,7 +28,7 @@ def delete_repository(client, name):
     delete_url = f"pulp/api/v3/repositories/ansible/ansible/{pk}/"
     return client.delete(delete_url, parse_json=False)
 
-def create_repository(client, name, pipeline, remote, distribution):
+def create_repository(client, name, pipeline, remote):
     """
     Create repository
     """
@@ -43,12 +44,4 @@ def create_repository(client, name, pipeline, remote, distribution):
         pk = remotes.get_remote_href(client, remote)
         registry["remote"] = pk
 
-    res = client.post(post_url, registry)
-
-    if distribution:
-        repo_href = get_repository_href(client, name)
-        distro_url = 'pulp/api/v3/distributions/ansible/ansible/'
-        distro = { "name" : name, "base_path" : name, "repository" : repo_href }
-        distro_res = client.post(distro_url, distro)
-
-    return res    
+    return client.post(post_url, registry)  

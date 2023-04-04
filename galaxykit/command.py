@@ -19,6 +19,7 @@ from . import users
 from . import __version__ as VERSION
 from . import remotes
 from . import repositories
+from . import distributions
 
 EXIT_OK = 0
 EXIT_UNKNOWN_ERROR = 1
@@ -216,7 +217,7 @@ KIND_OPS = {
             },
         },
     },
-     "repository": {
+    "repository": {
         "help": "Local repository",
         "ops": {
             "delete": {
@@ -229,7 +230,21 @@ KIND_OPS = {
                     "name": {},
                     "--pipeline" : {},
                     "--remote" : {},
-                    "--create_distribution" : {}
+                }
+            },
+        },
+    },
+    "distribution": {
+        "help": "Distribution of local repository",
+        "ops": {
+            "delete": {
+                "args": {
+                    "name": {},
+                }
+            },
+            "create": {
+                "args": {
+                    "name": {},
                 }
             },
         },
@@ -874,9 +889,27 @@ def main():
                         logger.error(e)
                         sys.exit(EXIT_NOT_FOUND)
             elif args.operation == "create":
-                name, pipeline, remote, distribution = args.name, args.pipeline, args.remote, args.create_distribution
+                name, pipeline, remote = args.name, args.pipeline, args.remote
                 try:
-                    resp = repositories.create_repository(client, name, pipeline, remote, distribution)
+                    resp = repositories.create_repository(client, name, pipeline, remote)
+                except ValueError as e:
+                    if not args.ignore:
+                        logger.error(e)
+                        sys.exit(EXIT_NOT_FOUND)
+
+        elif args.kind == "distribution":
+            if args.operation == "delete":
+                name = args.name
+                try:
+                    resp = distributions.delete_distribution(client, name)
+                except ValueError as e:
+                    if not args.ignore:
+                        logger.error(e)
+                        sys.exit(EXIT_NOT_FOUND)
+            elif args.operation == "create":
+                name = args.name
+                try:
+                    resp = distributions.create_distribution(client, name)
                 except ValueError as e:
                     if not args.ignore:
                         logger.error(e)
