@@ -86,7 +86,6 @@ class GalaxyClient:
 
             self.token_type = "Token"
             if not self.token and self.auth_url:
-
                 # https://developers.redhat.com/blog/2020/01/29/api-login-and-jwt-token-generation-using-keycloak
                 # When testing ephemeral environments, we won't have the
                 # access token up front, so we have to create one via user+pass.
@@ -191,7 +190,7 @@ class GalaxyClient:
         resp = requests.request(
             method, url, headers=headers, verify=self.https_verify, *args, **kwargs
         )
-        
+
         if "Invalid JWT token" in resp.text and "claim expired" in resp.text:
             self._refresh_jwt_token()
             self._update_auth_headers()

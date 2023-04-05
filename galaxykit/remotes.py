@@ -1,5 +1,6 @@
 from . import utils
 
+
 def community_remote_config(
     client, url, username, password, tls_validation=False, signed_only=True
 ):
@@ -24,13 +25,14 @@ def get_community_remote(client):
     url = "content/community/v3/sync/config"
     return client.get(url)
 
+
 def get_remote_pk(client, name):
     """
     Returns the primary key for a given remote name
     """
     href = get_remote_href(client, name)
     return utils.parse_pulp_id(href)
-   
+
 
 def get_remote_href(client, name):
     """
@@ -39,9 +41,10 @@ def get_remote_href(client, name):
     user_url = f"pulp/api/v3/remotes/ansible/collection/?name={name}"
     resp = client.get(user_url)
     if resp["results"] and resp["results"][0]:
-        return resp["results"][0]["pulp_href"];
+        return resp["results"][0]["pulp_href"]
     else:
         raise ValueError(f"No remote '{name}' found.")
+
 
 def delete_remote(client, name):
     """

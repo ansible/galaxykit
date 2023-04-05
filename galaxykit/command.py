@@ -201,7 +201,7 @@ KIND_OPS = {
             },
         },
     },
-     "remote": {
+    "remote": {
         "help": "Remote repository",
         "ops": {
             "delete": {
@@ -228,8 +228,8 @@ KIND_OPS = {
             "create": {
                 "args": {
                     "name": {},
-                    "--pipeline" : {},
-                    "--remote" : {},
+                    "--pipeline": {},
+                    "--remote": {},
                 }
             },
         },
@@ -891,7 +891,9 @@ def main():
             elif args.operation == "create":
                 name, pipeline, remote = args.name, args.pipeline, args.remote
                 try:
-                    resp = repositories.create_repository(client, name, pipeline, remote)
+                    resp = repositories.create_repository(
+                        client, name, pipeline, remote
+                    )
                 except ValueError as e:
                     if not args.ignore:
                         logger.error(e)
