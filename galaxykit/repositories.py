@@ -41,7 +41,8 @@ def get_all_repositories(client):
     return client.get(url)["results"]
 
 
-def create_repository(client, name, description=None, private=False, remote=None):
+def create_repository(client, name, description=None, private=False,
+                      remote=None, hide_from_search=False, pipeline=None):
     """
     Creates a repository
     """
@@ -49,6 +50,8 @@ def create_repository(client, name, description=None, private=False, remote=None
     body = {"name": name, "private": private}
     body.update({"description": description}) if description is not None else False
     body.update({"remote": remote}) if remote is not None else False
+    body.update({"pulp_labels": {"hide_from_search": ""}}) if hide_from_search is not False else False
+    body.update({"pulp_labels": {"pipeline": pipeline}}) if pipeline is not None else False
     return client.post(create_repo_url, body)
 
 
@@ -288,3 +291,15 @@ def move_content_between_repos(client, cv_hrefs, source_repo_href, destination_r
         # "signing_service": ""
     }
     return client.post(url, body)
+
+
+def view_repositories(client, name=None):
+    repo_url = f"pulp/api/v3/repositories/ansible/ansible/?name={name}"
+    return client.get(repo_url)
+
+
+def add_permissions_to_repository(client, name, role, groups):
+    r = view_repositories(client, name)
+    pulp_href = r["results"][0]["pulp_href"]
+    body = {"role": role, "groups": groups}
+    return client.post(pulp_href+"add_role/", body)

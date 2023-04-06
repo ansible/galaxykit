@@ -59,8 +59,15 @@ def update_remote(client, name, url, params=None):
 
 
 def delete_remote(client, name):
-    pulp_href = view_remotes(client, name)
-    pulp_id = pulp_href["results"][0]["pulp_href"].split("/")[-2]
+    r = view_remotes(client, name)
+    pulp_id = r["results"][0]["pulp_href"].split("/")[-2]
     remote_url = f"pulp/api/v3/remotes/ansible/collection/{pulp_id}/"
     r = client.delete(remote_url)
-    wait_for_task(client, r)
+    return wait_for_task(client, r)
+
+
+def add_permissions_to_remote(client, name, role, groups):
+    r = view_remotes(client, name)
+    pulp_href = r["results"][0]["pulp_href"]
+    body = {"role": role, "groups": groups}
+    return client.post(pulp_href+"add_role/", body)
