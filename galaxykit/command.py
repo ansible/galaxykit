@@ -203,7 +203,7 @@ KIND_OPS = {
         },
     },
     "remote": {
-        "help": "Remote repository",
+        "help": "Collection Remote",
         "ops": {
             "delete": {
                 "args": {
@@ -219,7 +219,7 @@ KIND_OPS = {
         },
     },
     "repository": {
-        "help": "Local repository",
+        "help": "Collection Repository",
         "ops": {
             "delete": {
                 "args": {
@@ -236,7 +236,7 @@ KIND_OPS = {
         },
     },
     "distribution": {
-        "help": "Distribution of local repository",
+        "help": "Collection Distribution",
         "ops": {
             "delete": {
                 "args": {
