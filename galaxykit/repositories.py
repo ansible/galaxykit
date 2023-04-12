@@ -7,7 +7,7 @@ def get_repository_pk(client, name):
     """
     Returns the primary key for a given repository name
     """
-    return utils.parse_pulp_id(get_repository_href(client, name))
+    return utils.pulp_href_to_id(get_repository_href(client, name))
 
 
 def get_repository_href(client, name):

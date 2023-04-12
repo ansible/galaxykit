@@ -3,6 +3,7 @@ from pprint import pprint
 
 from . import roles
 from .utils import GalaxyClientError
+from . import utils
 
 
 def get_group(client, group_name):
@@ -77,7 +78,7 @@ def get_group_role_id(client, group_name, role_name):
     )
     resp = client.get(roles_url)
     if resp["results"]:
-        return roles.pulp_href_to_id(resp["results"][0]["pulp_href"])
+        return utils.pulp_href_to_id(resp["results"][0]["pulp_href"])
     else:
         raise ValueError(f"No role '{role_name}' found in group '{group_name}'.")
 

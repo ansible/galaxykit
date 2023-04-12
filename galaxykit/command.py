@@ -20,6 +20,7 @@ from . import __version__ as VERSION
 from . import remotes
 from . import repositories
 from . import distributions
+from . import utils
 
 EXIT_OK = 0
 EXIT_UNKNOWN_ERROR = 1
@@ -925,7 +926,7 @@ def main():
                 if args.id == "all":
                     resp = tasks.wait_all(client)
                 else:
-                    task_id = tasks.pulp_href_to_id(args.id)
+                    task_id = utils.pulp_href_to_id(args.id)
                     resp = tasks.wait_task(client, task_id)
 
         elif args.kind == "collection":

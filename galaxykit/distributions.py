@@ -6,7 +6,7 @@ def get_distribution_pk(client, name):
     """
     Returns the primary key for a given distribution name
     """
-    return utils.parse_pulp_id(get_distribution_href(client, name))
+    return utils.pulp_href_to_id(get_distribution_href(client, name))
 
 
 def get_distribution_href(client, name):

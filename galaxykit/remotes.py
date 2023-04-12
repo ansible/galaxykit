@@ -31,7 +31,7 @@ def get_remote_pk(client, name):
     Returns the primary key for a given remote name
     """
     href = get_remote_href(client, name)
-    return utils.parse_pulp_id(href)
+    return utils.pulp_href_to_id(href)
 
 
 def get_remote_href(client, name):

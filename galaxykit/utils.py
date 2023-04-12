@@ -75,5 +75,11 @@ def wait_for_task(api_client, task, timeout=300, raise_on_error=False):
     return resp
 
 
-def parse_pulp_id(pulp_href):
-    return pulp_href.split("/")[-2]
+def pulp_href_to_id(href):
+    uuid_regex = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+
+    for section in href.split("/"):
+        if re.match(uuid_regex, section):
+            return section
+
+    return None
