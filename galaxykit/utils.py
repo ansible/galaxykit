@@ -48,12 +48,11 @@ class GalaxyClientError(Exception):
         super().__init__(*args[skip:], **kwargs)
 
 
-def wait_for_task(api_client, task, timeout=300, raise_on_error=False):
-    if isinstance(task, dict):
-        url = urljoin(api_client.galaxy_root, task["task"])
+def wait_for_task(api_client, resp, task_id=None, timeout=300, raise_on_error=False):
+    if task_id:
+        url = f"v3/tasks/{task_id}/"
     else:
-        task = json.loads(task.text)
-        url = urljoin(api_client.galaxy_root, task["task"])
+        url = urljoin(api_client.galaxy_root, resp["task"])
 
     ready = False
     wait_until = time.time() + timeout

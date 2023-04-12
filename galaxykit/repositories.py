@@ -298,8 +298,28 @@ def view_repositories(client, name=None):
     return client.get(repo_url)
 
 
+def view_distributions(client, name=None):
+    dist_url = f"pulp/api/v3/distributions/ansible/ansible/?name={name}"
+    return client.get(dist_url)
+
+
 def add_permissions_to_repository(client, name, role, groups):
     r = view_repositories(client, name)
     pulp_href = r["results"][0]["pulp_href"]
     body = {"role": role, "groups": groups}
     return client.post(pulp_href+"add_role/", body)
+
+
+def create_distribution(client, dist_name, repo_href):
+    ansible_distribution_path = "/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/"
+    dist_data = {"base_path": dist_name, "name": dist_name, "repository": repo_href}
+    task_resp = client.post(ansible_distribution_path, dist_data)
+    wait_for_task(client, task_resp)
+    return repo_href
+
+
+def delete_distribution(client, dist_name):
+    r = view_distributions(client, dist_name)
+    pulp_href = r["results"][0]["pulp_href"]
+    task_resp = client.delete(pulp_href)
+    return wait_for_task(client, task_resp)

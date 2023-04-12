@@ -206,7 +206,7 @@ def delete_collection(
         delete_url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/"
     else:
         delete_url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/versions/{version}/"
-    resp = client.delete(delete_url, parse_json=False)
+    resp = client.delete(delete_url)
     wait_for_task(client, resp)
     return resp
 
