@@ -51,7 +51,7 @@ def delete_repository(client, name):
     return wait_for_task(client, task_resp)
 
 
-def create_repository(client, name, pipeline, remote, description=None, private=False, hide_from_search=False):
+def create_repository(client, name, pipeline=None, remote=None, description=None, private=False, hide_from_search=False):
     """
     Create repository
     """
@@ -98,6 +98,15 @@ def search_collection(client, **search_param):
     response = client.get(search_url)
     client.galaxy_root = galaxy_root_bck
     return response
+
+
+def get_all_repositories(client):
+    """
+    Lists all repositories
+    """
+    url = "pulp/api/v3/repositories/"
+    return client.get(url)["results"]
+
 
 # move out from here
 
