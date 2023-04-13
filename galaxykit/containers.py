@@ -1,6 +1,7 @@
 from pprint import pprint
 from pkg_resources import parse_version
 from . import registries
+from . import utils
 from .constants import EE_ENDPOINTS_CHANGE_VERSION
 
 
@@ -57,7 +58,7 @@ def add_owner_to_ee(client, ee_name, group_name, role):
     ):
         url = f"pulp/api/v3/pulp_container/namespaces/?name={ee_name}"
         pulp_href = client.get(url)["results"][0]["pulp_href"]
-        ns_id = pulp_href.split("/")[-2]
+        ns_id = utils.pulp_href_to_id(pulp_href)
         url = f"pulp/api/v3/pulp_container/namespaces/{ns_id}/add_role/"
         data = {"groups": [group_name], "role": role[0]}
         return client.post(url, data)

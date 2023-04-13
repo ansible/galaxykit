@@ -1,6 +1,9 @@
 from galaxykit.utils import wait_for_task
 
 
+from . import utils
+
+
 def community_remote_config(
     client, url, username, password, tls_validation=False, signed_only=True
 ):
@@ -26,10 +29,42 @@ def get_community_remote(client):
     return client.get(url)
 
 
+def get_remote_pk(client, name):
+    """
+    Returns the primary key for a given remote name
+    """
+    href = get_remote_href(client, name)
+    return utils.pulp_href_to_id(href)
+
+
+def get_remote_href(client, name):
+    """
+    Returns the href for a given remote name
+    """
+    user_url = f"pulp/api/v3/remotes/ansible/collection/?name={name}"
+    resp = client.get(user_url)
+    if resp["results"] and resp["results"][0]:
+        return resp["results"][0]["pulp_href"]
+    else:
+        raise ValueError(f"No remote '{name}' found.")
+
+
+def delete_remote(client, name):
+    """
+    Delete remote
+    """
+    pk = get_remote_pk(client, name)
+    delete_url = f"pulp/api/v3/remotes/ansible/collection/{pk}/"
+    r = client.delete(delete_url)
+    return wait_for_task(client, r)
+
+
 def create_remote(client, name, url, signed_only=False, tls_validation=False, params=None):
-    params = params or {}
-    remote_url = "pulp/api/v3/remotes/ansible/collection/"
-    body = {
+    """
+    Create remote
+    """
+    post_url = f"pulp/api/v3/remotes/ansible/collection/"
+    registry = {
         "name": name,
         "url": url,
         "tls_validation": tls_validation,
@@ -37,7 +72,7 @@ def create_remote(client, name, url, signed_only=False, tls_validation=False, pa
         "signed_only": signed_only,
         **params
     }
-    return client.post(remote_url, body)
+    return client.post(post_url, registry)
 
 
 def view_remotes(client, name=None):
@@ -56,14 +91,6 @@ def update_remote(client, name, url, params=None):
         **params
     }
     return client.put(remote_url, body)
-
-
-def delete_remote(client, name):
-    r = view_remotes(client, name)
-    pulp_id = r["results"][0]["pulp_href"].split("/")[-2]
-    remote_url = f"pulp/api/v3/remotes/ansible/collection/{pulp_id}/"
-    r = client.delete(remote_url)
-    return wait_for_task(client, r)
 
 
 def add_permissions_to_remote(client, name, role, groups):

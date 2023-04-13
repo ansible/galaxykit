@@ -1,3 +1,6 @@
+from . import remotes
+from . import utils
+from . import tasks
 import uuid
 from urllib.parse import urlparse
 
@@ -18,41 +21,54 @@ except ModuleNotFoundError:
     import importlib_resources as pkg_resources
 
 
+def get_repository_pk(client, name):
+    """
+    Returns the primary key for a given repository name
+    """
+    return utils.pulp_href_to_id(get_repository_href(client, name))
+
+
+def get_repository_href(client, name):
+    """
+    Returns the href for a given repository name
+    """
+    user_url = f"pulp/api/v3/repositories/ansible/ansible/?name={name}"
+    resp = client.get(user_url)
+    if resp["results"] and resp["results"][0]:
+        href = resp["results"][0]["pulp_href"]
+        return href
+    else:
+        raise ValueError(f"No remote '{name}' found.")
+
+
 def delete_repository(client, name):
     """
-    Deletes a repository, throws GalaxyClientError if repository does not exist
+    Delete repository
     """
-    pulp_href = None
-    repos = get_all_repositories(client)
-    for repo in repos:
-        if repo["name"] == name:
-            pulp_href = repo["pulp_href"]
-    if not pulp_href:
-        raise GalaxyClientError(f"Repository {name} does not exist")
-    task_resp = client.delete(pulp_href)
-    wait_for_task(client, task_resp)
+    pk = get_repository_pk(client, name)
+    delete_url = f"pulp/api/v3/repositories/ansible/ansible/{pk}/"
+    return client.delete(delete_url, parse_json=False)
 
 
-def get_all_repositories(client):
+def create_repository(client, name, pipeline, remote, description=None, private=False, hide_from_search=False):
     """
-    Lists all repositories
+    Create repository
     """
-    url = "pulp/api/v3/repositories/"
-    return client.get(url)["results"]
+    post_url = f"pulp/api/v3/repositories/ansible/ansible/"
+    registry = {
+        "name": name, "private": private
+    }
+    registry.update({"description": description}) if description is not None else False
+    registry.update({"pulp_labels": {"hide_from_search": ""}}) if hide_from_search is not False else False
 
+    if pipeline:
+        registry["pulp_labels"] = {"pipeline": pipeline}
 
-def create_repository(client, name, description=None, private=False,
-                      remote=None, hide_from_search=False, pipeline=None):
-    """
-    Creates a repository
-    """
-    create_repo_url = "pulp/api/v3/repositories/ansible/ansible/"
-    body = {"name": name, "private": private}
-    body.update({"description": description}) if description is not None else False
-    body.update({"remote": remote}) if remote is not None else False
-    body.update({"pulp_labels": {"hide_from_search": ""}}) if hide_from_search is not False else False
-    body.update({"pulp_labels": {"pipeline": pipeline}}) if pipeline is not None else False
-    return client.post(create_repo_url, body)
+    if remote:
+        pk = remotes.get_remote_href(client, remote)
+        registry["remote"] = pk
+
+    return client.post(post_url, registry)
 
 
 def patch_update_repository(client, repository_id, update_body):

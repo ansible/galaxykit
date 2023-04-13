@@ -87,7 +87,6 @@ class GalaxyClient:
 
             self.token_type = "Token" if not token_type else token_type
             if not self.token and self.auth_url:
-
                 # https://developers.redhat.com/blog/2020/01/29/api-login-and-jwt-token-generation-using-keycloak
                 # When testing ephemeral environments, we won't have the
                 # access token up front, so we have to create one via user+pass.
