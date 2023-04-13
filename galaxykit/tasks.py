@@ -1,15 +1,4 @@
-import re
 from time import sleep
-
-
-def pulp_href_to_id(href):
-    uuid_regex = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
-
-    for section in href.split("/"):
-        if re.match(uuid_regex, section):
-            return section
-
-    return None
 
 
 def get_tasks(client, only_running=False):

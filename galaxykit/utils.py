@@ -1,6 +1,7 @@
 """Utility functions"""
 import logging
 import json
+import re
 import time
 from urllib import request
 from urllib.parse import urljoin
@@ -73,3 +74,13 @@ def wait_for_task(api_client, task, timeout=300, raise_on_error=False):
             ready = resp["state"] not in ("running", "waiting")
         time.sleep(5)
     return resp
+
+
+def pulp_href_to_id(href):
+    uuid_regex = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+
+    for section in href.split("/"):
+        if re.match(uuid_regex, section):
+            return section
+
+    return None

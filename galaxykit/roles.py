@@ -1,14 +1,4 @@
-import re
-
-
-def pulp_href_to_id(href):
-    uuid_regex = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
-
-    for section in href.split("/"):
-        if re.match(uuid_regex, section):
-            return section
-
-    return None
+from . import utils
 
 
 def get_role_list(client):
@@ -33,7 +23,7 @@ def get_role_id(client, role_name):
     roles_url = f"pulp/api/v3/roles/?name={role_name}"
     resp = client.get(roles_url)
     if resp["results"]:
-        return pulp_href_to_id(resp["results"][0]["pulp_href"])
+        return utils.pulp_href_to_id(resp["results"][0]["pulp_href"])
     else:
         raise ValueError(f"No role '{role_name}' found.")
 
@@ -100,7 +90,7 @@ def set_permissions(client, role_name, add_permissions=[], remove_permissions=[]
     Assigns the given permissions to the role.
     """
     role = get_role(client, role_name)
-    role_id = pulp_href_to_id(role["pulp_href"])
+    role_id = utils.pulp_href_to_id(role["pulp_href"])
     role_url = f"pulp/api/v3/roles/{role_id}/"
 
     permissions = set(role["permissions"])
