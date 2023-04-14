@@ -34,7 +34,15 @@ def delete_repository(client, name):
     return wait_for_task(client, task_resp)
 
 
-def create_repository(client, name, pipeline=None, remote=None, description=None, private=False, hide_from_search=False):
+def create_repository(
+    client,
+    name,
+    pipeline=None,
+    remote=None,
+    description=None,
+    private=False,
+    hide_from_search=False,
+):
     """
     Create repository
     """
@@ -43,7 +51,9 @@ def create_repository(client, name, pipeline=None, remote=None, description=None
         "name": name, "private": private
     }
     registry.update({"description": description}) if description is not None else False
-    registry.update({"pulp_labels": {"hide_from_search": ""}}) if hide_from_search is not False else False
+    registry.update(
+        {"pulp_labels": {"hide_from_search": ""}}
+    ) if hide_from_search is not False else False
 
     if pipeline:
         registry["pulp_labels"] = {"pipeline": pipeline}
@@ -68,12 +78,14 @@ def put_update_repository(client, repository_id, update_body):
 def search_collection(client, **search_param):
     # get rid of the api_prefix
     galaxy_root_bck = client.galaxy_root
-    client.galaxy_root = client.galaxy_root.split('api/automation-hub/')[0]
-    search_url = f'pulp_ansible/galaxy/default/api/v3/' \
-                 f'plugin/ansible/search/collection-versions/?'
+    client.galaxy_root = client.galaxy_root.split("api/automation-hub/")[0]
+    search_url = (
+        f"pulp_ansible/galaxy/default/api/v3/"
+        f"plugin/ansible/search/collection-versions/?"
+    )
     for key, value in search_param.items():
         if isinstance(value, list):
-            param = '&'.join([f"{key}={v}" for v in value])
+            param = "&".join([f"{key}={v}" for v in value])
         else:
             param = f"{key}={value}"
         search_url += f"{param}&"
@@ -92,12 +104,16 @@ def get_all_repositories(client):
 
 
 def get_distribution_id(client, name):
-    ansible_distribution_path = f"/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/?name={name}"
+    ansible_distribution_path = (
+        f"/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/?name={name}"
+    )
     resp = client.get(ansible_distribution_path)
     return resp["results"][0]["pulp_href"].split("/")[-2]
 
 
-def copy_content_between_repos(client, cv_hrefs, source_repo_href, destination_repo_hrefs):
+def copy_content_between_repos(
+    client, cv_hrefs, source_repo_href, destination_repo_hrefs
+):
     url = f"{source_repo_href}copy_collection_version/"
     body = {
         "collection_versions": cv_hrefs,
@@ -107,7 +123,9 @@ def copy_content_between_repos(client, cv_hrefs, source_repo_href, destination_r
     return wait_for_task(client, r)
 
 
-def move_content_between_repos(client, cv_hrefs, source_repo_href, destination_repo_hrefs):
+def move_content_between_repos(
+    client, cv_hrefs, source_repo_href, destination_repo_hrefs
+):
     url = f"{source_repo_href}move_collection_version/"
     body = {
         "collection_versions": cv_hrefs,
@@ -131,11 +149,13 @@ def add_permissions_to_repository(client, name, role, groups):
     r = view_repositories(client, name)
     pulp_href = r["results"][0]["pulp_href"]
     body = {"role": role, "groups": groups}
-    return client.post(pulp_href+"add_role/", body)
+    return client.post(pulp_href + "add_role/", body)
 
 
 def create_distribution(client, dist_name, repo_href):
-    ansible_distribution_path = "/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/"
+    ansible_distribution_path = (
+        "/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/"
+    )
     dist_data = {"base_path": dist_name, "name": dist_name, "repository": repo_href}
     task_resp = client.post(ansible_distribution_path, dist_data)
     wait_for_task(client, task_resp)

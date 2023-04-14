@@ -66,7 +66,7 @@ class GalaxyClient:
         container_registry=None,
         container_tls_verify=True,
         https_verify=False,
-        token_type=None
+        token_type=None,
     ):
         self.galaxy_root = galaxy_root
         self.headers = {}

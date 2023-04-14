@@ -58,7 +58,9 @@ def delete_remote(client, name):
     return wait_for_task(client, r)
 
 
-def create_remote(client, name, url, signed_only=False, tls_validation=False, params=None):
+def create_remote(
+    client, name, url, signed_only=False, tls_validation=False, params=None
+):
     """
     Create remote
     """
@@ -70,7 +72,7 @@ def create_remote(client, name, url, signed_only=False, tls_validation=False, pa
         "tls_validation": tls_validation,
         "download_concurrency": 10,
         "signed_only": signed_only,
-        **params
+        **params,
     }
     return client.post(remote_url, body)
 
@@ -85,11 +87,7 @@ def update_remote(client, name, url, params=None):
     pulp_href = view_remotes(client, name)
     pulp_id = pulp_href_to_id(pulp_href["results"][0]["pulp_href"])
     remote_url = f"pulp/api/v3/remotes/ansible/collection/{pulp_id}/"
-    body = {
-        "name": name,
-        "url": url,
-        **params
-    }
+    body = {"name": name, "url": url, **params}
     return client.put(remote_url, body)
 
 
@@ -97,4 +95,4 @@ def add_permissions_to_remote(client, name, role, groups):
     r = view_remotes(client, name)
     pulp_href = r["results"][0]["pulp_href"]
     body = {"role": role, "groups": groups}
-    return client.post(pulp_href+"add_role/", body)
+    return client.post(pulp_href + "add_role/", body)

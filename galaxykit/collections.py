@@ -242,11 +242,8 @@ def collection_sign(
 def sign_collection(client, cv_href, repo_pulp_href):
     results = client.get("pulp/api/v3/signing-services/?name=ansible-default")
     signing_service = results["results"][0]
-    body = {
-        "content_units": [cv_href],
-        "signing_service": signing_service["pulp_href"]
-    }
-    resp = client.post(f'{repo_pulp_href}sign/', body)
+    body = {"content_units": [cv_href], "signing_service": signing_service["pulp_href"]}
+    resp = client.post(f"{repo_pulp_href}sign/", body)
 
     resp = wait_for_task(client, resp)
-    assert resp['state'] == 'completed'
+    assert resp["state"] == "completed"
