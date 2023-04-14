@@ -103,7 +103,8 @@ def copy_content_between_repos(client, cv_hrefs, source_repo_href, destination_r
         "collection_versions": cv_hrefs,
         "destination_repositories": destination_repo_hrefs,
     }
-    return client.post(url, body)
+    r = client.post(url, body)
+    return wait_for_task(client, r)
 
 
 def move_content_between_repos(client, cv_hrefs, source_repo_href, destination_repo_hrefs):
@@ -112,7 +113,8 @@ def move_content_between_repos(client, cv_hrefs, source_repo_href, destination_r
         "collection_versions": cv_hrefs,
         "destination_repositories": destination_repo_hrefs,
     }
-    return client.post(url, body)
+    r = client.post(url, body)
+    return wait_for_task(client, r)
 
 
 def view_repositories(client, name=None):
