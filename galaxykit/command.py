@@ -123,6 +123,13 @@ KIND_OPS = {
                     "version": {},
                 },
             },
+            # for galaxy_ng >=4.7
+            "search": {
+                "help": "cross repository search by collection name",
+                "args": {
+                    "collection_name": {},
+                },
+            },
         },
     },
     "namespace": {
@@ -216,6 +223,10 @@ KIND_OPS = {
                     "url": {},
                 }
             },
+            "list": {
+                "help": "List all remotes",
+                "args": None,
+            },
         },
     },
     "repository": {
@@ -233,6 +244,15 @@ KIND_OPS = {
                     "--remote": {},
                 }
             },
+            "list": {
+                "help": "List all repositories",
+                "args": None,
+            },
+            # for galaxy_ng >=4.7
+            "collections": {
+                "help": "List all collections in the given repository",
+                "args": {"repository_name": {}},
+            },
         },
     },
     "distribution": {
@@ -247,6 +267,10 @@ KIND_OPS = {
                 "args": {
                     "name": {},
                 }
+            },
+            "list": {
+                "help": "List all distributions",
+                "args": None,
             },
         },
     },
@@ -879,7 +903,14 @@ def main():
                     if not args.ignore:
                         logger.error(e)
                         sys.exit(EXIT_NOT_FOUND)
-
+            elif args.operation == "list":
+                try:
+                    resp = remotes.get_all_remotes(client)
+                    print(format_list(resp, "name"))
+                except ValueError as e:
+                    if not args.ignore:
+                        logger.error(e)
+                        sys.exit(EXIT_NOT_FOUND)
         elif args.kind == "repository":
             if args.operation == "delete":
                 name = args.name
@@ -899,7 +930,23 @@ def main():
                     if not args.ignore:
                         logger.error(e)
                         sys.exit(EXIT_NOT_FOUND)
-
+            elif args.operation == "list":
+                try:
+                    resp = repositories.get_all_repositories(client)
+                    print(format_list(resp, "name"))
+                except ValueError as e:
+                    if not args.ignore:
+                        logger.error(e)
+                        sys.exit(EXIT_NOT_FOUND)
+            elif args.operation == "collections":
+                try:
+                    repository_name = args.repository_name or ""
+                    resp = repositories.search_collection(client, repository_name=repository_name)
+                    print(resp["data"])
+                except ValueError as e:
+                    if not args.ignore:
+                        logger.error(e)
+                        sys.exit(EXIT_NOT_FOUND)
         elif args.kind == "distribution":
             if args.operation == "delete":
                 name = args.name
@@ -917,7 +964,14 @@ def main():
                     if not args.ignore:
                         logger.error(e)
                         sys.exit(EXIT_NOT_FOUND)
-
+            elif args.operation == "list":
+                try:
+                    resp = distributions.get_all_distributions(client)
+                    print(format_list(resp, "name"))
+                except ValueError as e:
+                    if not args.ignore:
+                        logger.error(e)
+                        sys.exit(EXIT_NOT_FOUND)
         elif args.kind == "task":
             if args.operation == "list":
                 resp = tasks.get_tasks(client, args.only_running)
@@ -1005,7 +1059,15 @@ def main():
                         )
                     )
                 )
-
+            elif args.operation == "search":
+                try:
+                    collection_name = args.collection_name or ""
+                    resp = repositories.search_collection(client, name=collection_name)
+                    print(resp["data"])
+                except ValueError as e:
+                    if not args.ignore:
+                        logger.error(e)
+                        sys.exit(EXIT_NOT_FOUND)
         elif args.kind == "url":
             if args.operation == "get":
                 url = args.url

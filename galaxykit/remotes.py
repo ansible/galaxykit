@@ -82,6 +82,14 @@ def view_remotes(client, name=None):
     return client.get(remote_url)
 
 
+def get_all_remotes(client):
+    """
+    Lists all remotes
+    """
+    url = "pulp/api/v3/repositories/"
+    return client.get(url)["results"]
+
+
 def update_remote(client, name, url, params=None):
     params = params or {}
     pulp_href = view_remotes(client, name)

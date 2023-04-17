@@ -87,8 +87,7 @@ def search_collection(client, **search_param):
             param = f"{key}={value}"
         search_url += f"{param}&"
     search_url = search_url[:-1]
-    response = client.get(search_url)
-    return response
+    return client.get(search_url)
 
 
 def get_all_repositories(client):
