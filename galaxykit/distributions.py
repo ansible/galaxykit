@@ -47,3 +47,11 @@ def create_distribution(client, name):
 
     res = client.post(post_url, data)
     return res
+
+
+def get_all_distributions(client):
+    """
+    Lists all distributions
+    """
+    url = "pulp/api/v3/distributions/ansible/ansible/"
+    return client.get(url)["results"]

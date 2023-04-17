@@ -66,6 +66,7 @@ class GalaxyClient:
         container_registry=None,
         container_tls_verify=True,
         https_verify=False,
+        token_type=None,
     ):
         self.galaxy_root = galaxy_root
         self.headers = {}
@@ -84,7 +85,7 @@ class GalaxyClient:
             elif isinstance(auth, tuple):
                 self.username, self.password = auth
 
-            self.token_type = "Token"
+            self.token_type = "Token" if not token_type else token_type
             if not self.token and self.auth_url:
                 # https://developers.redhat.com/blog/2020/01/29/api-login-and-jwt-token-generation-using-keycloak
                 # When testing ephemeral environments, we won't have the
@@ -208,6 +209,8 @@ class GalaxyClient:
                 raise ValueError("Failed to parse JSON response from API") from exc
             if "errors" in json:
                 raise GalaxyClientError(resp, *json["errors"])
+            if resp.status_code >= 400:
+                raise GalaxyClientError(resp, resp.status_code)
             return json
         else:
             if resp.status_code >= 400:
@@ -219,13 +222,15 @@ class GalaxyClient:
             body = dumps(body)
         if isinstance(body, str):
             body = body.encode("utf8")
-        headers = {
-            **kwargs.pop("headers", self.headers),
-            "Content-Type": "application/json;charset=utf-8",
-            "Content-length": str(len(body)),
-        }
+        headers = {}
+        headers.update(self.headers)
+        headers.update(**kwargs.pop("headers", self.headers))
+        headers.setdefault("Content-Type", "application/json;charset=utf-8")
+        headers.setdefault("Content-Length", str(len(body)))
         kwargs["headers"] = headers
         kwargs["data"] = body
+        logger.debug(f"Request headers: {headers}")
+        logger.debug(f"Request body: {body}")
         return self._http(method, path, *args, **kwargs)
 
     def get(self, path, *args, **kwargs):

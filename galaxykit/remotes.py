@@ -1,3 +1,5 @@
+from galaxykit.utils import wait_for_task, pulp_href_to_id
+
 from . import utils
 
 
@@ -52,16 +54,53 @@ def delete_remote(client, name):
     """
     pk = get_remote_pk(client, name)
     delete_url = f"pulp/api/v3/remotes/ansible/collection/{pk}/"
-    return client.delete(delete_url, parse_json=False)
+    r = client.delete(delete_url)
+    return wait_for_task(client, r)
 
 
-def create_remote(client, name, url):
+def create_remote(
+    client, name, url, signed_only=False, tls_validation=False, params=None
+):
     """
     Create remote
     """
-    post_url = f"pulp/api/v3/remotes/ansible/collection/"
-    registry = {
+    params = params or {}
+    remote_url = "pulp/api/v3/remotes/ansible/collection/"
+    body = {
         "name": name,
         "url": url,
+        "tls_validation": tls_validation,
+        "download_concurrency": 10,
+        "signed_only": signed_only,
+        **params,
     }
-    return client.post(post_url, registry)
+    return client.post(remote_url, body)
+
+
+def view_remotes(client, name=None):
+    remote_url = f"pulp/api/v3/remotes/ansible/collection/?name={name}"
+    return client.get(remote_url)
+
+
+def get_all_remotes(client):
+    """
+    Lists all remotes
+    """
+    url = "pulp/api/v3/repositories/"
+    return client.get(url)["results"]
+
+
+def update_remote(client, name, url, params=None):
+    params = params or {}
+    pulp_href = view_remotes(client, name)
+    pulp_id = pulp_href_to_id(pulp_href["results"][0]["pulp_href"])
+    remote_url = f"pulp/api/v3/remotes/ansible/collection/{pulp_id}/"
+    body = {"name": name, "url": url, **params}
+    return client.put(remote_url, body)
+
+
+def add_permissions_to_remote(client, name, role, groups):
+    r = view_remotes(client, name)
+    pulp_href = r["results"][0]["pulp_href"]
+    body = {"role": role, "groups": groups}
+    return client.post(pulp_href + "add_role/", body)
