@@ -2,6 +2,7 @@ from . import remotes
 from . import utils
 from . import tasks
 from galaxykit.utils import wait_for_task
+from urllib.parse import urljoin
 
 
 def get_repository_pk(client, name):
@@ -76,13 +77,9 @@ def put_update_repository(client, repository_id, update_body):
 
 
 def search_collection(client, **search_param):
-    # get rid of the api_prefix
-    galaxy_root_bck = client.galaxy_root
-    client.galaxy_root = client.galaxy_root.split("api/automation-hub/")[0]
-    search_url = (
-        f"pulp_ansible/galaxy/default/api/v3/"
-        f"plugin/ansible/search/collection-versions/?"
-    )
+    galaxy_root = client.galaxy_root.split('api/automation-hub/')[0]
+    search_url = f"{galaxy_root}pulp_ansible/galaxy/default/api/v3/" \
+                 f"plugin/ansible/search/collection-versions/?"
     for key, value in search_param.items():
         if isinstance(value, list):
             param = "&".join([f"{key}={v}" for v in value])
@@ -91,7 +88,6 @@ def search_collection(client, **search_param):
         search_url += f"{param}&"
     search_url = search_url[:-1]
     response = client.get(search_url)
-    client.galaxy_root = galaxy_root_bck
     return response
 
 
@@ -114,7 +110,7 @@ def get_distribution_id(client, name):
 def copy_content_between_repos(
     client, cv_hrefs, source_repo_href, destination_repo_hrefs
 ):
-    url = f"{source_repo_href}copy_collection_version/"
+    url = urljoin(source_repo_href, "copy_collection_version/")
     body = {
         "collection_versions": cv_hrefs,
         "destination_repositories": destination_repo_hrefs,
@@ -126,7 +122,7 @@ def copy_content_between_repos(
 def move_content_between_repos(
     client, cv_hrefs, source_repo_href, destination_repo_hrefs
 ):
-    url = f"{source_repo_href}move_collection_version/"
+    url = urljoin(source_repo_href, "move_collection_version/")
     body = {
         "collection_versions": cv_hrefs,
         "destination_repositories": destination_repo_hrefs,

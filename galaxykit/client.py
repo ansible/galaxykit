@@ -229,6 +229,7 @@ class GalaxyClient:
         headers.setdefault("Content-Length", str(len(body)))
         kwargs["headers"] = headers
         kwargs["data"] = body
+        logger.debug(f"Request headers: {headers}")
         logger.debug(f"Request body: {body}")
         return self._http(method, path, *args, **kwargs)
 
