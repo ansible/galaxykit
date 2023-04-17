@@ -77,9 +77,11 @@ def put_update_repository(client, repository_id, update_body):
 
 
 def search_collection(client, **search_param):
-    galaxy_root = client.galaxy_root.split('api/automation-hub/')[0]
-    search_url = f"{galaxy_root}pulp_ansible/galaxy/default/api/v3/" \
-                 f"plugin/ansible/search/collection-versions/?"
+    galaxy_root = client.galaxy_root.split("api/automation-hub/")[0]
+    search_url = (
+        f"{galaxy_root}pulp_ansible/galaxy/default/api/v3/"
+        f"plugin/ansible/search/collection-versions/?"
+    )
     for key, value in search_param.items():
         if isinstance(value, list):
             param = "&".join([f"{key}={v}" for v in value])

@@ -941,7 +941,9 @@ def main():
             elif args.operation == "collections":
                 try:
                     repository_name = args.repository_name or ""
-                    resp = repositories.search_collection(client, repository_name=repository_name)
+                    resp = repositories.search_collection(
+                        client, repository_name=repository_name
+                    )
                     print(resp["data"])
                 except ValueError as e:
                     if not args.ignore:
