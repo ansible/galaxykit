@@ -47,6 +47,7 @@ def create_repository(
     Create repository
     """
     post_url = f"pulp/api/v3/repositories/ansible/ansible/"
+
     registry = {
         "name": name, "private": private
     }
@@ -145,9 +146,7 @@ def add_permissions_to_repository(client, name, role, groups):
 
 
 def create_distribution(client, dist_name, repo_href):
-    ansible_distribution_path = (
-        "/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/"
-    )
+    ansible_distribution_path = "pulp/api/v3/distributions/ansible/ansible/"
     dist_data = {"base_path": dist_name, "name": dist_name, "repository": repo_href}
     task_resp = client.post(ansible_distribution_path, dist_data)
     wait_for_task(client, task_resp)
