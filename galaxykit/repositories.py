@@ -96,7 +96,7 @@ def get_all_repositories(client):
 
 def get_distribution_id(client, name):
     ansible_distribution_path = (
-        f"/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/?name={name}"
+        f"pulp/api/v3/distributions/ansible/ansible/?name={name}"
     )
     resp = client.get(ansible_distribution_path)
     return resp["results"][0]["pulp_href"].split("/")[-2]
