@@ -48,9 +48,7 @@ def create_repository(
     """
     post_url = f"pulp/api/v3/repositories/ansible/ansible/"
 
-    registry = {
-        "name": name, "private": private
-    }
+    registry = {"name": name, "private": private}
     registry.update({"description": description}) if description is not None else False
     registry.update(
         {"pulp_labels": {"hide_from_search": ""}}
