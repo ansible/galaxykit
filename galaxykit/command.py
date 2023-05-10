@@ -233,6 +233,7 @@ KIND_OPS = {
                     "--remote": {},
                 }
             },
+            "list": {"args": None},
         },
     },
     "distribution": {
@@ -895,6 +896,14 @@ def main():
                     resp = repositories.create_repository(
                         client, name, pipeline, remote
                     )
+                except ValueError as e:
+                    if not args.ignore:
+                        logger.error(e)
+                        sys.exit(EXIT_NOT_FOUND)
+            elif args.operation == "list":
+                try:
+                    resp = repositories.list_repositories(client)
+                    pprint(json.dumps(resp))
                 except ValueError as e:
                     if not args.ignore:
                         logger.error(e)

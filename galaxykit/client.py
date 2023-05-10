@@ -197,7 +197,6 @@ class GalaxyClient:
             resp = requests.request(
                 method, url, headers=headers, verify=self.https_verify, *args, **kwargs
             )
-
         if parse_json:
             try:
                 json = resp.json()

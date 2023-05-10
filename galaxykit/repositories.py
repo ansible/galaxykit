@@ -49,3 +49,12 @@ def create_repository(client, name, pipeline, remote):
         registry["remote"] = pk
 
     return client.post(post_url, registry)
+
+
+def list_repositories(client):
+    """
+    list repositories
+    """
+
+    list_url = f"pulp/api/v3/repositories/ansible/ansible/?page_size=100"
+    return client.get(list_url, parse_json=True)
