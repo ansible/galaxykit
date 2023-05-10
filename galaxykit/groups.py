@@ -33,7 +33,7 @@ def create_group(client, group_name, exists_ok=True):
     try:
         return client.post("_ui/v1/groups/", {"name": group_name})
     except GalaxyClientError as e:
-        if e.status_code == 409 and exists_ok:
+        if e.response.status_code == 409 and exists_ok:
             # ok, already exists
             pass
         else:
