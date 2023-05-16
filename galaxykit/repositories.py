@@ -1,6 +1,5 @@
 from . import remotes
 from . import utils
-from . import tasks
 from galaxykit.utils import wait_for_task
 from urllib.parse import urljoin
 
@@ -48,9 +47,8 @@ def create_repository(
     Create repository
     """
     post_url = f"pulp/api/v3/repositories/ansible/ansible/"
-    registry = {
-        "name": name, "private": private
-    }
+
+    registry = {"name": name, "private": private}
     registry.update({"description": description}) if description is not None else False
     registry.update(
         {"pulp_labels": {"hide_from_search": ""}}
@@ -77,11 +75,7 @@ def put_update_repository(client, repository_id, update_body):
 
 
 def search_collection(client, **search_param):
-    galaxy_root = client.galaxy_root.split("api/automation-hub/")[0]
-    search_url = (
-        f"{galaxy_root}pulp_ansible/galaxy/default/api/v3/"
-        f"plugin/ansible/search/collection-versions/?"
-    )
+    search_url = "v3/plugin/ansible/search/collection-versions/?"
     for key, value in search_param.items():
         if isinstance(value, list):
             param = "&".join([f"{key}={v}" for v in value])
@@ -102,7 +96,7 @@ def get_all_repositories(client):
 
 def get_distribution_id(client, name):
     ansible_distribution_path = (
-        f"/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/?name={name}"
+        f"pulp/api/v3/distributions/ansible/ansible/?name={name}"
     )
     resp = client.get(ansible_distribution_path)
     return resp["results"][0]["pulp_href"].split("/")[-2]
@@ -150,9 +144,7 @@ def add_permissions_to_repository(client, name, role, groups):
 
 
 def create_distribution(client, dist_name, repo_href):
-    ansible_distribution_path = (
-        "/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/"
-    )
+    ansible_distribution_path = "pulp/api/v3/distributions/ansible/ansible/"
     dist_data = {"base_path": dist_name, "name": dist_name, "repository": repo_href}
     task_resp = client.post(ansible_distribution_path, dist_data)
     wait_for_task(client, task_resp)

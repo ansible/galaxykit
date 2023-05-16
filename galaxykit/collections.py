@@ -70,6 +70,7 @@ def upload_artifact(
     hash=True,
     no_filename=False,
     no_file=False,
+    path=None,
 ):
     """
     Publishes a collection to a Galaxy server and returns the import task URI.
@@ -84,6 +85,7 @@ def upload_artifact(
         Alternatively, could pass a hash in directly as this argument.
     :param no_filename: If True, no filename is attached to the request.
     :param no_file: If True, no file is attached to the request.
+    :param path: the repository the artifact will be directly uploaded to
     :return: The import task URI that contains the import results.
     """
 
@@ -152,6 +154,8 @@ def upload_artifact(
         EE_ENDPOINTS_CHANGE_VERSION
     ):
         col_upload_path = f"v3/artifacts/collections/"
+        if path:
+            col_upload_path = f"content/{path}/v3/artifacts/collections/"
     else:
         col_upload_path = (
             f"content/inbound-{artifact.namespace}/v3/artifacts/collections/"
