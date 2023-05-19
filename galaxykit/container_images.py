@@ -18,6 +18,14 @@ def get_container_images(client, container):
     return client.get(get_url)
 
 
+def get_container_images_latest(client, container):
+    """
+    Gets container images latest
+    """
+    get_url = f"{client.ui_ee_endpoint_prefix}execution-environments/repositories/{container}/_content/images/latest/"
+    return client.get(get_url)
+
+
 def get_container_history(client, container):
     """
     Gets container history
