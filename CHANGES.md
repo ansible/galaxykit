@@ -1,3 +1,10 @@
+##Version 0.14
+May 23, 2023
+* added method needed by galaxy_ng tests
+* fix url for x-repo search
+* add option to upload directly to repo (not through staging)
+* Repo management
+* Galaxykit Remotes, Distributions and Repositories - create and delete
 ## Version 0.13
 March 10, 2023
 * Remove inbound repo logic for Hub >= 4.7
