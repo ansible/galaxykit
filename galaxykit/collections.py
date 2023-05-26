@@ -166,13 +166,14 @@ def upload_artifact(
     return resp
 
 
-def move_collection(
+def move_or_copy_collection(
     client,
     namespace,
     collection_name,
     version="1.0.0",
     source="staging",
     destination="published",
+    operation="move",
 ):
     """
     Moves a collection between repositories. The default arguments are for the most common usecase, which
@@ -180,7 +181,7 @@ def move_collection(
 
     POST v3/collections/{namespace}/{collection_name}/versions/{version}/move/{source}/{destination}/
     """
-    move_url = f"v3/collections/{namespace}/{collection_name}/versions/{version}/move/{source}/{destination}/"
+    move_url = f"v3/collections/{namespace}/{collection_name}/versions/{version}/{operation}/{source}/{destination}/"
     payload = ""
     client.post(move_url, payload)
 

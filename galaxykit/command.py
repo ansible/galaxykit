@@ -98,6 +98,15 @@ KIND_OPS = {
                     "destination": {"nargs": "?", "default": "published"},
                 },
             },
+            "copy": {
+                "args": {
+                    "namespace": {},
+                    "collection_name": {},
+                    "version": {"nargs": "?", "default": "1.0.0"},
+                    "source": {"nargs": "?", "default": "staging"},
+                    "destination": {"nargs": "?", "default": "published"},
+                },
+            },
             "delete": {
                 "args": {
                     "namespace": {},
@@ -1011,8 +1020,31 @@ def main():
                     args.source or "staging",
                     args.destination or "published",
                 )
-                collections.move_collection(
-                    client, namespace, collection_name, version, source, destination
+                collections.move_or_copy_collection(
+                    client,
+                    namespace,
+                    collection_name,
+                    version,
+                    source,
+                    destination,
+                    "move",
+                )
+            elif args.operation == "copy":
+                namespace, collection_name, version, source, destination = (
+                    args.namespace,
+                    args.collection_name,
+                    args.version or "1.0.0",
+                    args.source or "staging",
+                    args.destination or "published",
+                )
+                collections.move_or_copy_collection(
+                    client,
+                    namespace,
+                    collection_name,
+                    version,
+                    source,
+                    destination,
+                    "copy",
                 )
             elif args.operation == "delete":
                 namespace, collection, version, repository = (
