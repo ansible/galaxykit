@@ -87,6 +87,11 @@ KIND_OPS = {
                         "nargs": "?",
                         "default": "1.0.0",
                     },
+                    "--path": {
+                        "help": "Path to repository, usualy repository name.",
+                        "nargs": "?",
+                        "default": "staging",
+                    },
                 },
             },
             "move": {
@@ -998,18 +1003,19 @@ def main():
             if args.operation == "list":
                 print(json.dumps(collections.get_collection_list(client)))
             elif args.operation == "upload":
-                namespace, collection_name, version = (
+                namespace, collection_name, version, path = (
                     args.namespace or client.username,
                     args.collection_name,
                     args.version or "1.0.0",
+                    args.path or "staging",
                 )
-
                 resp = namespaces.create_namespace(client, namespace, None)
                 artifact = collections.upload_test_collection(
                     client,
                     namespace=namespace,
                     collection_name=collection_name,
                     version=version,
+                    path=path,
                 )
                 print(json.dumps(artifact))
             elif args.operation == "move":
