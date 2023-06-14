@@ -30,7 +30,7 @@ def get_collection_list(client):
 
 
 def upload_test_collection(
-    client, namespace=None, collection_name=None, version="1.0.0"
+    client, namespace=None, collection_name=None, version="1.0.0", path="staging"
 ):
     """
     Uploads a test collection generated with orionutils
@@ -44,7 +44,7 @@ def upload_test_collection(
     # cloud importer config requires at least one tag
     config["tags"] = ["tools"]
     artifact = build_collection("skeleton", config=config)
-    upload_resp_url = upload_artifact(config, client, artifact)["task"]
+    upload_resp_url = upload_artifact(config, client, artifact, path=path)["task"]
 
     ready = False
     state = ""
