@@ -159,14 +159,18 @@ class GalaxyClient:
             "User-Agent": user_agent(),
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        json = self._http(
+        json, resp = self._http(
             "post",
             self.auth_url,
             data=payload,
             headers=headers,
+            include_response=True,
         )
-        self.token = json["access_token"]
-        self.token_type = "Bearer"
+        try:
+            self.token = json["access_token"]
+            self.token_type = "Bearer"
+        except KeyError:
+            raise GalaxyClientError("Unexpected error in JWT token refresh.", resp)
 
     def _update_auth_headers(self):
         self.headers.update(
@@ -187,6 +191,10 @@ class GalaxyClient:
         url = urljoin(self.galaxy_root, path)
         headers = kwargs.pop("headers", self.headers)
         parse_json = kwargs.pop("parse_json", True)
+        include_response = kwargs.pop("include_response", False)
+
+        if include_response and not parse_json:
+            raise ValueError("GalaxyClient._http() called with include_response=True only valid when parse_json=True!")
 
         resp = requests.request(
             method, url, headers=headers, verify=self.https_verify, *args, **kwargs
@@ -209,9 +217,13 @@ class GalaxyClient:
                 raise ValueError("Failed to parse JSON response from API") from exc
             if "errors" in json:
                 raise GalaxyClientError(resp, *json["errors"])
+
             if resp.status_code >= 400:
                 raise GalaxyClientError(resp, resp.status_code)
-            return json
+            elif include_response:
+                return json, resp
+            else:
+                return json
         else:
             if resp.status_code >= 400:
                 raise GalaxyClientError(resp, resp.status_code)
@@ -234,6 +246,8 @@ class GalaxyClient:
         return self._http(method, path, *args, **kwargs)
 
     def get(self, path, *args, **kwargs):
+        if args:
+            kwargs["params"], *args = args
         return self._http("get", path, *args, **kwargs)
 
     def post(self, *args, **kwargs):

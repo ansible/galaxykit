@@ -4,6 +4,7 @@ Functions for managing collections. Currently only handles uploading test collec
 
 import uuid
 import os
+import sys
 import json
 from time import sleep
 from urllib.parse import urljoin
@@ -24,9 +25,23 @@ def get_collection(client, namespace, collection_name, version):
     return client.get(collection_url)
 
 
-def get_collection_list(client):
-    url = "_ui/v1/collection-versions/?limit=999999"
-    return client.get(url)
+def get_collection_list(client, repo="published", limit=None, offset=None, keywords=None):
+    # url = "_ui/v1/collection-versions/?limit=999999"
+    url = f"_ui/v1/repo/{repo}/"
+    params = {}
+
+    if limit is not None:
+        params["limit"] = limit
+    if offset is not None:
+        params["offset"] = offset
+
+    if isinstance(keywords, str):
+        keywords = [keywords]
+    elif keywords is None:
+        keywords = []
+    if keywords:
+        params["keywords"] = keywords
+    return client.get(url, params)
 
 
 def upload_test_collection(
@@ -201,19 +216,75 @@ def move_or_copy_collection(
 
 
 def delete_collection(
-    client, namespace, collection, version=None, repository="published"
+    client, namespace, collection, version=None, repositories=("published",), dependents=False
 ):
     """
     Delete collection version
     """
+    assert isinstance(repositories, (tuple, list))
     logger.debug(f"Deleting {collection} from {namespace} on {client.galaxy_root}")
-    if version == None:
-        delete_url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/"
-    else:
-        delete_url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/versions/{version}/"
-    resp = client.delete(delete_url)
-    wait_for_task(client, resp)
-    return resp
+
+    completed_repositories = set()
+
+    final_resp = {
+        "repositories": list(repositories),
+        "responses": [],
+        "delete_count": 0,
+    }
+
+    for repository in repositories:
+        if repository in completed_repositories:
+            continue
+        else:
+            completed_repositories.add(repository)
+
+        coll_name = f"{namespace}.{collection}"
+        if not version:
+            delete_url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/"
+        else:
+            delete_url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/versions/{version}/"
+            coll_name += f":{version}"
+        try:
+            resp = client.delete(delete_url)
+        except GalaxyClientError as e:
+            if e.response.status_code == 404:
+                logger.debug(f"Ignoring (maybe) already deleted {coll_name}", file=sys.stderr)
+                resp = {
+                    "collection": coll_name,
+                    "response_body": e.response.text,
+                    "response_status_code": e.response.status_code,
+                }
+            else:
+                raise
+        else:
+            if "dependent_collection_versions" in resp:
+                dep_count = len(resp["dependent_collection_versions"])
+                logger.debug(f"Deleting {dep_count} dependents first...")
+                if dependents:
+                    combined = {
+                        "original": None,
+                        "dependents": []
+                    }
+                    for dep in resp["dependent_collection_versions"]:
+                        dep_coll, dep_ver = dep.split(" ")
+                        dep_ns, dep_name = dep_coll.split(".")
+                        dep_resp = delete_collection(client, dep_ns, dep_name, dep_ver, repositories, dependents=True)
+                        combined["dependents"].append(dep_resp)
+                    resp = client.delete(delete_url)
+                    if "delete_count" in resp:
+                        final_resp["delete_count"] += resp["delete_count"]
+                    combined["original"] = resp
+                    return combined
+                else:
+                    raise GalaxyClientError(resp)
+
+            wait_for_task(client, resp)
+            final_resp["delete_count"] += 1
+        final_resp["responses"].append({
+            "collection": coll_name,
+            "response": resp,
+        })
+    return final_resp
 
 
 def deprecate_collection(client, namespace, collection, repository):
