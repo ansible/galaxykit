@@ -1,15 +1,37 @@
 #!/usr/bin/env bash
 
-export HTTPS_PROXY="http://squid.corp.redhat.com:3128"
-
 # set -xv
 
 # LIMIT=100
 # BATCH=$LIMIT
 WAIT=0
 
-while getopts 'l:b:w:d' OPTION; do
+IFS='' read -r -d '' VAR <<'EOF'
+galaxy-cleaner.sh
+script usage: ./cleanup.sh [-l LIMIT] [-b BATCH_SIZE] [-d]
+
+    -l          Limit. Number of collections to remove.
+    -b          Batch size. Number of collections to fetch in each batch
+                to then delete. Adjust this for performance and/or rate limit
+                problems.
+    -d          Debug flag. Enables bash -xv flags and displays extra debug
+                information while running.
+    -t          Token file. Path to a file to read the access token from.
+    -T          Token. Directly pass the access token as a parameter.
+    -p          Proxy. Set the HTTP_PROXY value to access the Galaxy API via.
+    -w          Wait. Pause between steps to reduce server impact or avoid rate
+                limiting.
+
+EOF
+
+while getopts 't:T:l:b:w:p:d' OPTION; do
   case "$OPTION" in
+    t)
+      TOKEN=$(cat $OPTARG)
+      ;;
+    T)
+      TOKEN=$OPTARG
+      ;;
     l)
       LIMIT=$OPTARG
       ;;
@@ -18,6 +40,9 @@ while getopts 'l:b:w:d' OPTION; do
       ;;
     w)
       WAIT=$OPTARG
+      ;;
+    p)
+      export HTTPS_PROXY="${OPTARG}"
       ;;
     d)
       DEBUG=true
@@ -31,7 +56,7 @@ while getopts 'l:b:w:d' OPTION; do
 done
 shift "$(($OPTIND -1))"
 
-TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5MDI0YWU0ZC1kZDFlLTQ0MDEtOTg3MS1mOTdiNTUxYzEzN2UifQ.eyJpYXQiOjE2NTk5ODUwOTMsImp0aSI6IjhjZGRmYjNlLWI4NTctNGI4Zi04YTM1LTg5ODU3NjcxODhhNCIsImlzcyI6Imh0dHBzOi8vc3NvLnN0YWdlLnJlZGhhdC5jb20vYXV0aC9yZWFsbXMvcmVkaGF0LWV4dGVybmFsIiwiYXVkIjoiaHR0cHM6Ly9zc28uc3RhZ2UucmVkaGF0LmNvbS9hdXRoL3JlYWxtcy9yZWRoYXQtZXh0ZXJuYWwiLCJzdWIiOiJmOmFjNGJjZGI1LTFmYjEtNDFjNS05MzIzLTM0OTY5OGI5Yjc1NzphbnNpYmxlLWluc2lnaHRzIiwidHlwIjoiT2ZmbGluZSIsImF6cCI6ImNsb3VkLXNlcnZpY2VzIiwibm9uY2UiOiIzOGNiMDJmNC1kZDFjLTQwNTEtYmViNS1iMzdhMTRhNThlNWUiLCJzZXNzaW9uX3N0YXRlIjoiODIwODgwOGYtZWFmYS00MWY3LWIwZDctMjZjZjk5NzVhMTJjIiwic2NvcGUiOiJvcGVuaWQgb2ZmbGluZV9hY2Nlc3MgYXBpLmlhbS5zZXJ2aWNlX2FjY291bnRzIiwic2lkIjoiODIwODgwOGYtZWFmYS00MWY3LWIwZDctMjZjZjk5NzVhMTJjIn0.D7Ud40A-o9vSirwPJzR6EO0QUIJctz3Numw-pBQLQ-8"
+TOKEN=""
 
 read -r -d '' GKIT << EOM
 galaxykit
