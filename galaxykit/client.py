@@ -126,7 +126,8 @@ class GalaxyClient:
 
             self._update_auth_headers()
 
-        if isinstance(auth, dict) and github_social_auth:
+        if github_social_auth:
+            self.username = auth["username"]
             gh_client = GitHubSocialAuthClient(auth, galaxy_root)
             gh_client.login()
             self.headers = gh_client.headers
