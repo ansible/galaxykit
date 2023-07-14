@@ -3,6 +3,7 @@ client.py contains the wrapping interface for all the other modules (aside from 
 """
 import logging
 import platform
+import re
 import sys
 from urllib.parse import urlparse, urljoin
 from simplejson.errors import JSONDecodeError
@@ -11,6 +12,7 @@ from pkg_resources import parse_version
 
 import requests
 
+from .github_social_auth_client import GitHubSocialAuthClient
 from .utils import GalaxyClientError
 from . import containers
 from . import containerutils
@@ -67,6 +69,7 @@ class GalaxyClient:
         container_tls_verify=True,
         https_verify=False,
         token_type=None,
+        github_social_auth=False
     ):
         self.galaxy_root = galaxy_root
         self.headers = {}
@@ -76,7 +79,7 @@ class GalaxyClient:
         self._container_registry = container_registry
         self._container_tls_verify = container_tls_verify
 
-        if auth:
+        if auth and not github_social_auth:
             if isinstance(auth, dict):
                 self.username = auth.get("username")
                 self.password = auth.get("password")
@@ -122,6 +125,11 @@ class GalaxyClient:
                     print(f"Failed to fetch token: {resp.text}", file=sys.stderr)
 
             self._update_auth_headers()
+
+        if isinstance(auth, dict) and github_social_auth:
+            gh_client = GitHubSocialAuthClient(auth, galaxy_root)
+            gh_client.login()
+            self.headers = gh_client.headers
 
     @property
     def container_client(self):
