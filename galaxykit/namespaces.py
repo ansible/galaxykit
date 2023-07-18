@@ -88,6 +88,19 @@ def get_namespace_id(client, name):
         raise ValueError(f"No namespace '{name}' found.")
 
 
+def delete_v1_namespace(client, name):
+    """
+    Delete namespace
+    """
+    ns_url = f"v1/namespaces/?name={name}"
+    results = client.get(ns_url)
+    if results['count'] > 0:
+        delete_url = f"v1/namespaces/{results['results'][0]['id']}/"
+    else:
+        raise ValueError(f"No namespace '{name}' found.")
+    return client.delete(delete_url, parse_json=False)
+
+
 def delete_namespace(client, name):
     """
     Delete namespace
