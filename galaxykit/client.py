@@ -242,6 +242,11 @@ class GalaxyClient:
         logger.debug(f"Request body: {body}")
         return self._http(method, path, *args, **kwargs)
 
+    def get_token(self):
+        auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
+        r = self.post(auth_url, body={})
+        return r.get("token")
+
     def get(self, path, *args, **kwargs):
         return self._http("get", path, *args, **kwargs)
 
