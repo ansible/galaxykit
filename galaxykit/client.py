@@ -3,7 +3,6 @@ client.py contains the wrapping interface for all the other modules (aside from 
 """
 import logging
 import platform
-import re
 import sys
 from urllib.parse import urlparse, urljoin
 from simplejson.errors import JSONDecodeError
@@ -28,7 +27,8 @@ logger = logging.getLogger(__name__)
 
 
 def user_agent():
-    """Returns a user agent used by ansible-galaxy to include the Ansible version, platform and python version."""
+    """Returns a user agent used by ansible-galaxy to include the Ansible version,
+    platform and python version."""
 
     python_version = sys.version_info
     return "galaxy-kit/{version} ({platform}; python:{py_major}.{py_minor}.{py_micro})".format(
@@ -139,7 +139,8 @@ class GalaxyClient:
         if self._container_client is None:
             if not (self.username and self.password):
                 raise ValueError(
-                    "Cannot use container engine commands without username and password for authentication."
+                    "Cannot use container engine commands without "
+                    "username and password for authentication."
                 )
             container_registry = (
                 self._container_registry

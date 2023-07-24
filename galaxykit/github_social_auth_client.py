@@ -30,7 +30,7 @@ class GitHubSocialAuthClient:
             try:
                 self.headers = self._beta_galaxy_stage_login(session)
             except AuthenticationFailed:
-                # if we get here, we have exceeded the github rate limit and
+                # if we get here, we have exceeded the GitHub rate limit and
                 # need to re-authenticate
                 self.headers = self._reauthenticate(session)
 
