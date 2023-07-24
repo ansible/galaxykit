@@ -35,7 +35,7 @@ def get_all_collections(client):
 
 
 def upload_test_collection(
-        client, namespace=None, collection_name=None, version="1.0.0", path="staging"
+    client, namespace=None, collection_name=None, version="1.0.0", path="staging"
 ):
     """
     Uploads a test collection generated with orionutils
@@ -69,13 +69,13 @@ def upload_test_collection(
 
 
 def upload_artifact(
-        config,
-        client,
-        artifact,
-        hash=True,
-        no_filename=False,
-        no_file=False,
-        path=None,
+    config,
+    client,
+    artifact,
+    hash=True,
+    no_filename=False,
+    no_file=False,
+    path=None,
 ):
     """
     Publishes a collection to a Galaxy server and returns the import task URI.
@@ -159,7 +159,7 @@ def upload_artifact(
         headers.update(auth)
 
     if parse_version(client.server_version) >= parse_version(
-            EE_ENDPOINTS_CHANGE_VERSION
+        EE_ENDPOINTS_CHANGE_VERSION
     ):
         col_upload_path = f"v3/artifacts/collections/"
         if path:
@@ -170,19 +170,18 @@ def upload_artifact(
         )
 
     n_url = urljoin(client.galaxy_root, col_upload_path)
-    # resp = client._http("post", n_url, data=data, headers=headers)
     resp = client.post(n_url, body=data, headers=headers)
     return resp
 
 
 def move_or_copy_collection(
-        client,
-        namespace,
-        collection_name,
-        version="1.0.0",
-        source="staging",
-        destination="published",
-        operation="move",
+    client,
+    namespace,
+    collection_name,
+    version="1.0.0",
+    source="staging",
+    destination="published",
+    operation="move",
 ):
     """
     Moves a collection between repositories. The default arguments are for the most common usecase, which
@@ -210,7 +209,7 @@ def move_or_copy_collection(
 
 
 def delete_collection(
-        client, namespace, collection, version=None, repository="published"
+    client, namespace, collection, version=None, repository="published"
 ):
     """
     Delete collection version
@@ -235,12 +234,12 @@ def deprecate_collection(client, namespace, collection, repository):
 
 
 def collection_sign(
-        client,
-        repository,
-        namespace,
-        collection,
-        version,
-        signing_service="ansible-default",
+    client,
+    repository,
+    namespace,
+    collection,
+    version,
+    signing_service="ansible-default",
 ):
     url = f"content/{repository}/v3/sign/collections/"
     body = {
