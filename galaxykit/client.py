@@ -389,6 +389,12 @@ class GalaxyClient:
         """
         return groups.add_role_to_group(self, role_name, group_id)
 
+    def get_settings(self):
+        return self.get("_ui/v1/settings/")
+
+    def get_feature_flags(self):
+        return self.get("_ui/v1/feature-flags/")
+
     @property
     def rbac_enabled(self):
         if self._rbac_enabled is None:
