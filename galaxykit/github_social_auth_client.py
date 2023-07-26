@@ -66,35 +66,45 @@ class GitHubSocialAuthClient:
         )
         response.raise_for_status()
         next_url = response.headers["location"]
-        response = session.get(next_url, cookies=self.github_cookies, allow_redirects=False)
+        response = session.get(
+            next_url, cookies=self.github_cookies, allow_redirects=False
+        )
         response.raise_for_status()
         new_authenticity_token = extract_authenticity_token(response.text)
         session.headers.update({"Referer": next_url})
         session.headers.update({"Content-Type": "application/x-www-form-urlencoded"})
-        r = session.post(self.GITHUB_AUTH_URL,
-                         data={'authorize': 1, 'authenticity_token': new_authenticity_token,
-                               'redirect_uri_specified': True,
-                               'client_id': get_client_id(next_url),
-                               'redirect_uri': f"{self.url}/complete/github/",
-                               'scope': 'read:org,user:email',
-                               'state': get_state_from_url(next_url),
-                               'authorize': 1}, cookies=self.github_cookies)
+        r = session.post(
+            self.GITHUB_AUTH_URL,
+            data={
+                "authorize": 1,
+                "authenticity_token": new_authenticity_token,
+                "redirect_uri_specified": True,
+                "client_id": get_client_id(next_url),
+                "redirect_uri": f"{self.url}/complete/github/",
+                "scope": "read:org,user:email",
+                "state": get_state_from_url(next_url),
+                "authorize": 1,
+            },
+            cookies=self.github_cookies,
+        )
         complete_url = extract_complete_url(r.text)
-        response = session.get(complete_url, cookies=self.github_cookies,
-                               allow_redirects=False)
+        response = session.get(
+            complete_url, cookies=self.github_cookies, allow_redirects=False
+        )
         response.raise_for_status()
         return get_cookies_from_response(response)
 
     def _github_login(self, session):
         authenticity_token = self.get_authenticity_token(session)
         login_data = {
-            'commit': 'Sign in',
-            'login': self.auth["username"],
-            'password': self.auth["password"],
-            'authenticity_token': authenticity_token
+            "commit": "Sign in",
+            "login": self.auth["username"],
+            "password": self.auth["password"],
+            "authenticity_token": authenticity_token,
         }
-        session.cookies.set("_device_id", "4066e3c5dbc8a65829b6a1b8eecbb476",
-                            domain="github.com")
+        session.cookies.set(
+            "_device_id", "4066e3c5dbc8a65829b6a1b8eecbb476", domain="github.com"
+        )
         session.post(self.GITHUB_SESSION_URL, data=login_data, allow_redirects=False)
         return session.cookies
 
@@ -113,7 +123,7 @@ def extract_authenticity_token(text):
 
 
 def get_state_from_url(url):
-    state_pattern = r'&state=(.+?)&'
+    state_pattern = r"&state=(.+?)&"
     match = re.search(state_pattern, url)
     return match.group(1)
 
@@ -125,7 +135,7 @@ def extract_complete_url(text):
 
 
 def get_client_id(url):
-    state_pattern = r'client_id=(.+?)&'
+    state_pattern = r"client_id=(.+?)&"
     match = re.search(state_pattern, url)
     return match.group(1)
 
@@ -134,7 +144,7 @@ def get_cookies_from_response(response):
     csrftoken = response.cookies["csrftoken"]
     sessionid = response.cookies["sessionid"]
     return {
-        'Accept': 'application/json',
-        'X-CSRFToken': csrftoken,
-        'Cookie': f'csrftoken={csrftoken}; sessionid={sessionid}'
+        "Accept": "application/json",
+        "X-CSRFToken": csrftoken,
+        "Cookie": f"csrftoken={csrftoken}; sessionid={sessionid}",
     }

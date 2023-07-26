@@ -94,7 +94,7 @@ def delete_v1_namespace(client, name):
     """
     ns_url = f"v1/namespaces/?name={name}"
     results = client.get(ns_url)
-    if results['count'] > 0:
+    if results["count"] > 0:
         delete_url = f"v1/namespaces/{results['results'][0]['id']}/"
     else:
         raise ValueError(f"No namespace '{name}' found.")
