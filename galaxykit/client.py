@@ -69,7 +69,7 @@ class GalaxyClient:
         container_tls_verify=True,
         https_verify=False,
         token_type=None,
-        github_social_auth=False
+        github_social_auth=False,
     ):
         self.galaxy_root = galaxy_root
         self.headers = {}

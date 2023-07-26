@@ -151,7 +151,7 @@ def upload_artifact(
 
     headers = {
         "Content-Type": "multipart/form-data; boundary=%s" % boundary,
-        "Content-Length": f"{len(data)}"
+        "Content-Length": f"{len(data)}",
     }
 
     if client.token:

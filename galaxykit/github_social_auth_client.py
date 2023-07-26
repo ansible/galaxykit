@@ -3,6 +3,7 @@ import re
 from urllib.parse import urlparse
 
 import requests
+
 logger = logging.getLogger(__name__)
 
 
@@ -36,26 +37,33 @@ class GitHubSocialAuthClient:
 
     def _beta_galaxy_stage_login(self, session):
         self.github_cookies = self._github_login(session)
-        response = session.get(self.login_url, cookies=self.github_cookies,
-                               allow_redirects=False)
+        response = session.get(
+            self.login_url, cookies=self.github_cookies, allow_redirects=False
+        )
         response.raise_for_status()
         next_url = response.headers["location"]
-        response = session.get(next_url, cookies=self.github_cookies, allow_redirects=False)
+        response = session.get(
+            next_url, cookies=self.github_cookies, allow_redirects=False
+        )
         response.raise_for_status()
         try:
             complete_url = response.headers["location"]
         except KeyError:
-            logger.debug("Too many requests to GitHub login service. Re-authorization needed")
+            logger.debug(
+                "Too many requests to GitHub login service. Re-authorization needed"
+            )
             raise AuthenticationFailed("Too many requests. Re-authorization needed.")
-        response = session.get(complete_url, cookies=self.github_cookies,
-                               allow_redirects=False)
+        response = session.get(
+            complete_url, cookies=self.github_cookies, allow_redirects=False
+        )
         response.raise_for_status()
         return get_cookies_from_response(response)
 
     def _reauthenticate(self, session):
         self.github_cookies = self._github_login(session)
-        response = session.get(self.login_url, cookies=self.github_cookies,
-                               allow_redirects=False)
+        response = session.get(
+            self.login_url, cookies=self.github_cookies, allow_redirects=False
+        )
         response.raise_for_status()
         next_url = response.headers["location"]
         response = session.get(next_url, cookies=self.github_cookies, allow_redirects=False)
