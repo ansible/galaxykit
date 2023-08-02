@@ -29,6 +29,11 @@ def get_collection_list(client):
     return client.get(url)
 
 
+def get_all_collections(client):
+    url = "v3/collections/"
+    return client.get(url)
+
+
 def upload_test_collection(
     client, namespace=None, collection_name=None, version="1.0.0", path="staging"
 ):
@@ -145,10 +150,13 @@ def upload_artifact(
     data = b"\r\n".join(form)
 
     headers = {
-        "Content-type": "multipart/form-data; boundary=%s" % boundary,
-        "Content-length": f"{len(data)}",
-        "Authorization": f"{client.token_type} {client.token}",
+        "Content-Type": "multipart/form-data; boundary=%s" % boundary,
+        "Content-Length": f"{len(data)}",
     }
+
+    if client.token:
+        auth = {"Authorization": f"{client.token_type} {client.token}"}
+        headers.update(auth)
 
     if parse_version(client.server_version) >= parse_version(
         EE_ENDPOINTS_CHANGE_VERSION
@@ -162,7 +170,7 @@ def upload_artifact(
         )
 
     n_url = urljoin(client.galaxy_root, col_upload_path)
-    resp = client._http("post", n_url, data=data, headers=headers)
+    resp = client.post(n_url, body=data, headers=headers)
     return resp
 
 
@@ -207,7 +215,7 @@ def delete_collection(
     Delete collection version
     """
     logger.debug(f"Deleting {collection} from {namespace} on {client.galaxy_root}")
-    if version == None:
+    if version is None:
         delete_url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/"
     else:
         delete_url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/versions/{version}/"

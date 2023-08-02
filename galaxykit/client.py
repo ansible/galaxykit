@@ -11,6 +11,7 @@ from pkg_resources import parse_version
 
 import requests
 
+from .github_social_auth_client import GitHubSocialAuthClient
 from .utils import GalaxyClientError
 from . import containers
 from . import containerutils
@@ -26,7 +27,8 @@ logger = logging.getLogger(__name__)
 
 
 def user_agent():
-    """Returns a user agent used by ansible-galaxy to include the Ansible version, platform and python version."""
+    """Returns a user agent used by ansible-galaxy to include the Ansible version,
+    platform and python version."""
 
     python_version = sys.version_info
     return "galaxy-kit/{version} ({platform}; python:{py_major}.{py_minor}.{py_micro})".format(
@@ -67,6 +69,7 @@ class GalaxyClient:
         container_tls_verify=True,
         https_verify=False,
         token_type=None,
+        github_social_auth=False,
     ):
         self.galaxy_root = galaxy_root
         self.headers = {}
@@ -76,7 +79,7 @@ class GalaxyClient:
         self._container_registry = container_registry
         self._container_tls_verify = container_tls_verify
 
-        if auth:
+        if auth and not github_social_auth:
             if isinstance(auth, dict):
                 self.username = auth.get("username")
                 self.password = auth.get("password")
@@ -123,6 +126,12 @@ class GalaxyClient:
 
             self._update_auth_headers()
 
+        if github_social_auth:
+            self.username = auth["username"]
+            gh_client = GitHubSocialAuthClient(auth, galaxy_root)
+            gh_client.login()
+            self.headers = gh_client.headers
+
     @property
     def container_client(self):
         """Only create a container client if its actually needed."""
@@ -130,7 +139,8 @@ class GalaxyClient:
         if self._container_client is None:
             if not (self.username and self.password):
                 raise ValueError(
-                    "Cannot use container engine commands without username and password for authentication."
+                    "Cannot use container engine commands without "
+                    "username and password for authentication."
                 )
             container_registry = (
                 self._container_registry
@@ -232,6 +242,11 @@ class GalaxyClient:
         logger.debug(f"Request headers: {headers}")
         logger.debug(f"Request body: {body}")
         return self._http(method, path, *args, **kwargs)
+
+    def get_token(self):
+        auth_url = urljoin(self.galaxy_root, "v3/auth/token/")
+        r = self.post(auth_url, body={})
+        return r.get("token")
 
     def get(self, path, *args, **kwargs):
         return self._http("get", path, *args, **kwargs)
@@ -373,6 +388,12 @@ class GalaxyClient:
         Adds a role to a group
         """
         return groups.add_role_to_group(self, role_name, group_id)
+
+    def get_settings(self):
+        return self.get("_ui/v1/settings/")
+
+    def get_feature_flags(self):
+        return self.get("_ui/v1/feature-flags/")
 
     @property
     def rbac_enabled(self):
