@@ -35,7 +35,12 @@ def get_all_collections(client):
 
 
 def upload_test_collection(
-    client, namespace=None, collection_name=None, version="1.0.0", path="staging", tags=["tools"]
+    client,
+    namespace=None,
+    collection_name=None,
+    version="1.0.0",
+    path="staging",
+    tags=["tools"],
 ):
     """
     Uploads a test collection generated with orionutils
