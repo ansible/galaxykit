@@ -1013,7 +1013,7 @@ def main():
                     args.collection_name,
                     args.version or "1.0.0",
                     args.path or "staging",
-                    args.tags
+                    args.tags or ["tools"]
                 )
                 resp = namespaces.create_namespace(client, namespace, None)
                 artifact = collections.upload_test_collection(
