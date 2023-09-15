@@ -83,3 +83,22 @@ def pulp_href_to_id(href):
             return section
 
     return None
+
+
+def wait_for_url(client, url, timeout_sec=6000):
+    """Wait until url stops returning a 404."""
+    ready = False
+    res = None
+    wait_until = time.time() + timeout_sec
+    while not ready:
+        if wait_until < time.time():
+            raise TaskWaitingTimeout()
+        try:
+            res = client.get(url)
+        except GalaxyClientError as e:
+            if "404" not in str(e):
+                raise
+            time.sleep(5)
+        else:
+            ready = True
+    return res

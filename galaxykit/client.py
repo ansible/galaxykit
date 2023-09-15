@@ -40,6 +40,17 @@ def user_agent():
     )
 
 
+def send_request_with_retry_if_504(method, url, headers, verify, retries=3, *args, **kwargs):
+    for _ in range(retries):
+        resp = requests.request(method, url, headers=headers, verify=verify, *args,
+                                **kwargs)
+        if resp.status_code == 504:
+            logger.debug("504 Gateway timeout. Retrying.")
+        else:
+            return resp
+    raise GalaxyClientError(resp, resp.status_code)
+
+
 class GalaxyClient:
     """
     The primary class for the client - this is the authenticated context from
@@ -197,18 +208,10 @@ class GalaxyClient:
         url = urljoin(self.galaxy_root, path)
         headers = kwargs.pop("headers", self.headers)
         parse_json = kwargs.pop("parse_json", True)
-
-        resp = requests.request(
-            method, url, headers=headers, verify=self.https_verify, *args, **kwargs
-        )
-
-        if "Invalid JWT token" in resp.text and "claim expired" in resp.text:
-            self._refresh_jwt_token()
-            self._update_auth_headers()
-            resp = requests.request(
-                method, url, headers=headers, verify=self.https_verify, *args, **kwargs
-            )
-
+        resp = send_request_with_retry_if_504(method, url, headers=headers,
+                                              verify=self.https_verify, *args, **kwargs)
+        if "Invalid JWT token" in resp.text:
+            resp = self._retry_if_expired_token(method, url, headers, *args, **kwargs)
         if parse_json:
             try:
                 json = resp.json()
@@ -218,7 +221,16 @@ class GalaxyClient:
                 )
                 raise ValueError("Failed to parse JSON response from API") from exc
             if "errors" in json:
-                raise GalaxyClientError(resp, *json["errors"])
+                try:
+                    error_message = json["errors"][0]["detail"]
+                except KeyError:
+                    error_message = ""
+                if "Invalid JWT token" in error_message:
+                    resp = self._retry_if_expired_token(method, url, headers,
+                                                        *args, **kwargs)
+                    json = resp.json()
+                else:
+                    raise GalaxyClientError(resp, *json["errors"])
             if resp.status_code >= 400:
                 raise GalaxyClientError(resp, resp.status_code)
             return json
@@ -226,6 +238,13 @@ class GalaxyClient:
             if resp.status_code >= 400:
                 raise GalaxyClientError(resp, resp.status_code)
             return resp
+
+    def _retry_if_expired_token(self, method, url, headers, *args, **kwargs):
+        self._refresh_jwt_token()
+        self._update_auth_headers()
+        headers.update(self.headers)
+        return send_request_with_retry_if_504(method, url, headers=headers,
+                                              verify=self.https_verify, *args, **kwargs)
 
     def _payload(self, method, path, body, *args, **kwargs):
         if isinstance(body, dict):
