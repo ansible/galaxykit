@@ -40,10 +40,13 @@ def user_agent():
     )
 
 
-def send_request_with_retry_if_504(method, url, headers, verify, retries=3, *args, **kwargs):
+def send_request_with_retry_if_504(
+    method, url, headers, verify, retries=3, *args, **kwargs
+):
     for _ in range(retries):
-        resp = requests.request(method, url, headers=headers, verify=verify, *args,
-                                **kwargs)
+        resp = requests.request(
+            method, url, headers=headers, verify=verify, *args, **kwargs
+        )
         if resp.status_code == 504:
             logger.debug("504 Gateway timeout. Retrying.")
         else:
@@ -208,8 +211,9 @@ class GalaxyClient:
         url = urljoin(self.galaxy_root, path)
         headers = kwargs.pop("headers", self.headers)
         parse_json = kwargs.pop("parse_json", True)
-        resp = send_request_with_retry_if_504(method, url, headers=headers,
-                                              verify=self.https_verify, *args, **kwargs)
+        resp = send_request_with_retry_if_504(
+            method, url, headers=headers, verify=self.https_verify, *args, **kwargs
+        )
         if "Invalid JWT token" in resp.text:
             resp = self._retry_if_expired_token(method, url, headers, *args, **kwargs)
         if parse_json:
@@ -226,8 +230,9 @@ class GalaxyClient:
                 except KeyError:
                     error_message = ""
                 if "Invalid JWT token" in error_message:
-                    resp = self._retry_if_expired_token(method, url, headers,
-                                                        *args, **kwargs)
+                    resp = self._retry_if_expired_token(
+                        method, url, headers, *args, **kwargs
+                    )
                     json = resp.json()
                 else:
                     raise GalaxyClientError(resp, *json["errors"])
@@ -243,8 +248,9 @@ class GalaxyClient:
         self._refresh_jwt_token()
         self._update_auth_headers()
         headers.update(self.headers)
-        return send_request_with_retry_if_504(method, url, headers=headers,
-                                              verify=self.https_verify, *args, **kwargs)
+        return send_request_with_retry_if_504(
+            method, url, headers=headers, verify=self.https_verify, *args, **kwargs
+        )
 
     def _payload(self, method, path, body, *args, **kwargs):
         if isinstance(body, dict):
