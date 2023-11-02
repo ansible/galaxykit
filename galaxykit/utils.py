@@ -1,9 +1,7 @@
 """Utility functions"""
 import logging
-import json
 import re
 import time
-from urllib import request
 from urllib.parse import urljoin
 
 import requests
@@ -49,9 +47,9 @@ class GalaxyClientError(Exception):
         super().__init__(*args[skip:], **kwargs)
 
 
-def wait_for_task(api_client, resp, task_id=None, timeout=300, raise_on_error=False):
+def wait_for_task(api_client, resp, task_id=None, timeout=300, raise_on_error=False, version="v3"):
     if task_id:
-        url = f"v3/tasks/{task_id}/"
+        url = f"{version}/tasks/{task_id}/"
     else:
         url = urljoin(api_client.galaxy_root, resp["task"])
 
@@ -62,15 +60,24 @@ def wait_for_task(api_client, resp, task_id=None, timeout=300, raise_on_error=Fa
             raise TaskWaitingTimeout()
         try:
             resp = api_client.get(url)
-            if resp["state"] == "failed":
-                logger.error(resp["error"])
-                if raise_on_error:
-                    raise TaskFailed(resp["error"])
+            if version == "v1":
+                if resp["results"][0]["state"] == "failed":
+                    logger.error(resp["error"])
+                    if raise_on_error:
+                        raise TaskFailed(resp["error"])
+            else:
+                if resp["state"] == "failed":
+                    logger.error(resp["error"])
+                    if raise_on_error:
+                        raise TaskFailed(resp["error"])
         except GalaxyClientError as e:
             if "500" not in str(e):
                 raise
         else:
-            ready = resp["state"] not in ("running", "waiting")
+            if version == "v1":
+                ready = resp["results"][0]["state"] not in ("running", "waiting")
+            else:
+                ready = resp["state"] not in ("running", "waiting")
         time.sleep(5)
     return resp
 
