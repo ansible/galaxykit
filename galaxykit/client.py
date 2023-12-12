@@ -12,6 +12,7 @@ from pkg_resources import parse_version
 import requests
 
 from .github_social_auth_client import GitHubSocialAuthClient
+from .gw_auth_client import GatewayAuthClient
 from .utils import GalaxyClientError
 from . import containers
 from . import containerutils
@@ -84,6 +85,7 @@ class GalaxyClient:
         https_verify=False,
         token_type=None,
         github_social_auth=False,
+        gw_auth=False,
     ):
         self.galaxy_root = galaxy_root
         self.headers = {}
@@ -93,7 +95,7 @@ class GalaxyClient:
         self._container_registry = container_registry
         self._container_tls_verify = container_tls_verify
 
-        if auth and not github_social_auth:
+        if auth and not github_social_auth and not gw_auth:
             if isinstance(auth, dict):
                 self.username = auth.get("username")
                 self.password = auth.get("password")
@@ -145,6 +147,14 @@ class GalaxyClient:
             gh_client = GitHubSocialAuthClient(auth, galaxy_root)
             gh_client.login()
             self.headers = gh_client.headers
+
+        if gw_auth:
+            self.username = auth["username"]
+            gw_client = GatewayAuthClient(auth, galaxy_root)
+            gw_client.login()
+            self.headers = gw_client.headers
+
+
 
     @property
     def container_client(self):
