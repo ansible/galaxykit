@@ -1,6 +1,7 @@
 import logging
 import re
-from urllib.parse import urlparse
+import uuid
+from urllib.parse import urlparse, to_bytes
 
 import requests
 
@@ -30,7 +31,7 @@ class GatewayAuthClient:
         self.gw_cookies = session.cookies
         login_data = {
             'username': 'admin',
-            'password': '1n5ecD90L1d4N'
+            'password': None
         }
         session.headers.update({"Referer": f"{self.url}/login"})
         session.headers.update({"Content-Type": "multipart/form-data"})
@@ -38,7 +39,28 @@ class GatewayAuthClient:
         session.headers.update({"Set-Cookie": f"csrftoken={header_csfrtoken}"})
         session.headers.update({"X-Csrftoken": header_csfrtoken})
 
-        # csrftoken = response.cookies["csrftoken"]
+        form = []
+        boundary = "--------------------------%s" % uuid.uuid4().hex
+        part_boundary = b"--" + boundary.encode("utf8")
+
+        form.extend(
+            [
+                part_boundary,
+                b'Content-Disposition: form-data; name="username"',
+                b"admin",
+            ]
+        )
+
+        form.extend(
+            [
+                part_boundary,
+                b'Content-Disposition: form-data; name="password"',
+                b"1n5ecD90L1d4N",
+            ]
+        )
+
+        data = b"\r\n".join(form)
+
 
         response = session.post(self.login_url, data=login_data, cookies=self.gw_cookies)
 
