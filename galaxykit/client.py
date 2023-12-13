@@ -74,6 +74,10 @@ class GalaxyClient:
     _server_version = None
     _container_client = None
     _ui_ee_endpoint_prefix = None
+    gw_galaxy_url = None  # https://ec2-3-254-99-203.eu-west-1.compute.amazonaws.com/api/hub/
+    gw_gateway_url = None  # https://ec2-3-254-99-203.eu-west-1.compute.amazonaws.com/api/gateway/
+    gw_root_url = None  # https://ec2-3-254-99-203.eu-west-1.compute.amazonaws.com
+
 
     def __init__(
         self,
@@ -86,6 +90,7 @@ class GalaxyClient:
         token_type=None,
         github_social_auth=False,
         gw_auth=False,
+        gw_root_url=None,
     ):
         self.galaxy_root = galaxy_root
         self.headers = {}
@@ -94,6 +99,7 @@ class GalaxyClient:
         self._container_engine = container_engine
         self._container_registry = container_registry
         self._container_tls_verify = container_tls_verify
+        self.gw_root_url = gw_root_url
 
         if auth and not github_social_auth and not gw_auth:
             if isinstance(auth, dict):
@@ -149,10 +155,14 @@ class GalaxyClient:
             self.headers = gh_client.headers
 
         if gw_auth:
+            if not self.gw_root_url:
+                raise ValueError("If Gateway authentication is True, "
+                                 "gw_root_url needs to be provided.")
             self.username = auth["username"]
-            gw_client = GatewayAuthClient(auth, galaxy_root)
+            gw_client = GatewayAuthClient(auth, gw_root_url)
             gw_client.login()
             self.headers = gw_client.headers
+            self.galaxy_root = urljoin(self.gw_root_url, "/api/hub/")
 
 
 
