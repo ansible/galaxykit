@@ -20,7 +20,7 @@ def get_or_create_user(
     }
     """
     # check if the user already exists
-    user_url = f"_ui/v1/users?username={username}"
+    user_url = f"_ui/v1/users/?username={username}"
     user_resp = client.get(user_url)
     if user_resp["meta"]["count"] == 0:
         return True, create_user(
