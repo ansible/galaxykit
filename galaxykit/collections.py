@@ -10,7 +10,7 @@ from urllib.parse import urljoin
 from pkg_resources import parse_version
 
 from orionutils.generator import build_collection
-from .utils import wait_for_task, logger, GalaxyClientError
+from .utils import wait_for_task, logger, GalaxyClientError, wait_for_url
 from .constants import EE_ENDPOINTS_CHANGE_VERSION
 
 
@@ -223,7 +223,12 @@ def move_or_copy_collection(
             timeout = timeout - 1
             if timeout < 0:
                 raise
-    return True
+
+    dest_url = (
+        f"v3/plugin/ansible/content/{destination}/collections/index/"
+        f"{namespace}/{collection_name}/versions/{version}/"
+    )
+    return wait_for_url(client, dest_url)
 
 
 def delete_collection(
