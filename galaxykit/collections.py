@@ -106,7 +106,9 @@ def upload_test_collection(
     """
     Uploads a test collection generated with orionutils
     """
-    artifact = create_test_collection(namespace or client.username, collection_name, version, tags)
+    artifact = create_test_collection(
+        namespace or client.username, collection_name, version, tags
+    )
     return upload_and_wait(client, artifact, path)
 
 
@@ -132,6 +134,7 @@ def upload_and_wait(
         "version": artifact.version,
         "published": artifact.published,
     }
+
 
 def upload_artifact(
     client,
