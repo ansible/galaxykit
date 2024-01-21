@@ -97,6 +97,11 @@ KIND_OPS = {
                         "nargs": "*",
                         "default": None,
                     },
+                    "--skip-upload": {
+                        "help": "Save to a local file instead of uploading.",
+                        "action": "store_true",
+                        "default": False,
+                    },
                 },
             },
             "move": {
@@ -1008,22 +1013,31 @@ def main():
             if args.operation == "list":
                 print(json.dumps(collections.get_collection_list(client)))
             elif args.operation == "upload":
-                namespace, collection_name, version, path, tags = (
+                namespace, collection_name, version, path, tags, skip_upload = (
                     args.namespace or client.username,
                     args.collection_name,
                     args.version or "1.0.0",
                     args.path or "staging",
                     args.tags or ["tools"],
+                    args.skip_upload or False,
                 )
-                resp = namespaces.create_namespace(client, namespace, None)
-                artifact = collections.upload_test_collection(
-                    client,
-                    namespace=namespace,
-                    collection_name=collection_name,
-                    version=version,
-                    path=path,
-                    tags=tags,
-                )
+                if not skip_upload:
+                    namespaces.create_namespace(client, namespace, None)
+                    artifact = collections.upload_test_collection(
+                        client,
+                        namespace=namespace,
+                        collection_name=collection_name,
+                        version=version,
+                        path=path,
+                        tags=tags,
+                    )
+                else:
+                    artifact = collections.save_test_collection(
+                        namespace=namespace,
+                        collection_name=collection_name,
+                        version=version,
+                        tags=tags,
+                    )
                 print(json.dumps(artifact))
             elif args.operation == "move":
                 namespace, collection_name, version, source, destination = (
