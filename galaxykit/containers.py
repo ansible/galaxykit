@@ -76,3 +76,7 @@ def inspect_container_namespace(client, ee_name):
     """
     url = f"_ui/v1/execution-environments/namespaces/{ee_name}/"
     return client.get(url)
+
+def get_container_distribution(client, base_path):
+    url = f"pulp/api/v3/distributions/container/container/?base_path={base_path}"
+    return client.get(url)
