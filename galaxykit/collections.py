@@ -121,7 +121,7 @@ def upload_and_wait(
     artifact,
     path,
 ):
-    upload_resp_url = upload_artifact(client, artifact, path=path)["task"]
+    upload_resp_url = upload_artifact(None, client, artifact, path=path)["task"]
 
     ready = False
     state = ""
@@ -141,6 +141,7 @@ def upload_and_wait(
 
 
 def upload_artifact(
+    config,
     client,
     artifact,
     hash=True,
@@ -152,6 +153,7 @@ def upload_artifact(
     """
     Publishes a collection to a Galaxy server and returns the import task URI.
 
+    :param config: unused, left for compatibility
     :param client: a GalaxyClient object. Must be authenticated.
     :param artifact: the collection artifact to be uploaded. Expects structure to be that
         of collections produced using the orionutils build_collection function.
