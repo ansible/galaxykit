@@ -89,6 +89,7 @@ def save_test_collection(
     artifact = create_test_collection(
         namespace, collection_name, version, tags, template
     )
+
     return {
         "namespace": artifact.namespace,
         "name": artifact.name,
@@ -113,25 +114,10 @@ def upload_test_collection(
     artifact = create_test_collection(
         namespace or client.username, collection_name, version, tags, template
     )
-    return upload_and_wait(client, artifact, path)
 
+    resp = upload_artifact(None, client, artifact, path=path)
+    wait_for_task(client, resp)
 
-def upload_and_wait(
-    client,
-    artifact,
-    path,
-):
-    upload_resp_url = upload_artifact(None, client, artifact, path=path)["task"]
-
-    ready = False
-    state = ""
-    while not ready:
-        sleep(1)
-        task_resp = client.get(upload_resp_url)
-        state = task_resp["state"]
-        ready = state in ["completed", "failed"]
-    if state == "failed":
-        raise GalaxyClientError(json.dumps(task_resp))
     return {
         "namespace": artifact.namespace,
         "name": artifact.name,
