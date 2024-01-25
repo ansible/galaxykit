@@ -81,11 +81,14 @@ def save_test_collection(
     collection_name=None,
     version="1.0.0",
     tags=["tools"],
+    template="skeleton",
 ):
     """
     Saves (locally) a test collection generated with orionutils
     """
-    artifact = create_test_collection(namespace, collection_name, version, tags)
+    artifact = create_test_collection(
+        namespace, collection_name, version, tags, template
+    )
     return {
         "namespace": artifact.namespace,
         "name": artifact.name,
@@ -102,12 +105,13 @@ def upload_test_collection(
     version="1.0.0",
     path="staging",
     tags=["tools"],
+    template="skeleton",
 ):
     """
     Uploads a test collection generated with orionutils
     """
     artifact = create_test_collection(
-        namespace or client.username, collection_name, version, tags
+        namespace or client.username, collection_name, version, tags, template
     )
     return upload_and_wait(client, artifact, path)
 

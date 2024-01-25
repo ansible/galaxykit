@@ -102,6 +102,11 @@ KIND_OPS = {
                         "action": "store_true",
                         "default": False,
                     },
+                    "--template": {
+                        "help": "orionutils collection template",
+                        "nargs": "?",
+                        "default": "skeleton",
+                    },
                 },
             },
             "move": {
@@ -1013,13 +1018,22 @@ def main():
             if args.operation == "list":
                 print(json.dumps(collections.get_collection_list(client)))
             elif args.operation == "upload":
-                namespace, collection_name, version, path, tags, skip_upload = (
+                (
+                    namespace,
+                    collection_name,
+                    version,
+                    path,
+                    tags,
+                    skip_upload,
+                    template,
+                ) = (
                     args.namespace or client.username,
                     args.collection_name,
                     args.version or "1.0.0",
                     args.path or "staging",
                     args.tags or ["tools"],
                     args.skip_upload or False,
+                    args.template or "skeleton",
                 )
                 if not skip_upload:
                     namespaces.create_namespace(client, namespace, None)
@@ -1030,6 +1044,7 @@ def main():
                         version=version,
                         path=path,
                         tags=tags,
+                        template=template,
                     )
                 else:
                     artifact = collections.save_test_collection(
@@ -1037,6 +1052,7 @@ def main():
                         collection_name=collection_name,
                         version=version,
                         tags=tags,
+                        template=template,
                     )
                 print(json.dumps(artifact))
             elif args.operation == "move":
