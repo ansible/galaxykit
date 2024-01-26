@@ -58,6 +58,14 @@ def get_container_readme(client, name):
     return client.get(url)
 
 
+def get_container_tags(client, name):
+    """
+    Gets container's tags
+    """
+    url = f"{client.ui_ee_endpoint_prefix}execution-environments/repositories/{name}/_content/tags/"
+    return client.get(url)
+
+
 def put_container_readme(client, name, data):
     """
     Updates container's readme
