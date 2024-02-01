@@ -77,6 +77,7 @@ class GalaxyClient:
     gw_galaxy_url = None  # https://ec2-3-254-99-203.eu-west-1.compute.amazonaws.com/api/hub/
     gw_gateway_url = None  # https://ec2-3-254-99-203.eu-west-1.compute.amazonaws.com/api/gateway/
     gw_root_url = None  # https://ec2-3-254-99-203.eu-west-1.compute.amazonaws.com
+    gw_client = None
 
 
     def __init__(
@@ -159,9 +160,10 @@ class GalaxyClient:
                 raise ValueError("If Gateway authentication is True, "
                                  "gw_root_url needs to be provided.")
             self.username = auth["username"]
-            gw_client = GatewayAuthClient(auth, gw_root_url)
-            gw_client.login()
-            self.headers = gw_client.headers
+            self.password = auth["password"]
+            self.gw_client = GatewayAuthClient(auth, gw_root_url)
+            self.gw_client.login()
+            self.headers = self.gw_client.headers
             self.galaxy_root = urljoin(self.gw_root_url, "/api/hub/")
 
 

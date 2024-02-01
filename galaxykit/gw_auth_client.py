@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 import requests
 
-from galaxykit.github_social_auth_client import AuthenticationFailed
+from galaxykit.utils import GalaxyClientError
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +20,7 @@ class GatewayAuthClient:
         self.host = parsed_url.hostname
         self.login_url = f"{self.url}/api/gateway/v1/login/"
         self.gw_cookies = None
+        self.csrftoken = None
 
     def login(self):
         with requests.Session() as session:
@@ -35,8 +36,12 @@ class GatewayAuthClient:
         data = {"username": (None, self.auth["username"]),
                 "password": (None, self.auth["password"]),}
         response = session.post(self.login_url, files=data, allow_redirects=False)
-
-        return get_cookies_from_response(response)
+        if response.status_code == 401:
+            raise GalaxyClientError(
+                        "401 Unauthorized. Incorrect username or password.",
+                        response=response,
+                    )
+        return self.get_cookies_from_response(response)
 
     def get_header_csfrtoken(self, session):
         response = session.get(self.login_url)
@@ -45,10 +50,10 @@ class GatewayAuthClient:
         match = re.search(token_pattern, response.text)
         return match.group(1)
 
-def get_cookies_from_response(response):
-    csrftoken = response.cookies["csrftoken"]
-    gateway_sessionid = response.cookies["gateway_sessionid"]
-    return {
-        "Accept": "application/json",
-        "Cookie": f"csrftoken={csrftoken}; gateway_sessionid={gateway_sessionid}",
-    }
+    def get_cookies_from_response(self, response):
+        self.csrftoken = response.cookies["csrftoken"]
+        gateway_sessionid = response.cookies["gateway_sessionid"]
+        return {
+            "Accept": "application/json",
+            "Cookie": f"csrftoken={self.csrftoken}; gateway_sessionid={gateway_sessionid}",
+        }
