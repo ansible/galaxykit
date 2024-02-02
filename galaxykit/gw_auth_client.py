@@ -19,20 +19,40 @@ class GatewayAuthClient:
         self.url = f"{parsed_url.scheme}://{parsed_url.hostname}"
         self.host = parsed_url.hostname
         self.login_url = f"{self.url}/api/gateway/v1/login/"
+        self.logout_url = f"{self.url}/api/gateway/v1/logout/"
         self.gw_cookies = None
         self.csrftoken = None
+        self.response = None
+        self.session = None
+
+    @property
+    def cookies(self):
+        return dict(self.session.cookies)
+
 
     def login(self):
         with requests.Session() as session:
+            self.session = session
             session.verify = False
-            self.headers = self._gw_login(session)
+            self.response = self._gw_login(session)
+            self.headers = self.get_cookies_from_response(self.response)
+            return self.response
+
+    def logout(self):
+        self.session.headers = self.headers
+        self.session.headers.update({"Origin": self.url})
+        self.session.headers.update({"Referer": f"{self.url}/overview"})
+        self.session.headers.update({"X-CSRFToken": self.csrftoken})
+        self.session.post(self.logout_url)
+        return self.session
+
 
     def _gw_login(self, session):
-        header_csfrtoken = self.get_header_csfrtoken(session)
+        self.header_csfrtoken = self.get_header_csfrtoken(session)
         self.gw_cookies = session.cookies
         session.headers.update({"Referer": f"{self.url}/login"})
-        session.headers.update({"Set-Cookie": f"csrftoken={header_csfrtoken}"})
-        session.headers.update({"X-Csrftoken": header_csfrtoken})
+        session.headers.update({"Set-Cookie": f"csrftoken={self.header_csfrtoken}"})
+        session.headers.update({"X-Csrftoken": self.header_csfrtoken})
         data = {"username": (None, self.auth["username"]),
                 "password": (None, self.auth["password"]),}
         response = session.post(self.login_url, files=data, allow_redirects=False)
@@ -41,7 +61,7 @@ class GatewayAuthClient:
                         "401 Unauthorized. Incorrect username or password.",
                         response=response,
                     )
-        return self.get_cookies_from_response(response)
+        return response
 
     def get_header_csfrtoken(self, session):
         response = session.get(self.login_url)

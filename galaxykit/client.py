@@ -78,6 +78,7 @@ class GalaxyClient:
     gw_gateway_url = None  # https://ec2-3-254-99-203.eu-west-1.compute.amazonaws.com/api/gateway/
     gw_root_url = None  # https://ec2-3-254-99-203.eu-west-1.compute.amazonaws.com
     gw_client = None
+    response = None
 
 
     def __init__(
@@ -162,11 +163,13 @@ class GalaxyClient:
             self.username = auth["username"]
             self.password = auth["password"]
             self.gw_client = GatewayAuthClient(auth, gw_root_url)
-            self.gw_client.login()
+            self.response = self.gw_client.login()
             self.headers = self.gw_client.headers
             self.galaxy_root = urljoin(self.gw_root_url, "/api/hub/")
 
-
+    @property
+    def cookies(self):
+        return dict(self.response.cookies)
 
     @property
     def container_client(self):
