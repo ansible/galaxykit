@@ -237,6 +237,18 @@ def upload_artifact(
     return resp
 
 
+def approve_collection(client, namespace, collection_name, version):
+    return move_or_copy_collection(
+        client,
+        namespace,
+        collection_name,
+        version,
+        source="staging",
+        destination="published",
+        operation="move",
+    )
+
+
 def move_or_copy_collection(
     client,
     namespace,
@@ -296,6 +308,15 @@ def deprecate_collection(client, namespace, collection, repository):
     logger.debug(f"Deprecating {collection} in {namespace} on {client.galaxy_root}")
     url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/"
     body = {"deprecated": True}
+    resp = client.patch(url, body)
+    wait_for_task(client, resp)
+    return resp
+
+
+def undeprecate_collection(client, namespace, collection, repository):
+    logger.debug(f"Undeprecating {collection} in {namespace} on {client.galaxy_root}")
+    url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/"
+    body = {"deprecated": False}
     resp = client.patch(url, body)
     wait_for_task(client, resp)
     return resp

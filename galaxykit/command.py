@@ -159,6 +159,27 @@ KIND_OPS = {
                     "collection_name": {},
                 },
             },
+            "approve": {
+                "args": {
+                    "namespace": {},
+                    "collection_name": {},
+                    "version": {},
+                },
+            },
+            "deprecate": {
+                "args": {
+                    "namespace": {},
+                    "collection_name": {},
+                    "repository": {"nargs": "?", "default": "published"},
+                },
+            },
+            "undeprecate": {
+                "args": {
+                    "namespace": {},
+                    "collection_name": {},
+                    "repository": {"nargs": "?", "default": "published"},
+                },
+            },
         },
     },
     "namespace": {
@@ -1145,6 +1166,42 @@ def main():
                     if not args.ignore:
                         logger.error(e)
                         sys.exit(EXIT_NOT_FOUND)
+            elif args.operation == "approve":
+                namespace, collection_name, version = (
+                    args.namespace,
+                    args.collection_name,
+                    args.version,
+                )
+                collections.approve_collection(
+                    client,
+                    namespace,
+                    collection_name,
+                    version,
+                )
+            elif args.operation == "deprecate":
+                namespace, collection_name, repository = (
+                    args.namespace,
+                    args.collection_name,
+                    args.repository or "published",
+                )
+                collections.deprecate_collection(
+                    client,
+                    namespace,
+                    collection_name,
+                    repository,
+                )
+            elif args.operation == "undeprecate":
+                namespace, collection_name, repository = (
+                    args.namespace,
+                    args.collection_name,
+                    args.repository or "published",
+                )
+                collections.undeprecate_collection(
+                    client,
+                    namespace,
+                    collection_name,
+                    repository,
+                )
         elif args.kind == "url":
             if args.operation == "get":
                 url = args.url
