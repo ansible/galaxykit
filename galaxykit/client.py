@@ -239,6 +239,7 @@ class GalaxyClient:
         resp = send_request_with_retry_if_504(
             method, url, headers=headers, verify=self.https_verify, *args, **kwargs
         )
+        self.response = resp
         if "Invalid JWT token" in resp.text:
             resp = self._retry_if_expired_token(method, url, headers, *args, **kwargs)
         if parse_json:
@@ -259,6 +260,16 @@ class GalaxyClient:
                         method, url, headers, *args, **kwargs
                     )
                     json = resp.json()
+
+                elif (("not_authenticated" in json["errors"][0]["code"] or
+                        "authentication_failed" in json["errors"][0]["code"])
+                      and self.cookies['gateway_sessionid'] is not None):
+                    # we re-login only if we had already logged in, otherwise we want
+                    # to see the unauthenticated error message
+                    resp = self._retry_if_expired_gw_token(
+                        method, url, headers, *args, **kwargs
+                    )
+                    json = resp.json()
                 else:
                     raise GalaxyClientError(resp, *json["errors"])
             if resp.status_code >= 400:
@@ -273,9 +284,20 @@ class GalaxyClient:
         self._refresh_jwt_token()
         self._update_auth_headers()
         headers.update(self.headers)
-        return send_request_with_retry_if_504(
+        self.response = send_request_with_retry_if_504(
             method, url, headers=headers, verify=self.https_verify, *args, **kwargs
         )
+        return self.response
+
+    def _retry_if_expired_gw_token(self, method, url, headers, *args, **kwargs):
+        logger.debug("Reloading gateway session id.")
+        self.response = self.gw_client.login()
+        self.headers = self.gw_client.headers
+        headers.update(self.headers)
+        self.response = send_request_with_retry_if_504(
+            method, url, headers=headers, verify=self.https_verify, *args, **kwargs
+        )
+        return self.response
 
     def _payload(self, method, path, body, *args, **kwargs):
         if isinstance(body, dict):
