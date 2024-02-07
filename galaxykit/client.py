@@ -262,16 +262,26 @@ class GalaxyClient:
                     json = resp.json()
 
                 elif (("not_authenticated" in json["errors"][0]["code"] or
-                        "authentication_failed" in json["errors"][0]["code"])
-                      and self.cookies['gateway_sessionid'] is not None):
+                        "authentication_failed" in json["errors"][0]["code"] or
+                       resp.status_code == 403)
+                      and "gateway_sessionid" in self.headers['Cookie']):
                     # we re-login only if we had already logged in, otherwise we want
                     # to see the unauthenticated error message
                     resp = self._retry_if_expired_gw_token(
                         method, url, headers, *args, **kwargs
                     )
                     json = resp.json()
+                elif int(json["errors"][0]["status"]) == 403:
+                    print("hey")
                 else:
                     raise GalaxyClientError(resp, *json["errors"])
+            if resp.status_code == 403:
+                if json is not None:
+                    if "Authentication credentials were not provided" in json.get("detail"):
+                        resp = self._retry_if_expired_gw_token(
+                            method, url, headers, *args, **kwargs
+                        )
+                        json = resp.json()
             if resp.status_code >= 400:
                 raise GalaxyClientError(resp, resp.status_code)
             return json
