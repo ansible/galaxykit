@@ -236,6 +236,7 @@ class GalaxyClient:
         url = urljoin(self.galaxy_root, path)
         headers = kwargs.pop("headers", self.headers)
         parse_json = kwargs.pop("parse_json", True)
+        relogin = kwargs.pop("relogin", True)
         resp = send_request_with_retry_if_504(
             method, url, headers=headers, verify=self.https_verify, *args, **kwargs
         )
@@ -263,21 +264,22 @@ class GalaxyClient:
 
                 elif (("not_authenticated" in json["errors"][0]["code"] or
                         "authentication_failed" in json["errors"][0]["code"] or
-                       resp.status_code == 403)
-                      and "gateway_sessionid" in self.headers['Cookie']):
-                    # we re-login only if we had already logged in, otherwise we want
-                    # to see the unauthenticated error message
-                    resp = self._retry_if_expired_gw_token(
-                        method, url, headers, *args, **kwargs
-                    )
-                    json = resp.json()
+                       resp.status_code == 403)):
+                    if self.headers.get('Cookie') is not None:
+                        if "gateway_sessionid" in self.headers.get('Cookie') and relogin:
+                            # we re-login only if we had already logged in, otherwise we want
+                            # to see the unauthenticated error message
+                            resp = self._retry_if_expired_gw_token(
+                                method, url, headers, *args, **kwargs
+                            )
+                            json = resp.json()
                 elif int(json["errors"][0]["status"]) == 403:
                     print("hey")
                 else:
                     raise GalaxyClientError(resp, *json["errors"])
             if resp.status_code == 403:
-                if json is not None:
-                    if "Authentication credentials were not provided" in json.get("detail"):
+                if json.get("detail") is not None:
+                    if "Authentication credentials were not provided" in json.get("detail") and relogin:
                         resp = self._retry_if_expired_gw_token(
                             method, url, headers, *args, **kwargs
                         )

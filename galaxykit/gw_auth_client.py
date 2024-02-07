@@ -75,5 +75,5 @@ class GatewayAuthClient:
         gateway_sessionid = response.cookies["gateway_sessionid"]
         return {
             "Accept": "application/json",
-            "Cookie": f"csrftoken={self.csrftoken}; gateway_sessionid={gateway_sessionid}",
+            "Cookie": f"csrftoken={self.csrftoken}; gateway_sessionid={gateway_sessionid}"
         }
