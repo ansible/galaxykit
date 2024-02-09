@@ -12,7 +12,7 @@ It's intended to be a low-dependency and low-abstraction client for performing a
 
 ### Installing:
 
-To install the latest development version, run `pip3 install ansible galaxykit` in the root of your checked-out copy of this repository.
+To install the latest development version, run `pip3 install -e .` in the root of your checked-out copy of this repository.
 
 To set up the pre-commit hooks we are using (currently just autoformatting with `black`), run the following snippet:
 
