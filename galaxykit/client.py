@@ -74,9 +74,9 @@ class GalaxyClient:
     _server_version = None
     _container_client = None
     _ui_ee_endpoint_prefix = None
-    gw_galaxy_url = None  # https://ec2-3-254-99-203.eu-west-1.compute.amazonaws.com/api/hub/
-    gw_gateway_url = None  # https://ec2-3-254-99-203.eu-west-1.compute.amazonaws.com/api/gateway/
-    gw_root_url = None  # https://ec2-3-254-99-203.eu-west-1.compute.amazonaws.com
+    gw_galaxy_url = None
+    gw_gateway_url = None
+    gw_root_url = None
     gw_client = None
     response = None
 

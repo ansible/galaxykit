@@ -26,10 +26,6 @@ def get_collection(client, namespace, collection_name, version):
     return client.get(collection_url)
 
 def get_collection_from_repo(client, repository, namespace, collection_name, version):
-    collection_url = (f"content/{repository}/v3/collections/"
-                      f"{namespace}/{collection_name}/versions/{version}/")
-    # api/hub/content/validated/v3/plugin/ansible/content/validated/collections/index/autohubtest2/djwgntzc/versions/1.0.0/
-    # to avoid 302 redirect
     collection_url = (f"content/{repository}/v3/plugin/ansible/content/{repository}"
                       f"/collections/index/{namespace}/{collection_name}/versions/{version}/")
     return client.get(collection_url)
