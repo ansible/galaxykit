@@ -327,6 +327,9 @@ KIND_OPS = {
     "registry": {
         "help": "Remote Registry",
         "ops": {
+            "list": {
+                "args": None,
+            },
             "delete": {
                 "args": {
                     "name": {},
@@ -919,7 +922,16 @@ def main():
                         sys.exit(EXIT_NOT_FOUND)
 
         elif args.kind == "registry":
-            if args.operation == "delete":
+            if args.operation == "list":
+                try:
+                    resp = registries.list_registries(client)
+                    for name in map(lambda r: r["name"], resp):
+                        print(name)
+                except ValueError as e:
+                    if not args.ignore:
+                        logger.error(e)
+                        sys.exit(EXIT_NOT_FOUND)
+            elif args.operation == "delete":
                 name = args.name
                 try:
                     resp = registries.delete_registry(client, name)
