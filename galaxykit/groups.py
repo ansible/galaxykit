@@ -48,6 +48,7 @@ def create_group(client, group_name, exists_ok=True):
         else:
             raise
 
+
 def create_group_v3(client, group_name, exists_ok=True):
     """
     Creates a group
