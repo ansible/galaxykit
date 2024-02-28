@@ -20,7 +20,7 @@ def collection_info(client, repository, namespace, collection_name, version):
 
 
 def get_collection(client, namespace, collection_name, version):
-    collection_url = f"v3/collections/{namespace}/{collection_name}/versions/{version}/"
+    # collection_url = f"v3/collections/{namespace}/{collection_name}/versions/{version}/"
     collection_url = (f"v3/plugin/ansible/content/published/collections/index/"
                       f"{namespace}/{collection_name}/versions/{version}/")
     return client.get(collection_url)
