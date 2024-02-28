@@ -74,8 +74,6 @@ class GalaxyClient:
     _server_version = None
     _container_client = None
     _ui_ee_endpoint_prefix = None
-    gw_galaxy_url = None
-    gw_gateway_url = None
     gw_root_url = None
     gw_client = None
     response = None
@@ -225,7 +223,7 @@ class GalaxyClient:
             }
         )
 
-    def _get_server_version(self):
+    def get_server_version(self):
         return self._http("get", self.galaxy_root)["galaxy_ng_version"]
 
     def _is_rbac_available(self):
@@ -273,13 +271,12 @@ class GalaxyClient:
                                 method, url, headers, *args, **kwargs
                             )
                             json = resp.json()
-                elif int(json["errors"][0]["status"]) == 403:
-                    print("hey")
                 else:
                     raise GalaxyClientError(resp, *json["errors"])
             if resp.status_code == 403:
                 if json.get("detail") is not None:
-                    if "Authentication credentials were not provided" in json.get("detail") and relogin:
+                    if ("Authentication credentials were not provided" in json.get("detail")
+                            and relogin):
                         resp = self._retry_if_expired_gw_token(
                             method, url, headers, *args, **kwargs
                         )
@@ -488,7 +485,7 @@ class GalaxyClient:
     @property
     def server_version(self):
         if self._server_version is None:
-            self._server_version = self._get_server_version()
+            self._server_version = self.get_server_version()
         return self._server_version
 
     @property
