@@ -151,13 +151,6 @@ def create_distribution(client, dist_name, repo_href):
     return repo_href
 
 
-def create_distribution_v2(client, dist_name, repo_href):
-    ansible_distribution_path = "pulp/api/v3/distributions/ansible/ansible/"
-    dist_data = {"base_path": dist_name, "name": dist_name, "repository": repo_href}
-    task_resp = client.post(ansible_distribution_path, dist_data)
-    wait_for_task(client, task_resp)
-    return dist_data
-
 def delete_distribution(client, dist_name):
     r = view_distributions(client, dist_name)
     pulp_href = r["results"][0]["pulp_href"]
