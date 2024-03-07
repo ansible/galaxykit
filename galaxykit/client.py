@@ -295,6 +295,7 @@ class GalaxyClient:
             return json
         else:
             if resp.status_code >= 400:
+                logging.debug(resp.text)
                 raise GalaxyClientError(resp, resp.status_code)
             return resp
 
