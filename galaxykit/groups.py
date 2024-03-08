@@ -14,6 +14,15 @@ def get_group(client, group_name):
     return client.get(groups_url)["data"][0]
 
 
+def get_group_v3(client, group_name):
+    """
+    Returns the data of the group with group_name
+    """
+    group_id = get_group_id(client, group_name)
+    groups_url = f"pulp/api/v3/groups/{group_id}/"
+    return client.get(groups_url)
+
+
 def get_group_id(client, group_name):
     """
     Returns the id for a given group
@@ -40,6 +49,20 @@ def create_group(client, group_name, exists_ok=True):
             raise
 
 
+def create_group_v3(client, group_name, exists_ok=True):
+    """
+    Creates a group
+    """
+    try:
+        return client.post("pulp/api/v3/groups/", {"name": group_name})
+    except GalaxyClientError as e:
+        if e.response.status_code == 409 and exists_ok:
+            # ok, already exists
+            pass
+        else:
+            raise
+
+
 def delete_group(client, group_name):
     # need to get the group id,
     # then make the url and requests.delete it
@@ -48,9 +71,17 @@ def delete_group(client, group_name):
     return client.delete(delete_url, parse_json=False)
 
 
+def delete_group_v3(client, group_name):
+    # need to get the group id,
+    # then make the url and requests.delete it
+    group_id = get_group_id(client, group_name)
+    delete_url = f"pulp/api/v3/groups/{group_id}/"
+    return client.delete(delete_url, parse_json=False)
+
+
 def get_roles(client, group_name):
     group_id = get_group_id(client, group_name)
-    roles_url = f"pulp/api/v3/groups/{group_id}/roles/?content_object=null"
+    roles_url = f"pulp/api/v3/groups/{group_id}/roles/"
     return client.get(roles_url)
 
 

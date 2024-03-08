@@ -12,6 +12,7 @@ from pkg_resources import parse_version
 import requests
 
 from .github_social_auth_client import GitHubSocialAuthClient
+from .gw_auth_client import GatewayAuthClient
 from .utils import GalaxyClientError
 from . import containers
 from . import containerutils
@@ -73,6 +74,9 @@ class GalaxyClient:
     _server_version = None
     _container_client = None
     _ui_ee_endpoint_prefix = None
+    gw_root_url = None
+    gw_client = None
+    response = None
 
     def __init__(
         self,
@@ -84,6 +88,8 @@ class GalaxyClient:
         https_verify=False,
         token_type=None,
         github_social_auth=False,
+        gw_auth=False,
+        gw_root_url=None,
     ):
         self.galaxy_root = galaxy_root
         self.headers = {}
@@ -92,8 +98,9 @@ class GalaxyClient:
         self._container_engine = container_engine
         self._container_registry = container_registry
         self._container_tls_verify = container_tls_verify
+        self.gw_root_url = gw_root_url
 
-        if auth and not github_social_auth:
+        if auth and not github_social_auth and not gw_auth:
             if isinstance(auth, dict):
                 self.username = auth.get("username")
                 self.password = auth.get("password")
@@ -145,6 +152,23 @@ class GalaxyClient:
             gh_client = GitHubSocialAuthClient(auth, galaxy_root)
             gh_client.login()
             self.headers = gh_client.headers
+
+        if gw_auth:
+            if not self.gw_root_url:
+                raise ValueError(
+                    "If Gateway authentication is True, "
+                    "gw_root_url needs to be provided."
+                )
+            self.username = auth["username"]
+            self.password = auth["password"]
+            self.gw_client = GatewayAuthClient(auth, gw_root_url)
+            self.response = self.gw_client.login()
+            self.headers = self.gw_client.headers
+            self.galaxy_root = urljoin(self.gw_root_url, "/api/hub/")
+
+    @property
+    def cookies(self):
+        return dict(self.response.cookies)
 
     @property
     def container_client(self):
@@ -200,7 +224,7 @@ class GalaxyClient:
             }
         )
 
-    def _get_server_version(self):
+    def get_server_version(self):
         return self._http("get", self.galaxy_root)["galaxy_ng_version"]
 
     def _is_rbac_available(self):
@@ -211,9 +235,11 @@ class GalaxyClient:
         url = urljoin(self.galaxy_root, path)
         headers = kwargs.pop("headers", self.headers)
         parse_json = kwargs.pop("parse_json", True)
+        relogin = kwargs.pop("relogin", True)
         resp = send_request_with_retry_if_504(
             method, url, headers=headers, verify=self.https_verify, *args, **kwargs
         )
+        self.response = resp
         if "Invalid JWT token" in resp.text:
             resp = self._retry_if_expired_token(method, url, headers, *args, **kwargs)
         if parse_json:
@@ -234,13 +260,42 @@ class GalaxyClient:
                         method, url, headers, *args, **kwargs
                     )
                     json = resp.json()
+
+                elif (
+                    "not_authenticated" in json["errors"][0]["code"]
+                    or "authentication_failed" in json["errors"][0]["code"]
+                    or resp.status_code == 403
+                ):
+                    if self.headers.get("Cookie") is not None:
+                        if (
+                            "gateway_sessionid" in self.headers.get("Cookie")
+                            and relogin
+                        ):
+                            # we re-login only if we had already logged in, otherwise we want
+                            # to see the unauthenticated error message
+                            resp = self._retry_if_expired_gw_token(
+                                method, url, headers, *args, **kwargs
+                            )
+                            json = resp.json()
                 else:
                     raise GalaxyClientError(resp, *json["errors"])
+            if resp.status_code == 403:
+                if json.get("detail") is not None:
+                    if (
+                        "Authentication credentials were not provided"
+                        in json.get("detail")
+                        and relogin
+                    ):
+                        resp = self._retry_if_expired_gw_token(
+                            method, url, headers, *args, **kwargs
+                        )
+                        json = resp.json()
             if resp.status_code >= 400:
                 raise GalaxyClientError(resp, resp.status_code)
             return json
         else:
             if resp.status_code >= 400:
+                logging.debug(resp.text)
                 raise GalaxyClientError(resp, resp.status_code)
             return resp
 
@@ -248,9 +303,20 @@ class GalaxyClient:
         self._refresh_jwt_token()
         self._update_auth_headers()
         headers.update(self.headers)
-        return send_request_with_retry_if_504(
+        self.response = send_request_with_retry_if_504(
             method, url, headers=headers, verify=self.https_verify, *args, **kwargs
         )
+        return self.response
+
+    def _retry_if_expired_gw_token(self, method, url, headers, *args, **kwargs):
+        logger.debug("Reloading gateway session id.")
+        self.response = self.gw_client.login()
+        self.headers = self.gw_client.headers
+        headers.update(self.headers)
+        self.response = send_request_with_retry_if_504(
+            method, url, headers=headers, verify=self.https_verify, *args, **kwargs
+        )
+        return self.response
 
     def _payload(self, method, path, body, *args, **kwargs):
         if isinstance(body, dict):
@@ -429,7 +495,7 @@ class GalaxyClient:
     @property
     def server_version(self):
         if self._server_version is None:
-            self._server_version = self._get_server_version()
+            self._server_version = self.get_server_version()
         return self._server_version
 
     @property

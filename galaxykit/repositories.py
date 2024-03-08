@@ -154,5 +154,13 @@ def create_distribution(client, dist_name, repo_href):
 def delete_distribution(client, dist_name):
     r = view_distributions(client, dist_name)
     pulp_href = r["results"][0]["pulp_href"]
+    pulp_href = fix_prefix_workaround(client, pulp_href)
     task_resp = client.delete(pulp_href)
     return wait_for_task(client, task_resp)
+
+
+def fix_prefix_workaround(client, url):
+    if client.gw_client is not None:
+        return url.replace("/api/galaxy/", "/api/hub/")
+    else:
+        return url

@@ -55,3 +55,8 @@ def get_all_distributions(client):
     """
     url = "pulp/api/v3/distributions/ansible/ansible/"
     return client.get(url)["results"]
+
+
+def get_v1_distributions(client):
+    url = "_ui/v1/distributions/"
+    return client.get(url)

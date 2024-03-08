@@ -10,7 +10,7 @@ from urllib.parse import urljoin
 from pkg_resources import parse_version
 
 from orionutils.generator import build_collection
-from .utils import wait_for_task, logger, GalaxyClientError
+from .utils import wait_for_task, logger, GalaxyClientError, wait_for_url
 from .constants import EE_ENDPOINTS_CHANGE_VERSION
 
 
@@ -20,8 +20,28 @@ def collection_info(client, repository, namespace, collection_name, version):
 
 
 def get_collection(client, namespace, collection_name, version):
-    collection_url = f"v3/collections/{namespace}/{collection_name}/versions/{version}/"
+    # collection_url = f"v3/collections/{namespace}/{collection_name}/versions/{version}/"
+    collection_url = (
+        f"v3/plugin/ansible/content/published/collections/index/"
+        f"{namespace}/{collection_name}/versions/{version}/"
+    )
     return client.get(collection_url)
+
+
+def get_collection_from_repo(client, repository, namespace, collection_name, version):
+    collection_url = (
+        f"content/{repository}/v3/plugin/ansible/content/{repository}"
+        f"/collections/index/{namespace}/{collection_name}/versions/{version}/"
+    )
+    return client.get(collection_url)
+
+
+def get_ui_collection(client, repository, namespace, collection_name, version):
+    ui_collection_url = (
+        f"_ui/v1/repo/{repository}/{namespace}/"
+        f"{collection_name}/?versions={version}"
+    )
+    return client.get(ui_collection_url)
 
 
 def get_collection_list(client):
@@ -81,6 +101,7 @@ def upload_artifact(
     no_filename=False,
     no_file=False,
     path=None,
+    use_distribution=False,
 ):
     """
     Publishes a collection to a Galaxy server and returns the import task URI.
@@ -174,7 +195,13 @@ def upload_artifact(
             f"content/inbound-{artifact.namespace}/v3/artifacts/collections/"
         )
 
-    n_url = urljoin(client.galaxy_root, col_upload_path)
+    if use_distribution:
+        n_url = urljoin(
+            client.galaxy_root,
+            f"content/inbound-{artifact.namespace}/v3/artifacts/collections/",
+        )
+    else:
+        n_url = urljoin(client.galaxy_root, col_upload_path)
     resp = client.post(n_url, body=data, headers=headers)
     return resp
 
@@ -210,7 +237,12 @@ def move_or_copy_collection(
             timeout = timeout - 1
             if timeout < 0:
                 raise
-    return True
+
+    dest_url = (
+        f"v3/plugin/ansible/content/{destination}/collections/index/"
+        f"{namespace}/{collection_name}/versions/{version}/"
+    )
+    return wait_for_url(client, dest_url)
 
 
 def delete_collection(
