@@ -3,7 +3,6 @@ import logging
 import json
 import re
 import time
-from urllib import request
 from urllib.parse import urljoin
 
 import requests

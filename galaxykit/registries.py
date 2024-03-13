@@ -39,3 +39,12 @@ def create_registry(client, name, url):
         "url": url,
     }
     return client.post(post_url, registry)
+
+
+def list_registries(client):
+    """
+    List registries
+    """
+    url = f"_ui/v1/execution-environments/registries/?limit=100"
+    resp = client.get(url)
+    return resp["data"]

@@ -97,6 +97,16 @@ KIND_OPS = {
                         "nargs": "*",
                         "default": None,
                     },
+                    "--skip-upload": {
+                        "help": "Save to a local file instead of uploading.",
+                        "action": "store_true",
+                        "default": False,
+                    },
+                    "--template": {
+                        "help": "orionutils collection template",
+                        "nargs": "?",
+                        "default": "skeleton",
+                    },
                 },
             },
             "move": {
@@ -147,6 +157,27 @@ KIND_OPS = {
                 "help": "cross repository search by collection name",
                 "args": {
                     "collection_name": {},
+                },
+            },
+            "approve": {
+                "args": {
+                    "namespace": {},
+                    "collection_name": {},
+                    "version": {},
+                },
+            },
+            "deprecate": {
+                "args": {
+                    "namespace": {},
+                    "collection_name": {},
+                    "repository": {"nargs": "?", "default": "published"},
+                },
+            },
+            "undeprecate": {
+                "args": {
+                    "namespace": {},
+                    "collection_name": {},
+                    "repository": {"nargs": "?", "default": "published"},
                 },
             },
         },
@@ -296,6 +327,9 @@ KIND_OPS = {
     "registry": {
         "help": "Remote Registry",
         "ops": {
+            "list": {
+                "args": None,
+            },
             "delete": {
                 "args": {
                     "name": {},
@@ -888,7 +922,16 @@ def main():
                         sys.exit(EXIT_NOT_FOUND)
 
         elif args.kind == "registry":
-            if args.operation == "delete":
+            if args.operation == "list":
+                try:
+                    resp = registries.list_registries(client)
+                    for name in map(lambda r: r["name"], resp):
+                        print(name)
+                except ValueError as e:
+                    if not args.ignore:
+                        logger.error(e)
+                        sys.exit(EXIT_NOT_FOUND)
+            elif args.operation == "delete":
                 name = args.name
                 try:
                     resp = registries.delete_registry(client, name)
@@ -1008,22 +1051,42 @@ def main():
             if args.operation == "list":
                 print(json.dumps(collections.get_collection_list(client)))
             elif args.operation == "upload":
-                namespace, collection_name, version, path, tags = (
+                (
+                    namespace,
+                    collection_name,
+                    version,
+                    path,
+                    tags,
+                    skip_upload,
+                    template,
+                ) = (
                     args.namespace or client.username,
                     args.collection_name,
                     args.version or "1.0.0",
                     args.path or "staging",
                     args.tags or ["tools"],
+                    args.skip_upload or False,
+                    args.template or "skeleton",
                 )
-                resp = namespaces.create_namespace(client, namespace, None)
-                artifact = collections.upload_test_collection(
-                    client,
-                    namespace=namespace,
-                    collection_name=collection_name,
-                    version=version,
-                    path=path,
-                    tags=tags,
-                )
+                if not skip_upload:
+                    namespaces.create_namespace(client, namespace, None)
+                    artifact = collections.upload_test_collection(
+                        client,
+                        namespace=namespace,
+                        collection_name=collection_name,
+                        version=version,
+                        path=path,
+                        tags=tags,
+                        template=template,
+                    )
+                else:
+                    artifact = collections.save_test_collection(
+                        namespace=namespace,
+                        collection_name=collection_name,
+                        version=version,
+                        tags=tags,
+                        template=template,
+                    )
                 print(json.dumps(artifact))
             elif args.operation == "move":
                 namespace, collection_name, version, source, destination = (
@@ -1115,6 +1178,42 @@ def main():
                     if not args.ignore:
                         logger.error(e)
                         sys.exit(EXIT_NOT_FOUND)
+            elif args.operation == "approve":
+                namespace, collection_name, version = (
+                    args.namespace,
+                    args.collection_name,
+                    args.version,
+                )
+                collections.approve_collection(
+                    client,
+                    namespace,
+                    collection_name,
+                    version,
+                )
+            elif args.operation == "deprecate":
+                namespace, collection_name, repository = (
+                    args.namespace,
+                    args.collection_name,
+                    args.repository or "published",
+                )
+                collections.deprecate_collection(
+                    client,
+                    namespace,
+                    collection_name,
+                    repository,
+                )
+            elif args.operation == "undeprecate":
+                namespace, collection_name, repository = (
+                    args.namespace,
+                    args.collection_name,
+                    args.repository or "published",
+                )
+                collections.undeprecate_collection(
+                    client,
+                    namespace,
+                    collection_name,
+                    repository,
+                )
         elif args.kind == "url":
             if args.operation == "get":
                 url = args.url

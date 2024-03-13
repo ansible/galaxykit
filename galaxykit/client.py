@@ -100,6 +100,9 @@ class GalaxyClient:
         self._container_tls_verify = container_tls_verify
         self.gw_root_url = gw_root_url
 
+        if not https_verify:
+            requests.packages.urllib3.disable_warnings()
+
         if auth and not github_social_auth and not gw_auth:
             if isinstance(auth, dict):
                 self.username = auth.get("username")
