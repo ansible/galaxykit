@@ -233,7 +233,7 @@ class GalaxyClient:
 
     def _add_user_agent(self, headers):
         """python-requests user-agent is blocked"""
-        keys = [x.lower() for x in headers]
+        keys = [x.lower() for x in headers.keys()]
         if 'user-agent' not in keys:
             headers['user-agent'] = user_agent()
         return headers
