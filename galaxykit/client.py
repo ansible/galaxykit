@@ -231,9 +231,17 @@ class GalaxyClient:
         galaxy_ng_version = self.server_version
         return parse_version(galaxy_ng_version) >= parse_version(RBAC_VERSION)
 
+    def _add_user_agent(self, headers):
+        """python-requests user-agent is blocked"""
+        keys = [x.lower() for x in headers]
+        if 'user-agent' not in keys:
+            headers['user-agent'] = user_agent()
+        return headers
+
     def _http(self, method, path, *args, **kwargs):
         url = urljoin(self.galaxy_root, path)
         headers = kwargs.pop("headers", self.headers)
+        headers = self._add_user_agent(headers)
         parse_json = kwargs.pop("parse_json", True)
         relogin = kwargs.pop("relogin", True)
         resp = send_request_with_retry_if_504(
