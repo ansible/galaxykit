@@ -24,7 +24,7 @@ dynamic = ["version"]
 dev = ["pre-commit"]
 
 [project.urls]
-Repository = "https://github.com/hendersonreed/galaxykit/"
+Repository = "https://github.com/ansible/galaxykit/"
 
 [project.scripts]
 galaxykit = "galaxykit.command:main"
