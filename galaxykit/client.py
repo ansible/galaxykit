@@ -282,7 +282,7 @@ class GalaxyClient:
             if resp.status_code in (401, 403) and json.get("detail") is not None:
                 if (
                     "Authentication credentials were not provided"
-                    in json.get["detail"]
+                    in json["detail"]
                     and relogin
                 ):
                     resp = self._retry_if_expired_gw_token(
