@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "galaxykit"
+description = "A small client library for testing galaxy_ng."
+authors = [
+    { name = "Red Hat PEAQE Team", email = "info@ansible.com" },
+]
+# FIXME(cutwater): Specify valid SPDX license identifier here.
+# FIXME(cutwater): Include a copy of a license into the project repository.
+license = { text = "GPLv2" }
+readme = { file = "README.md", content-type = "text/markdown" }
+dependencies = [
+    "requests",
+    "simplejson",
+    "orionutils",
+    "pyyaml",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = ["pre-commit"]
+
+[project.urls]
+Repository = "https://github.com/hendersonreed/galaxykit/"
+
+[project.scripts]
+galaxykit = "galaxykit.command:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "galaxykit._version.__version__" }
+
+[tool.flake8]
+max-line-length = 100
+
+[tool.pylint.messages_control]
+disable = [
+    "no-self-use",
+    "subprocess-run-check",
+]
