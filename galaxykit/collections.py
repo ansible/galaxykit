@@ -54,6 +54,51 @@ def get_all_collections(client):
     return client.get(url)
 
 
+def create_test_collection(
+    namespace=None,
+    name=None,
+    version="1.0.0",
+    tags=None,
+    template="skeleton",
+):
+    config = {
+        "namespace": namespace,
+        "version": version,
+    }
+
+    if name is not None:
+        config["name"] = name
+
+    # cloud importer config requires at least one tag
+    if tags is not None:
+        config["tags"] = tags
+
+    return build_collection(template, config=config)
+
+
+def save_test_collection(
+    namespace=None,
+    collection_name=None,
+    version="1.0.0",
+    tags=["tools"],
+    template="skeleton",
+):
+    """
+    Saves (locally) a test collection generated with orionutils
+    """
+    artifact = create_test_collection(
+        namespace, collection_name, version, tags, template
+    )
+
+    return {
+        "namespace": artifact.namespace,
+        "name": artifact.name,
+        "version": artifact.version,
+        "published": artifact.published,
+        "filename": artifact.filename,
+    }
+
+
 def upload_test_collection(
     client,
     namespace=None,
@@ -61,30 +106,18 @@ def upload_test_collection(
     version="1.0.0",
     path="staging",
     tags=["tools"],
+    template="skeleton",
 ):
     """
     Uploads a test collection generated with orionutils
     """
-    config = {
-        "namespace": namespace or client.username,
-        "version": version,
-    }
-    if collection_name is not None:
-        config["name"] = collection_name
-    # cloud importer config requires at least one tag
-    config["tags"] = tags
-    artifact = build_collection("skeleton", config=config)
-    upload_resp_url = upload_artifact(config, client, artifact, path=path)["task"]
+    artifact = create_test_collection(
+        namespace or client.username, collection_name, version, tags, template
+    )
 
-    ready = False
-    state = ""
-    while not ready:
-        sleep(1)
-        task_resp = client.get(upload_resp_url)
-        state = task_resp["state"]
-        ready = state in ["completed", "failed"]
-    if state == "failed":
-        raise GalaxyClientError(json.dumps(task_resp))
+    resp = upload_artifact(None, client, artifact, path=path)
+    wait_for_task(client, resp)
+
     return {
         "namespace": artifact.namespace,
         "name": artifact.name,
@@ -106,9 +139,7 @@ def upload_artifact(
     """
     Publishes a collection to a Galaxy server and returns the import task URI.
 
-    :param config: a configuration object to describe the artifact to be uploaded.
-        Example:
-            {"namespace": "foo", "name": "bar"}
+    :param config: unused, left for compatibility
     :param client: a GalaxyClient object. Must be authenticated.
     :param artifact: the collection artifact to be uploaded. Expects structure to be that
         of collections produced using the orionutils build_collection function.
@@ -206,6 +237,18 @@ def upload_artifact(
     return resp
 
 
+def approve_collection(client, namespace, collection_name, version):
+    return move_or_copy_collection(
+        client,
+        namespace,
+        collection_name,
+        version,
+        source="staging",
+        destination="published",
+        operation="move",
+    )
+
+
 def move_or_copy_collection(
     client,
     namespace,
@@ -265,6 +308,15 @@ def deprecate_collection(client, namespace, collection, repository):
     logger.debug(f"Deprecating {collection} in {namespace} on {client.galaxy_root}")
     url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/"
     body = {"deprecated": True}
+    resp = client.patch(url, body)
+    wait_for_task(client, resp)
+    return resp
+
+
+def undeprecate_collection(client, namespace, collection, repository):
+    logger.debug(f"Undeprecating {collection} in {namespace} on {client.galaxy_root}")
+    url = f"v3/plugin/ansible/content/{repository}/collections/index/{namespace}/{collection}/"
+    body = {"deprecated": False}
     resp = client.patch(url, body)
     wait_for_task(client, resp)
     return resp
