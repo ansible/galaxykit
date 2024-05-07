@@ -100,6 +100,9 @@ class GalaxyClient:
         self._container_tls_verify = container_tls_verify
         self.gw_root_url = gw_root_url
 
+        if not https_verify:
+            requests.packages.urllib3.disable_warnings()
+
         if auth and not github_social_auth and not gw_auth:
             if isinstance(auth, dict):
                 self.username = auth.get("username")
@@ -264,7 +267,7 @@ class GalaxyClient:
                 elif (
                     "not_authenticated" in json["errors"][0]["code"]
                     or "authentication_failed" in json["errors"][0]["code"]
-                    or resp.status_code == 403
+                    or resp.status_code in (401, 403)
                 ):
                     if self.headers.get("Cookie") is not None:
                         if (
@@ -279,17 +282,16 @@ class GalaxyClient:
                             json = resp.json()
                 else:
                     raise GalaxyClientError(resp, *json["errors"])
-            if resp.status_code == 403:
-                if json.get("detail") is not None:
-                    if (
-                        "Authentication credentials were not provided"
-                        in json.get("detail")
-                        and relogin
-                    ):
-                        resp = self._retry_if_expired_gw_token(
-                            method, url, headers, *args, **kwargs
-                        )
-                        json = resp.json()
+            if resp.status_code in (401, 403) and json.get("detail") is not None:
+                if (
+                    "Authentication credentials were not provided"
+                    in json["detail"]
+                    and relogin
+                ):
+                    resp = self._retry_if_expired_gw_token(
+                        method, url, headers, *args, **kwargs
+                    )
+                    json = resp.json()
             if resp.status_code >= 400:
                 raise GalaxyClientError(resp, resp.status_code)
             return json

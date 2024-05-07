@@ -65,7 +65,7 @@ class GatewayAuthClient:
     def get_header_csfrtoken(self, session):
         response = session.get(self.login_url)
         response.raise_for_status()
-        token_pattern = r'csrfToken:\s+?"(.+?)"'
+        token_pattern = r'"csrfToken":\s+?"(.+?)"'
         match = re.search(token_pattern, response.text)
         return match.group(1)
 

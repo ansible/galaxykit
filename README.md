@@ -26,3 +26,19 @@ After running those commands, make sure to run the following command to the late
 ```pip3 install ansible git+https://github.com/ansible/galaxykit.git@master```
 
 After that's been done, the first commit you make will have to install any of those dependencies, and may take a few minutes.
+
+### Distributing
+
+To build a distribution package you need to install `build` tool, a build-backend agnostic and standartized tool 
+for building dictrubiton packages.
+
+```shell
+pip install build
+```
+
+After installation, execute it as following:
+
+```shell
+python -m build
+```
+
