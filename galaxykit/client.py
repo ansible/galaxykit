@@ -167,7 +167,7 @@ class GalaxyClient:
             self.gw_client = GatewayAuthClient(auth, gw_root_url)
             self.response = self.gw_client.login()
             self.headers = self.gw_client.headers
-            self.galaxy_root = urljoin(self.gw_root_url, "/api/hub/")
+            self.galaxy_root = urljoin(self.gw_root_url, "/api/galaxy/")
 
     @property
     def cookies(self):
