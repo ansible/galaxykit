@@ -47,7 +47,9 @@ class GalaxyClientError(Exception):
         super().__init__(*args[skip:], **kwargs)
 
 
-def wait_for_task(api_client, resp, task_id=None, timeout=300, raise_on_error=False, version="v3"):
+def wait_for_task(
+    api_client, resp, task_id=None, timeout=300, raise_on_error=False, version="v3"
+):
     if task_id:
         url = f"{version}/tasks/{task_id}/"
     else:
