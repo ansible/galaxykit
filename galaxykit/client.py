@@ -284,10 +284,10 @@ class GalaxyClient:
                     raise GalaxyClientError(resp, *json_data["errors"])
             if resp.status_code in (401, 403) and json_data.get("detail") is not None:
                 if (
-                        ("Authentication credentials were not provided"
-                    in json_data["detail"] or "JWT has expired" in json_data["detail"])
-                    and relogin
-                ):
+                    "Authentication credentials were not provided"
+                    in json_data["detail"]
+                    or "JWT has expired" in json_data["detail"]
+                ) and relogin:
                     logging.debug(f"Login again because {json_data['detail']}")
                     resp = self._retry_if_expired_gw_token(
                         method, url, headers, *args, **kwargs
