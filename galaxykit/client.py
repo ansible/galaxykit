@@ -247,26 +247,26 @@ class GalaxyClient:
             resp = self._retry_if_expired_token(method, url, headers, *args, **kwargs)
         if parse_json:
             try:
-                json = resp.json()
+                json_data = resp.json()
             except JSONDecodeError as exc:
                 logging.error(
                     f"Cannot parse expected JSON response ({url}): {resp.text}"
                 )
                 raise ValueError("Failed to parse JSON response from API") from exc
-            if "errors" in json:
+            if "errors" in json_data:
                 try:
-                    error_message = json["errors"][0]["detail"]
+                    error_message = json_data["errors"][0]["detail"]
                 except KeyError:
                     error_message = ""
                 if "Invalid JWT token" in error_message:
                     resp = self._retry_if_expired_token(
                         method, url, headers, *args, **kwargs
                     )
-                    json = resp.json()
+                    json_data = resp.json()
 
                 elif (
-                    "not_authenticated" in json["errors"][0]["code"]
-                    or "authentication_failed" in json["errors"][0]["code"]
+                    "not_authenticated" in json_data["errors"][0]["code"]
+                    or "authentication_failed" in json_data["errors"][0]["code"]
                     or resp.status_code in (401, 403)
                 ):
                     if self.headers.get("Cookie") is not None:
@@ -279,22 +279,24 @@ class GalaxyClient:
                             resp = self._retry_if_expired_gw_token(
                                 method, url, headers, *args, **kwargs
                             )
-                            json = resp.json()
+                            json_data = resp.json()
                 else:
-                    raise GalaxyClientError(resp, *json["errors"])
-            if resp.status_code in (401, 403) and json.get("detail") is not None:
+                    raise GalaxyClientError(resp, *json_data["errors"])
+            if resp.status_code in (401, 403) and json_data.get("detail") is not None:
                 if (
-                    "Authentication credentials were not provided"
-                    in json["detail"]
+                        ("Authentication credentials were not provided"
+                    in json_data["detail"] or "JWT has expired" in json_data["detail"])
                     and relogin
                 ):
+                    logging.debug(f"Login again because {json_data['detail']}")
                     resp = self._retry_if_expired_gw_token(
                         method, url, headers, *args, **kwargs
                     )
-                    json = resp.json()
+                    json_data = resp.json()
             if resp.status_code >= 400:
+                logging.debug(resp.json())
                 raise GalaxyClientError(resp, resp.status_code)
-            return json
+            return json_data
         else:
             if resp.status_code >= 400:
                 logging.debug(resp.text)
