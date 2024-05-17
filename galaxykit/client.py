@@ -263,7 +263,8 @@ class GalaxyClient:
                         method, url, headers, *args, **kwargs
                     )
                     return resp.json()
-
+                elif "permission_denied" in json_data["errors"][0]["code"]:
+                    raise GalaxyClientError(resp, resp.status_code)
                 elif (
                     "not_authenticated" in json_data["errors"][0]["code"]
                     or "authentication_failed" in json_data["errors"][0]["code"]
@@ -280,6 +281,8 @@ class GalaxyClient:
                                 method, url, headers, *args, **kwargs
                             )
                             return resp.json()
+                        else:
+                            raise GalaxyClientError(resp, resp.status_code)
                 else:
                     raise GalaxyClientError(resp, *json_data["errors"])
             if resp.status_code in (401, 403) and json_data.get("detail") is not None:
