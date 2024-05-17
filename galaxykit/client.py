@@ -262,7 +262,7 @@ class GalaxyClient:
                     resp = self._retry_if_expired_token(
                         method, url, headers, *args, **kwargs
                     )
-                    json_data = resp.json()
+                    return resp.json()
 
                 elif (
                     "not_authenticated" in json_data["errors"][0]["code"]
@@ -279,7 +279,7 @@ class GalaxyClient:
                             resp = self._retry_if_expired_gw_token(
                                 method, url, headers, *args, **kwargs
                             )
-                            json_data = resp.json()
+                            return resp.json()
                 else:
                     raise GalaxyClientError(resp, *json_data["errors"])
             if resp.status_code in (401, 403) and json_data.get("detail") is not None:
@@ -292,7 +292,7 @@ class GalaxyClient:
                     resp = self._retry_if_expired_gw_token(
                         method, url, headers, *args, **kwargs
                     )
-                    json_data = resp.json()
+                    return resp.json()
             if resp.status_code >= 400:
                 logging.debug(resp.json())
                 raise GalaxyClientError(resp, resp.status_code)
