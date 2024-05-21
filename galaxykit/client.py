@@ -283,6 +283,8 @@ class GalaxyClient:
                             return resp.json()
                         else:
                             raise GalaxyClientError(resp, resp.status_code)
+                    else:
+                        raise GalaxyClientError(resp, resp.status_code)
                 else:
                     raise GalaxyClientError(resp, *json_data["errors"])
             if resp.status_code in (401, 403) and json_data.get("detail") is not None:
