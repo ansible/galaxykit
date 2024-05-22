@@ -325,6 +325,7 @@ class GalaxyClient:
         self.response = send_request_with_retry_if_504(
             method, url, headers=headers, verify=self.https_verify, *args, **kwargs
         )
+        self.response.raise_for_status()
         return self.response
 
     def _payload(self, method, path, body, *args, **kwargs):
