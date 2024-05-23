@@ -333,7 +333,6 @@ class GalaxyClient:
             time.sleep(5)
         self.response.raise_for_status()
 
-
     def _payload(self, method, path, body, *args, **kwargs):
         if isinstance(body, dict):
             body = dumps(body)
