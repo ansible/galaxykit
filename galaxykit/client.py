@@ -4,6 +4,7 @@ client.py contains the wrapping interface for all the other modules (aside from 
 import logging
 import platform
 import sys
+import time
 from urllib.parse import urlparse, urljoin
 from simplejson.errors import JSONDecodeError
 from simplejson import dumps
@@ -318,15 +319,20 @@ class GalaxyClient:
         return self.response
 
     def _retry_if_expired_gw_token(self, method, url, headers, *args, **kwargs):
-        logger.debug("Reloading gateway session id.")
-        self.response = self.gw_client.login()
-        self.headers = self.gw_client.headers
-        headers.update(self.headers)
-        self.response = send_request_with_retry_if_504(
-            method, url, headers=headers, verify=self.https_verify, *args, **kwargs
-        )
+        for _ in range(2):
+            logger.debug("Reloading gateway session id.")
+            self.response = self.gw_client.login()
+            self.headers = self.gw_client.headers
+            headers.update(self.headers)
+            self.response = send_request_with_retry_if_504(
+                method, url, headers=headers, verify=self.https_verify, *args, **kwargs
+            )
+            if self.response.status_code < 400:
+                return self.response
+            logger.debug(f"Reloading token failed: {self.response.text}")
+            time.sleep(5)
         self.response.raise_for_status()
-        return self.response
+
 
     def _payload(self, method, path, body, *args, **kwargs):
         if isinstance(body, dict):
