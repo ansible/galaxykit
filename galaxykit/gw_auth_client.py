@@ -16,7 +16,10 @@ class GatewayAuthClient:
         self.headers = {}
         parsed_url = urlparse(self.galaxy_root)
         self.url = f"{parsed_url.scheme}://{parsed_url.hostname}"
-        if (parsed_url.scheme == "https" and parsed_url.port != 443) or (parsed_url.scheme == "http" and parsed_url.port != 80):
+        if parsed_url.port is not None and (
+            (parsed_url.scheme == "https" and parsed_url.port != 443)
+            or (parsed_url.scheme == "http" and parsed_url.port != 80)
+        ):
             self.url += ":" + str(parsed_url.port)
         self.host = parsed_url.hostname
         self.login_url = f"{self.url}/api/gateway/v1/login/"
