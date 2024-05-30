@@ -304,7 +304,9 @@ class GalaxyClient:
                 raise GalaxyClientError(resp, resp.status_code)
             return json_data
         else:
-            if resp.status_code == 401 and "gateway_sessionid" in self.headers.get("Cookie"):
+            if resp.status_code == 401 and "gateway_sessionid" in self.headers.get(
+                "Cookie"
+            ):
                 return self._retry_if_expired_gw_token(
                         method, url, headers, *args, **kwargs
                     )
