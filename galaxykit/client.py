@@ -308,8 +308,8 @@ class GalaxyClient:
                 "Cookie"
             ):
                 return self._retry_if_expired_gw_token(
-                        method, url, headers, *args, **kwargs
-                    )
+                    method, url, headers, *args, **kwargs
+                )
             elif resp.status_code >= 400:
                 logging.debug(resp.text)
                 raise GalaxyClientError(resp, resp.status_code)
