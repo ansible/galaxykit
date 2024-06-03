@@ -1,4 +1,6 @@
 from time import sleep
+from .constants import SLEEP_SECONDS_POLLING
+from .constants import POLLING_MAX_ATTEMPTS
 
 
 def get_tasks(client, only_running=False):
@@ -14,7 +16,12 @@ def get_task(client, task_id):
     return client.get(tasks_url)
 
 
-def wait_task(client, task_id, sleep_seconds=10, max_attempts=10):
+def wait_task(client, task_id, sleep_seconds=None, max_attempts=None):
+    if sleep_seconds is None:
+        sleep_seconds = SLEEP_SECONDS_POLLING
+    if max_attempts is None:
+        max_attempts = POLLING_MAX_ATTEMPTS
+
     task = get_task(client, task_id)
 
     while task["state"] not in ["completed", "failed", "canceled"]:
@@ -32,7 +39,12 @@ def wait_task(client, task_id, sleep_seconds=10, max_attempts=10):
     return task
 
 
-def wait_all(client, sleep_seconds=10, max_attempts=10):
+def wait_all(client, sleep_seconds=None, max_attempts=10):
+    if sleep_seconds is None:
+        sleep_seconds = SLEEP_SECONDS_POLLING
+    if max_attempts is None:
+        max_attempts = POLLING_MAX_ATTEMPTS
+
     tasks = get_tasks(client, only_running=True)
 
     while tasks and tasks["results"]:

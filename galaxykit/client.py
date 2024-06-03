@@ -23,7 +23,7 @@ from . import namespaces
 from . import collections
 from . import roles
 from . import __version__ as VERSION
-from .constants import RBAC_VERSION, EE_ENDPOINTS_CHANGE_VERSION
+from .constants import RBAC_VERSION, EE_ENDPOINTS_CHANGE_VERSION, SLEEP_SECONDS_ONETIME
 
 logger = logging.getLogger(__name__)
 
@@ -336,7 +336,7 @@ class GalaxyClient:
             if self.response.status_code < 400:
                 return self.response
             logger.debug(f"Reloading token failed: {self.response.text}")
-            time.sleep(5)
+            time.sleep(SLEEP_SECONDS_ONETIME)
         self.response.raise_for_status()
 
     def _payload(self, method, path, body, *args, **kwargs):

@@ -11,7 +11,7 @@ from pkg_resources import parse_version
 
 from orionutils.generator import build_collection
 from .utils import wait_for_task, logger, GalaxyClientError, wait_for_url
-from .constants import EE_ENDPOINTS_CHANGE_VERSION
+from .constants import EE_ENDPOINTS_CHANGE_VERSION, SLEEP_SECONDS_POLLING
 
 
 def collection_info(client, repository, namespace, collection_name, version):
@@ -276,7 +276,7 @@ def move_or_copy_collection(
             client.get(dest_url)
             ready = True
         except GalaxyClientError:
-            sleep(1)
+            sleep(SLEEP_SECONDS_POLLING)
             timeout = timeout - 1
             if timeout < 0:
                 raise
