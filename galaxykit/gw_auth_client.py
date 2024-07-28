@@ -80,4 +80,5 @@ class GatewayAuthClient:
         return {
             "Accept": "application/json",
             "Cookie": f"csrftoken={self.csrftoken}; gateway_sessionid={gateway_sessionid}",
+            "X-CSRFToken": self.csrftoken
         }
