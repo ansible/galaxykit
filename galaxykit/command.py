@@ -652,6 +652,11 @@ def params_main(parser):
         action="version",
         version=("%(prog)s " + VERSION),
     )
+    parser.add_argument(
+        "--gw_root_url",
+        action="store",
+        type=str,
+    )
 
 
 def main():
@@ -686,7 +691,16 @@ def main():
     if args.kind == "greet":
         creds = None
 
-    client = GalaxyClient(args.server, creds, https_verify=https_verify)
+    if args.gw_root_url:
+        client = GalaxyClient(
+            args.server,
+            creds,
+            https_verify=https_verify,
+            gw_auth=True,
+            gw_root_url=args.gw_root_url,
+        )
+    else:
+        client = GalaxyClient(args.server, creds, https_verify=https_verify)
 
     resp = None
 
