@@ -23,10 +23,13 @@ class GitHubSocialAuthClient:
         self.headers = {}
         parsed_url = urlparse(self.galaxy_root)
         self.url = f"{parsed_url.scheme}://{parsed_url.hostname}"
-        if parsed_url.scheme == 'http' and parsed_url.port != 80:
-            self.url += ':' + str(parsed_url.port)
-        elif parsed_url.scheme == 'https' and parsed_url.port != 443:
-            self.url += ':' + str(parsed_url.port)
+
+        if parsed_url.port and not (
+            (parsed_url.scheme == "http" and parsed_url.port == 80)
+            or (parsed_url.scheme == "https" and parsed_url.port == 443)
+        ):
+            self.url += f":{parsed_url.port}"
+
         self.login_url = f"{self.url}/login/github/"
         self.github_cookies = None
 
