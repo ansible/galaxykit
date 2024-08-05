@@ -691,16 +691,17 @@ def main():
     if args.kind == "greet":
         creds = None
 
-    if args.gw_root_url:
-        client = GalaxyClient(
-            args.server,
-            creds,
-            https_verify=https_verify,
-            gw_auth=True,
-            gw_root_url=args.gw_root_url,
-        )
-    else:
-        client = GalaxyClient(args.server, creds, https_verify=https_verify)
+    if args.kind != "collection" or args.operation != "upload" or not args.skip_upload:
+        if args.gw_root_url:
+            client = GalaxyClient(
+                args.server,
+                creds,
+                https_verify=https_verify,
+                gw_auth=True,
+                gw_root_url=args.gw_root_url,
+            )
+        else:
+            client = GalaxyClient(args.server, creds, https_verify=https_verify)
 
     resp = None
 
