@@ -25,8 +25,8 @@ class GitHubSocialAuthClient:
         self.url = f"{parsed_url.scheme}://{parsed_url.hostname}"
 
         if parsed_url.port and not (
-            (parsed_url.scheme == 'http' and parsed_url.port == 80) or
-            (parsed_url.scheme == 'https' and parsed_url.port == 443)
+            (parsed_url.scheme == "http" and parsed_url.port == 80)
+            or (parsed_url.scheme == "https" and parsed_url.port == 443)
         ):
             self.url += f":{parsed_url.port}"
 
