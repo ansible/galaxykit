@@ -236,7 +236,7 @@ class GalaxyClient:
         return parse_version(galaxy_ng_version) >= parse_version(RBAC_VERSION)
 
     def _http(self, method, path, *args, **kwargs):
-        url = urljoin(self.galaxy_root, path)
+        url = urljoin(self.galaxy_root.rstrip("/") + "/", path)
         headers = kwargs.pop("headers", self.headers)
         parse_json = kwargs.pop("parse_json", True)
         relogin = kwargs.pop("relogin", True)
