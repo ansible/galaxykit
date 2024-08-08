@@ -228,11 +228,11 @@ def upload_artifact(
 
     if use_distribution:
         n_url = urljoin(
-            client.galaxy_root,
+            client.galaxy_root.rstrip("/") + "/",
             f"content/inbound-{artifact.namespace}/v3/artifacts/collections/",
         )
     else:
-        n_url = urljoin(client.galaxy_root, col_upload_path)
+        n_url = urljoin(client.galaxy_root.rstrip("/") + "/", col_upload_path)
     resp = client.post(n_url, body=data, headers=headers)
     return resp
 
