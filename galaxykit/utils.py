@@ -7,7 +7,7 @@ from urllib.parse import urljoin
 import requests
 from simplejson.errors import JSONDecodeError
 
-from .constants import SLEEP_SECONDS_POLLING,
+from .constants import SLEEP_SECONDS_POLLING
 
 
 logger = logging.getLogger(__name__)

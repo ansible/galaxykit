@@ -168,7 +168,9 @@ class GalaxyClient:
             self.gw_client = GatewayAuthClient(auth, gw_root_url)
             self.response = self.gw_client.login()
             self.headers = self.gw_client.headers
-            self.galaxy_root = urljoin(self.gw_root_url.rstrip("/") + "/", "/api/galaxy/")
+            self.galaxy_root = urljoin(
+                self.gw_root_url.rstrip("/") + "/", "/api/galaxy/"
+            )
 
     @property
     def cookies(self):
@@ -186,7 +188,8 @@ class GalaxyClient:
                 )
             container_registry = (
                 self._container_registry
-                or urlparse(self.galaxy_root.rstrip("/") + "/").netloc.split(":")[0] + ":5001"
+                or urlparse(self.galaxy_root.rstrip("/") + "/").netloc.split(":")[0]
+                + ":5001"
             )
 
             self._container_client = containerutils.ContainerClient(
@@ -229,7 +232,9 @@ class GalaxyClient:
         )
 
     def get_server_version(self):
-        return self._http("get", self.galaxy_root.rstrip("/") + "/")["galaxy_ng_version"]
+        return self._http("get", self.galaxy_root.rstrip("/") + "/")[
+            "galaxy_ng_version"
+        ]
 
     def _is_rbac_available(self):
         galaxy_ng_version = self.server_version
@@ -357,7 +362,6 @@ class GalaxyClient:
 
     def get_token(self):
         auth_url = urljoin(self.galaxy_root.rstrip("/") + "/", "v3/auth/token/")
-        import epdb; epdb.st()
         r = self.post(auth_url, body={})
         return r.get("token")
 
