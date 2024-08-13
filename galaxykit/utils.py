@@ -7,6 +7,9 @@ from urllib.parse import urljoin
 import requests
 from simplejson.errors import JSONDecodeError
 
+from .constants import SLEEP_SECONDS_POLLING
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -80,7 +83,8 @@ def wait_for_task(
                 ready = resp["results"][0]["state"] not in ("running", "waiting")
             else:
                 ready = resp["state"] not in ("running", "waiting")
-        time.sleep(5)
+
+        time.sleep(SLEEP_SECONDS_POLLING)
     return resp
 
 
@@ -107,7 +111,7 @@ def wait_for_url(client, url, timeout_sec=6000):
         except GalaxyClientError as e:
             if "404" not in str(e):
                 raise
-            time.sleep(5)
+            time.sleep(SLEEP_SECONDS_POLLING)
         else:
             ready = True
     return res
