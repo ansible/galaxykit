@@ -44,13 +44,13 @@ class GitHubSocialAuthClient:
 
     def _beta_galaxy_stage_login(self, session):
         self.github_cookies = self._github_login(session)
-        logger.debug(f'github cookies {dict(self.github_cookies)}')
+        logger.debug(f"github cookies {dict(self.github_cookies)}")
         response = session.get(
             self.login_url, cookies=self.github_cookies, allow_redirects=False
         )
         response.raise_for_status()
         next_url = response.headers["location"]
-        logger.debug(f'github redirect {next_url}')
+        logger.debug(f"github redirect {next_url}")
         response = session.get(
             next_url, cookies=self.github_cookies, allow_redirects=False
         )
@@ -62,7 +62,7 @@ class GitHubSocialAuthClient:
                 "Too many requests to GitHub login service. Re-authorization needed"
             )
             raise AuthenticationFailed("Too many requests. Re-authorization needed.")
-        logger.debug(f'complete url {complete_url}')
+        logger.debug(f"complete url {complete_url}")
 
         # we expect this to just simply login ... ?
         response = session.get(
@@ -70,12 +70,12 @@ class GitHubSocialAuthClient:
         )
         response.raise_for_status()
         cookies = get_cookies_from_response(response)
-        logger.debug(f'new github cookies {dict(cookies)}')
+        logger.debug(f"new github cookies {dict(cookies)}")
         return cookies
 
     def _reauthenticate(self, session):
         self.github_cookies = self._github_login(session)
-        logger.debug(f'cookies after github login {self.github_cookies}')
+        logger.debug(f"cookies after github login {self.github_cookies}")
         response = session.get(
             self.login_url, cookies=self.github_cookies, allow_redirects=False
         )
@@ -111,7 +111,7 @@ class GitHubSocialAuthClient:
 
     def _github_login(self, session):
         authenticity_token = self.get_authenticity_token(session)
-        logger.debug(f'github login authenticity token {authenticity_token}')
+        logger.debug(f"github login authenticity token {authenticity_token}")
         login_data = {
             "commit": "Sign in",
             "login": self.auth["username"],
@@ -121,10 +121,12 @@ class GitHubSocialAuthClient:
         session.cookies.set(
             "_device_id", "4066e3c5dbc8a65829b6a1b8eecbb476", domain="github.com"
         )
-        resp = session.post(self.GITHUB_SESSION_URL, data=login_data, allow_redirects=False)
-        logger.debug(f'github login POST response {resp.status_code} {resp.reason}')
-        if 'Incorrect username or password' in resp.text:
-            raise Exception('github auth failed with incorrect username&password')
+        resp = session.post(
+            self.GITHUB_SESSION_URL, data=login_data, allow_redirects=False
+        )
+        logger.debug(f"github login POST response {resp.status_code} {resp.reason}")
+        if "Incorrect username or password" in resp.text:
+            raise Exception("github auth failed with incorrect username&password")
         return session.cookies
 
     def get_authenticity_token(self, session):
