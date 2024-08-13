@@ -380,6 +380,9 @@ class GalaxyClient:
     def delete(self, path, *args, **kwargs):
         return self._http("delete", path, *args, **kwargs)
 
+    def options(self, path, *args, **kwargs):
+        return self._http("options", path, *args, **kwargs)
+
     def pull_image(self, image_name):
         """pulls an image with the given credentials"""
         return self.container_client.pull_image(image_name)
