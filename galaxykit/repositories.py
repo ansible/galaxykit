@@ -50,9 +50,11 @@ def create_repository(
 
     registry = {"name": name, "private": private}
     registry.update({"description": description}) if description is not None else False
-    registry.update(
-        {"pulp_labels": {"hide_from_search": ""}}
-    ) if hide_from_search is not False else False
+    (
+        registry.update({"pulp_labels": {"hide_from_search": ""}})
+        if hide_from_search is not False
+        else False
+    )
 
     if pipeline:
         registry["pulp_labels"] = {"pipeline": pipeline}

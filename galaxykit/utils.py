@@ -1,4 +1,5 @@
 """Utility functions"""
+
 import logging
 import re
 import time
