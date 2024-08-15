@@ -702,6 +702,8 @@ def main():
             )
         else:
             client = GalaxyClient(args.server, creds, https_verify=https_verify)
+    else:
+        client = None
 
     resp = None
 
@@ -1075,7 +1077,7 @@ def main():
                     skip_upload,
                     template,
                 ) = (
-                    args.namespace or client.username,
+                    args.namespace or (client.username if client else "unknown"),
                     args.collection_name,
                     args.version or "1.0.0",
                     args.path or "staging",
