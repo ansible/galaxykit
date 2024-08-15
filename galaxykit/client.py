@@ -1,6 +1,7 @@
 """
 client.py contains the wrapping interface for all the other modules (aside from cli.py)
 """
+
 import logging
 import platform
 import sys
