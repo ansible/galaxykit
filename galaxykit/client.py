@@ -543,7 +543,7 @@ class GalaxyClient:
 
 
 class BasicAuthClient(GalaxyClient):
-    '''Simplified basic auth through galaxykit.'''
+    """Simplified basic auth through galaxykit."""
 
     def __init__(self, galaxy_root, username, password):
         self.galaxy_root = galaxy_root
@@ -577,17 +577,14 @@ class BasicAuthClient(GalaxyClient):
                 kwargs.pop('body')
 
         # not all endpoints return json
-        want_json = True
-        if 'want_json' in kwargs:
-            want_json = kwargs['want_json']
-            kwargs.pop('want_json')
+        parse_json = kwargs.pop("parse_json", True)
 
         func = getattr(requests, method)
-        rr = func(url, **kwargs)
+        response = func(url, **kwargs)
 
         try:
-            if want_json:
-                return rr.json()
-            return rr.text
+            if parse_json:
+                return response.json()
+            return response.text
         except Exception:
-            raise GalaxyClientError(rr.text, rr.status_code)
+            raise GalaxyClientError(response.text, response.status_code)
