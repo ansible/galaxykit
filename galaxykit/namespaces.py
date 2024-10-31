@@ -31,6 +31,7 @@ def get_namespace(client, name):
         namespace = client.get(f"v3/namespaces/{name}/")
         return namespace
     except Exception as e:
+        logger.exception(e)
         if e.args[0]["status"] == "404":
             raise KeyError(f"No namespace {name} found.")
         else:
@@ -42,6 +43,7 @@ def get_namespace_collections(client, name):
         collection_list = client.get(f"_ui/v1/repo/published/?namespace={name}")
         return collection_list
     except Exception as e:
+        logger.exception(e)
         if e.args[0]["status"] == "404":
             raise KeyError(f"No namespace {name} found.")
         else:
