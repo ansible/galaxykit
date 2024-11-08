@@ -7,7 +7,7 @@ import os
 import json
 from time import sleep
 from urllib.parse import urljoin
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 
 from orionutils.generator import build_collection
 from .utils import wait_for_task, logger, GalaxyClientError, wait_for_url

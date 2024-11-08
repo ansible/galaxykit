@@ -17,7 +17,7 @@ dependencies = [
     "simplejson",
     "orionutils",
     "pyyaml",
-    "setuptools",
+    "packaging",
 ]
 dynamic = ["version"]
 
