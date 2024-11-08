@@ -10,7 +10,7 @@ import time
 from urllib.parse import urlparse, urljoin
 from simplejson.errors import JSONDecodeError
 from simplejson import dumps
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 
 import requests
 
