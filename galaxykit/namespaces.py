@@ -104,12 +104,12 @@ def delete_v1_namespace(client, name):
     return client.delete(delete_url, parse_json=False)
 
 
-def delete_namespace(client, name, recurse=False):
+def delete_namespace(client, name, cascade=False):
     """
     Delete namespace
     """
 
-    if recurse:
+    if cascade:
         # find all collections first ...
         collections = set()
         next_url = f"v3/plugin/ansible/search/collection-versions/?namespace={name}&is_highest=true"
