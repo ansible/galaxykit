@@ -1,5 +1,6 @@
 from . import groups
 from .utils import logger
+from .collections import delete_collection
 
 
 def create_namespace(client, name, group, object_roles=None):
@@ -103,10 +104,30 @@ def delete_v1_namespace(client, name):
     return client.delete(delete_url, parse_json=False)
 
 
-def delete_namespace(client, name):
+def delete_namespace(client, name, cascade=False):
     """
     Delete namespace
     """
+
+    if cascade:
+        # find all collections first ...
+        collections = set()
+        next_url = f"v3/plugin/ansible/search/collection-versions/?namespace={name}&is_highest=true"
+        while next_url:
+            resp = client.get(next_url)
+            for collection in resp["data"]:
+                collections.add((
+                    collection["repository"]["name"],
+                    collection["collection_version"]["namespace"],
+                    collection["collection_version"]["name"],
+                ))
+            if resp["links"]["next"] is None:
+                break
+            next_url = resp["links"]["next"]
+
+        for collection in collections:
+            delete_collection(client, collection[1], collection[2], repository=collection[0])
+
     delete_url = f"_ui/v1/namespaces/{name}"
     return client.delete(delete_url, parse_json=False)
 
