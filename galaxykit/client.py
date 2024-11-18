@@ -270,9 +270,9 @@ class GalaxyClient:
 
     def _http(self, method, path, *args, **kwargs):
 
+        # ensure we have a valid session instead of hoping
+        # that retries will get around expirations.
         self.check_or_refresh_gateway_session()
-        #if "gateway_sessionid" in self.headers.get("Cookie"):
-        #    import epdb; epdb.st()
 
         url = urljoin(self.galaxy_root.rstrip("/") + "/", path)
         headers = kwargs.pop("headers", self.headers)
