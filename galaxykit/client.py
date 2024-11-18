@@ -77,9 +77,13 @@ class GalaxyClient:
     _server_version = None
     _container_client = None
     _ui_ee_endpoint_prefix = None
+    gw_auth = None
     gw_root_url = None
     gw_client = None
     response = None
+
+    # expiration tracking for the gateway session cookie
+    session_expires = None
 
     def __init__(
         self,
@@ -102,6 +106,7 @@ class GalaxyClient:
         self._container_registry = container_registry
         self._container_tls_verify = container_tls_verify
         self.gw_root_url = gw_root_url
+        self.gw_auth = gw_auth
 
         if not https_verify:
             requests.packages.urllib3.disable_warnings()
@@ -165,14 +170,35 @@ class GalaxyClient:
                     "If Gateway authentication is True, "
                     "gw_root_url needs to be provided."
                 )
+
             self.username = auth["username"]
             self.password = auth["password"]
-            self.gw_client = GatewayAuthClient(auth, gw_root_url)
-            self.response = self.gw_client.login()
-            self.headers = self.gw_client.headers
+            self.check_or_refresh_gateway_session()
+
             self.galaxy_root = urljoin(
                 self.gw_root_url.rstrip("/") + "/", "/api/galaxy/"
             )
+
+    def check_or_refresh_gateway_session(self):
+        """Keep track of the session expiration and refresh as necessary"""
+        if self.gw_auth is not True:
+            return
+
+        if self.session_expires is not None:
+            current_time = int(time.time())
+            if current_time < (self.session_expires - 10):
+                return
+
+        auth = {"username": self.username, "password": self.password}
+        self.gw_client = GatewayAuthClient(auth, self.gw_root_url)
+        self.response = self.gw_client.login()
+        self.headers = self.gw_client.headers
+
+        for cookie in self.response.cookies:
+            if cookie.name != "gateway_sessionid":
+                continue
+            self.session_expires = cookie.expires
+            break
 
     @property
     def cookies(self):
@@ -243,6 +269,11 @@ class GalaxyClient:
         return parse_version(galaxy_ng_version) >= parse_version(RBAC_VERSION)
 
     def _http(self, method, path, *args, **kwargs):
+
+        # ensure we have a valid session instead of hoping
+        # that retries will get around expirations.
+        self.check_or_refresh_gateway_session()
+
         url = urljoin(self.galaxy_root.rstrip("/") + "/", path)
         headers = kwargs.pop("headers", self.headers)
         parse_json = kwargs.pop("parse_json", True)
