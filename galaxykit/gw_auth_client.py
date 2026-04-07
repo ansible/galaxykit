@@ -74,11 +74,20 @@ class GatewayAuthClient:
         match = re.search(token_pattern, response.text)
         return match.group(1)
 
+    def parse_custom_gateway_sessionid(self, cookies):
+        """Support gateway_sessionid cookie with optional suffix. 
+        For example the aap-dev 2.7, the HTTP header key is gateway_sessionid44927.
+        """
+        for cookie in cookies:
+                if cookie.name.startswith("gateway_sessionid"):
+                    return cookie.name, cookie.value
+        return None, None
+
     def get_cookies_from_response(self, response):
         self.csrftoken = response.cookies["csrftoken"]
-        gateway_sessionid = response.cookies["gateway_sessionid"]
+        custom_sessionid, gateway_sessionid = self.parse_custom_gateway_sessionid(response.cookies)
         return {
             "Accept": "application/json",
-            "Cookie": f"csrftoken={self.csrftoken}; gateway_sessionid={gateway_sessionid}",
+            "Cookie": f"csrftoken={self.csrftoken}; {custom_sessionid}={gateway_sessionid}",
             "X-CSRFToken": self.csrftoken,
         }
