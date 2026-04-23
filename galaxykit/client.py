@@ -195,7 +195,7 @@ class GalaxyClient:
         self.headers = self.gw_client.headers
 
         for cookie in self.response.cookies:
-            if cookie.name != "gateway_sessionid":
+            if not cookie.name.startswith("gateway_sessionid"):
                 continue
             self.session_expires = cookie.expires
             break
